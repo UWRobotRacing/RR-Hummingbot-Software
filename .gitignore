@@ -2,6 +2,9 @@
 Thumbs.db
 ehthumbs.db
 
+# Doxygen output
+doxygen_output/
+
 # Folder config file
 Desktop.ini
 

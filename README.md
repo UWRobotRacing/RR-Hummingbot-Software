@@ -41,6 +41,11 @@ Please fill this header out above every source code file(including launch files 
  *  @competition IARRC 2018
  */
 ```
+In order to generate documentation, go to the base directory of this repo and run:
+``` bash
+doxygen doxygen_config
+```
+It is setup to document all \*.c, \*.cpp, \*.h, and \*.hpp files. It will generate html output under doxygen\_output/html. To view this, reference the index.html file in that directory in a browser of your choice. Feel free to change the doxygen\_config file in order to generate different types of documentation or cover more file types.
 
 ### Moving forward:
 This code base should be integrated with the overall UWRobotics code such that modularity can be achieved?
