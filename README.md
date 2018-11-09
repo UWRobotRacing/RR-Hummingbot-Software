@@ -18,6 +18,7 @@ Please review the competition rules before pushing any code :)
 For C++ code and Python Scripts we follow the Google coding standards linked below
 * https://google.github.io/styleguide/cppguide.html
 * https://google.github.io/styleguide/pyguide.html
+
 Git workflow that we follow:
 * https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
 
