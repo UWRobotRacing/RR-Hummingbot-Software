@@ -19,7 +19,7 @@ For C++ code and Python Scripts we follow the Google coding standards linked bel
 * https://google.github.io/styleguide/cppguide.html
 * https://google.github.io/styleguide/pyguide.html
 
-Git workflow that we follow:
+Git workflow that we follow
 * https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
 
 Please fill out this header above all functions (Doxygen style)
