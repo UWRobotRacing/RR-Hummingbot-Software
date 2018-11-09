@@ -2,18 +2,24 @@
 ## Robot Racing
                                                             
 ### Description:
-This repository contains the current competition code (2018). This code will be used for the IARRC 2018. This code currently handles LIDAR mapping, trajectory rollout, PID speed control, lane detection and traffic light detection.
+This repository contains the current competition code (2019). This code will be used for the IARRC 2019. This code currently handles LIDAR mapping, trajectory rollout, PID speed control, lane detection and traffic light detection.
 
 A list of what we're currently working on is in the issues section of this repo.
 
+### Getting Started:
+Here is a good doc that outlines everything you need to know in order to get set up and working with the codebase!
+* https://docs.google.com/document/d/1ZDILnQNoG6NpTkf0U2AT2KQerttBemVC6pHEtwzu-uU/edit
+
 ### Competition Rules:
 Please review the competition rules before pushing any code :)
-* https://drive.google.com/file/d/1iF5CkpvjLxLN1k5ueg4_vOaK9uYlgP9x/view
+* https://iarrc.org/rules/
 
 ### Coding Standards:
 For C++ code and Python Scripts we follow the Google coding standards linked below
 * https://google.github.io/styleguide/cppguide.html
 * https://google.github.io/styleguide/pyguide.html
+Git workflow that we follow:
+* https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
 
 Please fill out this header above all functions (Doxygen style)
 ``` cpp
