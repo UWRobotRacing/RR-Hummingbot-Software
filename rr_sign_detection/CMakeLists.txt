@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rr_lane_detection)
+project(rr_sign_detection)
 
 set(CMAKE_BUILD_TYPE Release)
 
@@ -19,5 +19,5 @@ catkin_package()
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(lane_detection src/lane_detection_main.cpp src/lane_detection.cpp include/lane_detection.hpp)
-target_link_libraries(lane_detection ${catkin_LIBRARIES} ${OpenCV_LIBS})
+add_executable(sign_detection src/sign_detection.cpp src/sign_detection_main.cpp include/sign_detection.hpp)
+target_link_libraries(sign_detection ${catkin_LIBRARIES} ${OpenCV_LIBS})

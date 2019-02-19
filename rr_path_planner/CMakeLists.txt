@@ -25,10 +25,10 @@ catkin_package(
   DEPENDS system_lib
 )
 
-roslint_cpp(src/main.cpp src/path_planner.cpp include/path_planner.h)
+roslint_cpp(src/path_planner_main.cpp src/path_planner.cpp include/path_planner.h)
 
 include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
-add_executable(rr_path_planner src/main.cpp)
+add_executable(rr_path_planner src/path_planner_main.cpp)
 add_library(path_planner src/path_planner.cpp include/path_planner.h)
 
 ## Specify libraries to link a library or executable target against

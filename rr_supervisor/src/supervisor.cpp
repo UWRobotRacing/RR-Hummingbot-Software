@@ -46,7 +46,6 @@ Supervisor::Supervisor()
 
   // Setup subscribers to monitor battery and speed
   cmd_sub_ = nh_.subscribe("/rr_vehicle/vel_cmd", 1, &Supervisor::TrackSpeed, this);
-  battery_sub_ = nh_.subscribe("/arduino/battery_state", 1, &Supervisor::MonitorBattery, this);
 
   // Setup service servers
   start_race_service_ = nh_.advertiseService("/Supervisor/start_race", &Supervisor::StartRace, this);
@@ -130,20 +129,6 @@ void Supervisor::TrackSpeed(const geometry_msgs::TwistConstPtr& msg)
 {
   twist_msg_count_ += 1;
   speed_sum_ += sqrt(pow(msg->linear.x, 2) + pow(msg->linear.y, 2));
-}
-
-/**
- * @brief subscriber callback method for monitoring battery
- * @param msg battery percentage as an int published from arduino
- * @return void
- */
-void Supervisor::MonitorBattery(const std_msgs::Int8::ConstPtr& msg)
-{
-  if (msg->data <= 10)
-  {
-    ROS_INFO("Battery is less than 10 percent, ending race...");
-    this->FinishRace();
-  }
 }
 
 /**
