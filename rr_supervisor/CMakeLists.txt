@@ -15,7 +15,7 @@ include_directories(include
 )
 
 add_executable(supervisor
-  src/main.cpp
+  src/supervisor_main.cpp
   src/supervisor.cpp
   include/supervisor.hpp
 )

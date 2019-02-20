@@ -6,7 +6,7 @@
 //ROS
 #include <ros/ros.h>
 
-//OPENCV includes
+//OPENCV
 
 //LOCAL
 #include "lane_detection.hpp"

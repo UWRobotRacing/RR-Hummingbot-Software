@@ -5,19 +5,15 @@
  *  @competition IARRC 2018
  */
 
-// CPP
-#include <algorithm>
-
 // Local
 #include "laser_mapper.hpp"
-#include <occupancy_grid_utils.hpp>
 
 /**
  * @name LaserMapper
  * @brief initiliazes the LaserMapper class
  * @return NONE
  */
-LaserMapper::LaserMapper(ros::NodeHandle nh) : it_(nh) {
+LaserMapper::LaserMapper(ros::NodeHandle nh) {
 }
 
 /**

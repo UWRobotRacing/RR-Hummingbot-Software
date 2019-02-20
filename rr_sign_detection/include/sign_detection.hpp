@@ -3,18 +3,11 @@
  *  @breif Sign Detection Class header file
  *  @competition IARRC 2019
  */
-#ifndef __SIGN_DETECTION_PROCESSOR_HPP
-#define __SIGN_DETECTION_PROCESSOR_HPP
+#ifndef SIGN_DETECTION_PROCESSOR_HPP
+#define SIGN_DETECTION_PROCESSOR_HPP
 
 //ROS
 #include <ros/ros.h>
-
-//OPENCV
-#include <opencv2/opencv.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-
-//LOCAL
 
 class SignDetection
 {
@@ -26,4 +19,4 @@ class SignDetection
 
 };
 
-#endif //__SIGN_DETECTION_PROCESSOR_HPP
+#endif //SIGN_DETECTION_PROCESSOR_HPP

@@ -19,5 +19,5 @@ catkin_package()
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(sign_detection src/sign_detection.cpp src/sign_detection_main.cpp include/sign_detection.hpp)
+add_executable(sign_detection src/sign_detection.cpp src/sign_detection_main.cpp)
 target_link_libraries(sign_detection ${catkin_LIBRARIES} ${OpenCV_LIBS})

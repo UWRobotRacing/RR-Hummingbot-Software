@@ -20,5 +20,5 @@ catkin_package()
 roslint_cpp()
 
 include_directories(include ${catkin_INCLUDE_DIRS})
-add_executable(rr_mapper src/laser_mapper_main.cpp src/laser_mapper.cpp src/occupancy_grid_utils.cpp)
+add_executable(rr_mapper src/laser_mapper_main.cpp src/laser_mapper.cpp include/laser_mapper.hpp)
 target_link_libraries(rr_mapper ${catkin_LIBRARIES}) 

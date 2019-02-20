@@ -6,23 +6,11 @@
 #ifndef LASERMAPPER_H
 #define LASERMAPPER_H
 
-// CPP
-#include <stdio.h>
-#include <math.h>
-#include <vector>
-#include <string>
-
 // ROS headers
 #include <ros/ros.h>
-#include <std_msgs/Bool.h>
-#include <geometry_msgs/Pose2D.h>
-#include <nav_msgs/OccupancyGrid.h>
-#include <sensor_msgs/LaserScan.h>
-#include <tf/transform_datatypes.h>
-#include <tf/transform_listener.h>
 
 /*
- *  Callback Class for laser to Occumpancy Grid Format/OpenCV Format
+ * Callback Class for laser to Occumpancy Grid Format/OpenCV Format
  */
 
 class LaserMapper

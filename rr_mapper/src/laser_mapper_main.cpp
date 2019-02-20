@@ -37,11 +37,8 @@
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "rr_mapper");
-  LaserMapper laserProcessor;
-
-  // Subscribe to Enable
-  bool enable = false;
   ros::NodeHandle nh;
+  LaserMapper laserProcessor(nh);
 
   ROS_INFO("Mapper: Laser Node Initialized");
   ros::spin();

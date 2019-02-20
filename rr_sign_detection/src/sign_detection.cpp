@@ -12,14 +12,16 @@
  * @name SignDetection 
  * @brief Constructor
  * @param nh: ROS node handler
+ * @return NONE
 */
 SignDetection::SignDetection(ros::NodeHandle nh) {
 
 }
 
 /*
- * @name ~SingDetection
+ * @name ~SignDetection
  * @brief Destructor
+ * @return NONE
 */
 SignDetection::~SignDetection() {
 

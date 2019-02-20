@@ -3,25 +3,7 @@
  -  @competition IARRC 2018
  -->
 <launch>
-  <param name="device" command="$(find rr_traffic_light)/scripts/camera_parameters_tl.sh"/>
-
-  <node ns ="traffic_light" name="usb_cam_traffic_light" pkg="usb_cam" type="usb_cam_node" output="screen" >
-
-    <param name="video_device" value="/dev/cam_traffic_light" />
-
-    <param name="image_width" value="640" />
-    <param name="image_height" value="480" />
-    <param name="pixel_format" value="yuyv" />
-    <!-- param name="camera_frame_id" value="usb_cam_traffic_light" /-->
-    <!-- param name="io_method" value="mmap"/-->
-    <!-- param name="gain_automatic" value="true" /-->
+  <node pkg ="rr_traffic_light" name="traffic_light" type="traffic_light" output="screen" >
   </node>
-
-  <rosparam file="$(find rr_traffic_light)/launch/rr_traffic_light.yaml"/>
-
-  <!-- node ns ="traffic_light" name="output_video_cam_traffic_light" pkg="image_view" type="image_view" respawn="false" output="screen">
-       <remap from="image" to="/traffic_light/usb_cam_traffic_light/image_raw" />
-       <param name="autosize" value="true" />
-  </node -->
 
 </launch>

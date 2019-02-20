@@ -3,19 +3,19 @@
  *  @competition IARRC 2019
  */
 
-#include "lane_detection_processor.hpp"
+#include "lane_detection.hpp"
 
 /*
  * @name LaneDetection 
  * @brief Constructor
  * @param nh: ROS node handler
 */
-LaneDetection::LaneDetection(ros::NodeHandle nh) : it_(nh) {
+LaneDetection::LaneDetection(ros::NodeHandle nh) {
 
 }
 
 /*
- * @name ~SingDetection
+ * @name ~LaneDetection
  * @brief Destructor
 */
 LaneDetection::~LaneDetection() {
