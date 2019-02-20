@@ -1,0 +1,9 @@
+<!--@file rr_traffic_light_camera.launch
+ -  @author Toni Ogunmade(oluwatoni)
+ -  @competition IARRC 2018
+ -->
+<launch>
+  <node pkg ="rr_traffic_light" name="traffic_light" type="traffic_light" output="screen" >
+  </node>
+
+</launch>
