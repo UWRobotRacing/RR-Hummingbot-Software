@@ -12,7 +12,7 @@
 /**@name TrafficLightDetector
  * @brief Constructor
  */
-TrafficLight::TrafficLight(ros::NodeHandle nh) {
+TrafficLight::TrafficLight() {
 }
 
 TrafficLight::~TrafficLight() {

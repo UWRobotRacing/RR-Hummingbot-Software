@@ -18,15 +18,9 @@
  *  @competition IARRC 2018
  */
 
-#include <stdio.h>
-#include <math.h>
-
 #include <ros/ros.h>
-#include <std_msgs/Bool.h>
 
 #include "laser_mapper.hpp"
-
-#define DEBUG false
 
 /** @brief starts the laser_mapper node
  *

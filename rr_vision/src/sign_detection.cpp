@@ -14,8 +14,7 @@
  * @param nh: ROS node handler
  * @return NONE
 */
-SignDetection::SignDetection(ros::NodeHandle nh) {
-
+SignDetection::SignDetection() {
 }
 
 /*
@@ -24,5 +23,4 @@ SignDetection::SignDetection(ros::NodeHandle nh) {
  * @return NONE
 */
 SignDetection::~SignDetection() {
-
 }

@@ -17,7 +17,7 @@
 class TrafficLight {
     private:
     public:
-    TrafficLight(ros::NodeHandle nh);
+    TrafficLight();
     ~TrafficLight();
 };
 

@@ -1,10 +1,10 @@
-/** @file lane_detection_processor.hpp
+/** @file computer_vision.hpp
  *  @author Matthew Post
  *  @author Toni Ogunmade(oluwatoni)
  *  @competition IARRC 2018
  */
-#ifndef __LANE_DETECTION_HPP
-#define __LANE_DETECTION_HPP
+#ifndef COMPUTER_VISION
+#define COMPUTER_VISION
 
 
 //ROS
@@ -15,13 +15,13 @@
 
 //LOCAL
 
-class LaneDetection
+class ComputerVision
 {
   private:
 
   public:
-    LaneDetection(ros::NodeHandle nh);
-    ~LaneDetection();
+    ComputerVision(ros::NodeHandle nh);
+    ~ComputerVision();
 };
 
-#endif //__LANE_DETECTION_HPP
+#endif // COMPUTER_VISION

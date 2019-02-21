@@ -1,4 +1,4 @@
-/** @file lane_detection_main.cpp
+/** @file computer_vision_main.cpp
  *  @author Andrew Jin
  *  @competition IARRC 2019
  */
@@ -9,17 +9,17 @@
 //OPENCV
 
 //LOCAL
-#include "lane_detection.hpp"
+#include "computer_vision.hpp"
 
 /** @brief main file that starts the subscribers and calls spin
  */
 int main(int argc, char** argv)
 {
   //Node and image transport initialization
-  ros::init(argc, argv, "lane_detection");
+  ros::init(argc, argv, "rr_computer_vision");
   ros::NodeHandle nh;
-  ROS_INFO("Starting lane detection");
-  LaneDetection lane_detection(nh);
+  ROS_INFO("Starting Computer Vision Node");
+  ComputerVision computer_vision(nh);
 
   ros::spin();
   return 0;

@@ -1,4 +1,4 @@
-<!--@file lane_detection_cam.launch
+<!--@file computer_vision_base.launch
  -  @brief This launch file is used to run the lane detection node on each camera
  -  @author Matthew Post
  -  @author Toni Ogunmade(oluwatoni)
@@ -9,6 +9,6 @@
   <arg name="config_file" default=""/>
 
   <group ns="$(arg camera)">
-    <node pkg="rr_lane_detection" type="lane_detection" name="lane_detection" output="screen"/>
+    <node pkg="rr_computer_vision" type="computer_vision" name="computer_vision" output="screen"/>
   </group>
 </launch>

@@ -14,7 +14,7 @@ class SignDetection
   private:
 
   public:
-    SignDetection(ros::NodeHandle nh);
+    SignDetection();
     ~SignDetection();
 
 };

@@ -10,7 +10,7 @@
  * @brief Constructor
  * @param nh: ROS node handler
 */
-LaneDetection::LaneDetection(ros::NodeHandle nh) {
+LaneDetection::LaneDetection() {
 
 }
 
