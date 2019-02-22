@@ -1,0 +1,8 @@
+<!--@file tf_mapper.launch
+ -  @author Andrew Jin
+ -  @competition IARRC 2019
+ -->
+<launch>
+  <node pkg="rr_tf_mapper" name="tf_mapper" type="tf_mapper" output="screen">
+  </node>  
+</launch>

@@ -1,0 +1,12 @@
+[submodule "rr_third_party_packages/urg_c"]
+	path = rr_third_party_packages/urg_c
+	url = https://github.com/ros-drivers/urg_c
+[submodule "rr_third_party_packages/urg_node"]
+	path = rr_third_party_packages/urg_node
+	url = https://github.com/ros-drivers/urg_node
+[submodule "rr_third_party_packages/laser_proc"]
+	path = rr_third_party_packages/laser_proc
+	url = https://github.com/ros-perception/laser_proc
+[submodule "rr_third_party_packages/twist_mux"]
+	path = rr_third_party_packages/twist_mux
+	url = https://github.com/ros-teleop/twist_mux
