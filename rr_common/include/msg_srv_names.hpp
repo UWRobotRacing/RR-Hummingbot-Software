@@ -5,8 +5,8 @@
  *  @brief defines the topic and service names across the project
  */
 
-#ifndef __MSG_SRV_NAMES_HPP
-#define __MSG_SRV_NAMES_HPP
+#ifndef MSG_SRV_NAMES
+#define MSG_SRV_NAMES
 
 #include <string.h>
 
@@ -22,4 +22,4 @@ namespace rr_signal_srvs{
 namespace rr_processed_topics{
 }
 
-#endif //__MSG_SRV_NAMES_HPP
+#endif // MSG_SRV_NAMES

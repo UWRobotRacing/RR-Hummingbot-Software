@@ -9,6 +9,14 @@
   <arg name="config_file" default=""/>
 
   <group ns="$(arg camera)">
+    <arg name="svo_file"                default="" /> <!-- <arg name="svo_file" default="path/to/svo/file.svo"> -->
+    
+    <!-- Launch ZED camera wrapper -->
+    <include file="$(find zed_wrapper)/launch/zed.launch">
+        <arg name="camera_model"        value="0" /> <!-- 0=ZED, 1=ZEDM-->
+        <arg name="svo_file"            value="$(arg svo_file)" />
+    </include>
+
     <node pkg="rr_computer_vision" type="computer_vision" name="computer_vision" output="screen"/>
   </group>
 </launch>
