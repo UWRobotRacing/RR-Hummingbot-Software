@@ -1,0 +1,78 @@
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Doxygen output
+doxygen_output/
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# =========================
+# Operating System Files
+# =========================
+
+# OSX
+# =========================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+#Vim temp files
+*.swp
+*.swo
+
+#temp files
+*.py~
+*.pyc
+*.bag
+*.c~
+*.cpp~
+
+#Visual studio
+*.o
+*.lss
+*.map
+*.elf
+*.srec
+*.atsuo
+
+#Rosbags because they are too big
+*.bag
+
+#YOLO weights
+*.weights
+
+.vscode/settings.json
+.vscode/c_cpp_properties.json
+<<<<<<< HEAD
+=======
+.weights
+>>>>>>> origin/simulation

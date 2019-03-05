@@ -1,0 +1,4 @@
+<launch>
+  <!-- Supervisor Node -->
+  <node pkg="rr_supervisor" type="supervisor" name="supervisor" output="screen"/>
+</launch>
