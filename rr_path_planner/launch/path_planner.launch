@@ -1,0 +1,8 @@
+<!--@file path_planner.launch
+ -  @author Andrew Jin
+ -  @competition IARRC 2019
+ -->
+<launch>
+  <node pkg="rr_path_planner" name="rr_path_planner" type="rr_path_planner" output="screen">
+  </node>  
+</launch>
