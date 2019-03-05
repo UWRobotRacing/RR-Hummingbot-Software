@@ -1,7 +1,6 @@
 /** @file computer_vision.hpp
- *  @author Matthew Post
- *  @author Toni Ogunmade(oluwatoni)
- *  @competition IARRC 2018
+ *  @author Andrew Jin (D29Jin)
+ *  @competition IARRC 2019
  */
 #ifndef COMPUTER_VISION
 #define COMPUTER_VISION
