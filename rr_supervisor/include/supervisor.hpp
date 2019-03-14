@@ -16,6 +16,7 @@ class Supervisor
     Supervisor();
     ~Supervisor();
   private:
+  testest
 };
 
 #endif  // SUPERVISOR_H
