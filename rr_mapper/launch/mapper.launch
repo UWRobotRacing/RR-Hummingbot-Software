@@ -1,0 +1,18 @@
+<!--@file mapper.launch
+ -  @author Sirui Song
+ -  @author Jungwook Lee
+ -  @author Raymond Kuo
+ -  @author Toni Ogunmade(oluwatoni)
+ -  @competition IARRC 2018
+ -->
+<launch>    
+  <node pkg="urg_node" name="urg_node" type="urg_node">
+    <param name="serial_port" type ="string" value="/dev/hokuyo" />
+    <param name="error_limit" type="int" value="0" />
+    <param name="baud_rate" type="int" value="115200" />
+    <param name="frame_id" value="/base_link" />
+  </node>
+
+  <node pkg="rr_mapper" name="mapper" type="mapper" output="screen">
+  </node> 
+</launch>

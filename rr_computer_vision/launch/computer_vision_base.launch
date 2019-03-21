@@ -1,0 +1,15 @@
+<!--@file computer_vision_base.launch
+ -  @brief This launch file is used to run the lane detection node on each camera
+ -  @author Matthew Post
+ -  @author Toni Ogunmade(oluwatoni)
+ -  @competition IARRC 2018
+ -->
+<launch>
+  <arg name="camera" default=""/>
+  <arg name="config_file" default=""/>
+    
+  <!-- Launch ZED camera wrapper -->
+  <include file="$(find zed_wrapper)/launch/zed.launch"> </include>
+
+  <node pkg="rr_computer_vision" type="computer_vision" name="computer_vision" output="screen"/>
+</launch>
