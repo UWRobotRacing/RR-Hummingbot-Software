@@ -10,6 +10,8 @@ import json
 MIN_SIGN_SIZE = 20
 ASPECT_RATIO_TOLERANCE = 0.25 # aspect ratio must be 1 +/- tolerance
 MAX_ROTATION = (0.8, 0.8, 0.05) # max rotation angles in rads (x,y,z) (0.15,0.15,0.15)
+BLUR_KERNEL = (3, 3)
+GAUSSIAN_NOISE = (0, 0.01) # mean and variance for gaussian noise
 
 DATASET_LOC = "C:/Users/ethie/OneDrive - University of Waterloo/Documents/UWRobotics/StreetImageDataset/mapillary-vistas-dataset_public_v1.1/"
 
@@ -86,24 +88,61 @@ def get_perspective_mat(target_size, x_angle, y_angle, z_angle, x, y):
 
 def apply_transforms(template, target_size, window_size):
 
+    # Order of transforms:
+    # 1. Hue variations
+    # 2. Lighting variations
+    # 3. Rotations
+    # 4. Gaussian blur
+    # 5. Gaussian noise
+
+    # convert template to hsv
+    #hsv_template = cv2.cvtColor(template, cv2.BGR2HSV)
+
+
+
+
+    
+
+
+
+
     # generate random rotation angles for x,y,z axes (in radians)
     x_angle = np.random.uniform(-MAX_ROTATION[0], MAX_ROTATION[0])
     y_angle = np.random.uniform(-MAX_ROTATION[1], MAX_ROTATION[1])
     z_angle = np.random.uniform(-MAX_ROTATION[2], MAX_ROTATION[2])
 
     # calculate dx,dy needed to center template
-    dx = window_size/2 - target_size/2
-    dy = window_size/2 - target_size/2
+    dx = (window_size - target_size)/2
+    dy = (window_size - target_size)/2
     
     # calculate perspective matrix for rotations
     mat = get_perspective_mat(window_size, x_angle, y_angle, z_angle, dx, dy)
 
     # apply transformation matrix
-    rotated = cv2.warpPerspective(template.copy(), mat, (window_size, window_size))
+    rotated = cv2.warpPerspective(template.copy(), mat, (window_size, window_size), borderValue=255)
+
+    # get binary mask for rotated image
+    inverted = cv2.bitwise_not(rotated)
+    ret, binary_template = cv2.threshold(inverted, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    _, contours, _ = cv2.findContours(binary_template, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cnt = contours[0]
+    mask = np.zeros(binary_template.shape, np.uint8)
+    cv2.drawContours(mask, [cnt], 0, 255, -1)
+
+    # apply gaussian blur
+    blurred = cv2.GaussianBlur(rotated, BLUR_KERNEL, 0)
+
+    # add gaussian noise
+    shp = blurred.shape
+    gaussian = np.random.normal(GAUSSIAN_NOISE[0], GAUSSIAN_NOISE[1]**0.5, shp)
+    gaussian = gaussian.reshape(shp[0], shp[1])
+    noised = blurred + gaussian
 
 
 
-    return rotated
+
+
+    return rotated, mask
 
 
 
@@ -119,8 +158,8 @@ def create_data():
     #    os.makedirs("haar_training_data/positives")
 
     # load in templates
-    up_template = cv2.imread("templates/SIGN_UP.jpg")
-    h, w, _ = up_template.shape
+    up_template = cv2.imread("templates/SIGN_UP.jpg", 0)
+    h, w = up_template.shape
 
     M90 = cv2.getRotationMatrix2D((w/2,h/2), 90, 1.0)
     left_template = cv2.warpAffine(up_template, M90, (h, w))
@@ -170,18 +209,24 @@ def create_data():
         template = cv2.resize(temp,(target_size,target_size),interpolation=cv2.INTER_AREA)
 
         # invert template
-        gs_temp = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-        gs_temp = cv2.bitwise_not(gs_temp)
-        template = cv2.cvtColor(gs_temp, cv2.COLOR_GRAY2BGR)
+        #template = cv2.bitwise_not(template)
 
         # apply random transformations to template
         window_size = int(target_size*1.5)
-        transformed_template = apply_transforms(template, target_size, window_size)
+        transformed_template, mask = apply_transforms(template, target_size, window_size)
 
-        #cv2.imshow('image', transformed_template)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
-
+        # overlay transformed template over base image
+        #transformed_template = cv2.cvtColor(transformed_template, cv2.COLOR_GRAY2BGR)
+        rgb_mask = np.stack((cv2.bitwise_not(mask),)*3, axis=-1)
+        
+        masked_template = cv2.bitwise_and(transformed_template, mask)
+        masked_template = cv2.cvtColor(masked_template, cv2.COLOR_GRAY2BGR)
+        image_final = base_image.copy()
+        image_final[target_bbox[1]:target_bbox[1]+transformed_template.shape[0], target_bbox[0]:target_bbox[0]+transformed_template.shape[1]] = cv2.bitwise_and(image_final[target_bbox[1]:target_bbox[1]+transformed_template.shape[0], target_bbox[0]:target_bbox[0]+transformed_template.shape[1]], rgb_mask)
+        image_final[target_bbox[1]:target_bbox[1]+transformed_template.shape[0], target_bbox[0]:target_bbox[0]+transformed_template.shape[1]] = image_final[target_bbox[1]:target_bbox[1]+transformed_template.shape[0], target_bbox[0]:target_bbox[0]+transformed_template.shape[1]] + masked_template
+        
+        
+        
 
 
 
@@ -238,7 +283,7 @@ def create_data():
 
 """
 
-    return transformed_template
+    return image_final
 
 
 if __name__ == "__main__":
