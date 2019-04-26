@@ -63,8 +63,7 @@ Temporary Items
 *.elf
 *.srec
 *.atsuo
-*.vscode
-*.vscode/ipch
+.vscode/ipch/
 
 #Rosbags because they are too big
 *.bag
