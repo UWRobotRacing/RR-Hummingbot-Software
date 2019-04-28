@@ -21,4 +21,3 @@ Interface::Interface(ros::NodeHandle nh) {
  */
 Interface::~Interface() {
 }
-
