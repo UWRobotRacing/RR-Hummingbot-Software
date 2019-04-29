@@ -82,8 +82,8 @@ int main(int argc, char **argv)
 				usleep ((sizeof(payload) + 25) * 100);
 				regulator = 0;
 			}
-			int rx_length = read(uart0_filestream, (void*)rx_buffer, 255);		//Filestream, buffer to store in, number of bytes to read (max)
-			while (rx_length < 255) {
+			int rx_length = read(uart0_filestream, (void*)rx_buffer, sizeof(rx_buffer));		//Filestream, buffer to store in, number of bytes to read (max)
+			while (rx_length < sizeof(rx_buffer)) {
 				if (rx_length < 0) {
 					ROS_WARN("Error Occurred as there are no bytes");
 				}

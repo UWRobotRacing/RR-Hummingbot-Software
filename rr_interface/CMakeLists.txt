@@ -11,12 +11,20 @@ find_package(
   rospy 
   std_msgs 
   roslint
-)
+  message_generation
+  )
 
+  add_message_files(FILES
+    Transmitter.msg
+  )
+
+generate_messages(
+  DEPENDENCIES std_msgs
+)
+  
 catkin_package()
 roslint_cpp()
 
 include_directories(include ${catkin_INCLUDE_DIRS})
-include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 add_executable(rr_interface src/interface_main.cpp src/interface.cpp include/interface.hpp)
 target_link_libraries(rr_interface ${catkin_LIBRARIES}) 

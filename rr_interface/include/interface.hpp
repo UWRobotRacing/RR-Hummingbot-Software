@@ -9,6 +9,8 @@
 // ROS headers
 #include <ros/ros.h>
 
+#include <rr_interface/Transmitter.h>
+
 class Interface
 {
   private:
@@ -31,10 +33,12 @@ class Interface
     Transmitter transmitter_;
     Receiver receiver_;
   private:
-    // std::vector<uint16_t> transmitter_ {3,0};
-    // std::vector<uint16_t> receiver_ {3,0};
-    // uint32_t serialized_transmitter_;
 
+    // Subscribers/Advertisers
+    ros::Subscriber transmitter_subscriber_;
+    ros::Publisher receiver_publisher_;
+
+    void TransmitterCallback(const rr_interface::Transmitter &msg);
 };
 
 #endif  // INTERFACE_H

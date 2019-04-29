@@ -12,6 +12,7 @@
  * @return NONE
  */
 Interface::Interface(ros::NodeHandle nh) {
+    transmitter_subscriber_ = nh.subscribe("interface/transmitter", 0 , &Interface::TransmitterCallback, this);
 }
 
 /**
@@ -20,4 +21,11 @@ Interface::Interface(ros::NodeHandle nh) {
  * @return NONE
  */
 Interface::~Interface() {
+}
+
+
+void Interface::TransmitterCallback(const rr_interface::Transmitter &msg) {
+    transmitter_.speed = msg.speed;
+    transmitter_.steer = msg.steer;
+    transmitter_.position = msg.position;
 }
