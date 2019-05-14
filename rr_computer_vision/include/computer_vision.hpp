@@ -5,7 +5,6 @@
 #ifndef COMPUTER_VISION
 #define COMPUTER_VISION
 
-
 //ROS
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>

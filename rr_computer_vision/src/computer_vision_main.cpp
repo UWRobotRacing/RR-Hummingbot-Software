@@ -10,6 +10,7 @@
 
 //LOCAL
 #include "computer_vision.hpp"
+#include "lane_detection.hpp"
 
 /** @brief main file that starts the subscribers and calls spin
  */
@@ -22,7 +23,7 @@ int main(int argc, char** argv)
   ComputerVision computer_vision(nh);
 
   ROS_INFO("Constructing lane detection object");
-  LaneDetection computer_vision();
+  LaneDetection lane_detection();
 
   ros::spin();
   return 0;

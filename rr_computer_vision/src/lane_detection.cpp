@@ -5,6 +5,12 @@
 
 #include "lane_detection.hpp"
 
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+
+#include <opencv2/opencv.hpp>
+
+
 /*
  * @name LaneDetection 
  * @brief Constructor
@@ -13,7 +19,7 @@
 LaneDetection::LaneDetection() {
     // Initialize publishers and subscribers
     InitializeSubscribers();
-    InitializePublishers()
+    InitializePublishers();
 }
 
 /*
@@ -25,23 +31,29 @@ LaneDetection::~LaneDetection() {
 }
 
 void LaneDetection::InitializeSubscribers() {
-    test_subscriber = nh_.subscribe("rgb/image_rect_color", 0, &ComputerVision::RGBCameraCallback, this);
+    test_subscriber = nh_.subscribe("rgb/image_rect_color", 0, &LaneDetection::RGBCameraCallback, this);
 }
 
 void LaneDetection::InitializePublishers() {
-    test_publisher = nh_.advertise<sensor_msgs::Image>("test_publisher")
+    test_publisher = nh_.advertise<sensor_msgs::Image>("test_publisher", 10);
 }
 
 void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
-    cv_input_bridge_ = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    cv_bridge::CvImagePtr cv_input_bridge_ = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    cv::Mat im_input_;
     cv_input_bridge_->image.copyTo(im_input_);
     cv::Mat detected_edges;
     sensor_msgs::Image output;
-    Canny(im_input_, detected_edges, 50, 80, 3);
-    output.toImageMsg(detected_edges);
-    test_publisher.publish(output);
-    ros::spin()
-    return 0;
+    cv::Canny(im_input_, detected_edges, 50, 80, 3);
+
+
+    cv_bridge::CvImage out_msg;
+    out_msg.header   = msg.header; // Same timestamp and tf frame as input image
+    out_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC1; // Or whatever
+    out_msg.image    = detected_edges; // Your cv::Mat
+
+    test_publisher.publish(out_msg.toImageMsg());
+    ros::spin();
 }
 
 /*
@@ -179,3 +191,5 @@ cv::Mat GetContours(const cv::Mat &image, int min_size) {
   }
   return filtered;
 }
+
+*/
