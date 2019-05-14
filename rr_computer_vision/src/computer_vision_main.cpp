@@ -21,6 +21,9 @@ int main(int argc, char** argv)
   ROS_INFO("Starting Computer Vision Node");
   ComputerVision computer_vision(nh);
 
+  ROS_INFO("Constructing lane detection object");
+  LaneDetection computer_vision();
+
   ros::spin();
   return 0;
 }

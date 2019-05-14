@@ -18,7 +18,10 @@
 class LaneDetection
 {
   private:
-
+    ros::Subscriber rgb_camera_subscriber_;
+    ros::Publisher rgb_camera_publisher_;
+    ros::NodeHandle nh_;
+    void RGBCameraCallback(const sensor_msgs::Image& msg);
   public:
     LaneDetection();
     ~LaneDetection();
