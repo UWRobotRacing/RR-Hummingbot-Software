@@ -59,7 +59,9 @@ int main(int argc, char **argv)
 	options.c_lflag = 0;
 	tcflush(uart0_filestream, TCIFLUSH);
 	tcsetattr(uart0_filestream, TCSANOW, &options);
-	unsigned char rx_buffer[512];
+	char rx_buffer[256];
+	memset(&rx_buffer, '\0', sizeof(rx_buffer));
+
 
 	ros::init(argc, argv, "rr_interface");
 	ros::NodeHandle nh;
@@ -82,7 +84,7 @@ int main(int argc, char **argv)
 				usleep ((sizeof(payload) + 25) * 100);
 				regulator = 0;
 			}
-			int rx_length = read(uart0_filestream, (void*)rx_buffer, sizeof(rx_buffer));		//Filestream, buffer to store in, number of bytes to read (max)
+			int rx_length = read(uart0_filestream, &rx_buffer, sizeof(rx_buffer));		//Filestream, buffer to store in, number of bytes to read (max)
 			if (rx_length == 0) {
 				ROS_INFO("NO DATA WAITING");
 			}
@@ -97,7 +99,7 @@ int main(int argc, char **argv)
 				//memcpy(&interface.receiver_, &rx_length, sizeof(Interface::Receiver));
 				// Method 2
 				// interface.receiver_ = ntohl(rx_buffer);
-				rx_buffer[rx_length] = '\0';
+				// rx_buffer[rx_length] = '\0';
 				//std::string r = "" + interface.receiver_.payload;
 				
 				ROS_INFO("%i bytes read : %s\n", rx_length, rx_buffer);
