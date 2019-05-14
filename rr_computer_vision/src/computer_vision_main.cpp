@@ -18,12 +18,12 @@ int main(int argc, char** argv)
 {
   //Node and image transport initialization
   ros::init(argc, argv, "rr_computer_vision");
+  ROS_INFO("Initializing Computer vision node");
   ros::NodeHandle nh;
-  ROS_INFO("Starting Computer Vision Node");
-  ComputerVision computer_vision(nh);
 
-  ROS_INFO("Constructing lane detection object");
-  LaneDetection lane_detection();
+  // Construct neccesarry objects
+  ComputerVision computer_vision(nh);
+  LaneDetection lane_detection(nh);
 
   ros::spin();
   return 0;

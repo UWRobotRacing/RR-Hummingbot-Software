@@ -16,7 +16,8 @@
  * @brief Constructor
  * @param nh: ROS node handler
 */
-LaneDetection::LaneDetection() {
+LaneDetection::LaneDetection(ros::NodeHandle nh) {
+    nh_ = nh;
     // Initialize publishers and subscribers
     InitializeSubscribers();
     InitializePublishers();
@@ -31,11 +32,11 @@ LaneDetection::~LaneDetection() {
 }
 
 void LaneDetection::InitializeSubscribers() {
-    test_subscriber = nh_.subscribe("rgb/image_rect_color", 0, &LaneDetection::RGBCameraCallback, this);
+    test_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 0, &LaneDetection::RGBCameraCallback, this);
 }
 
 void LaneDetection::InitializePublishers() {
-    test_publisher = nh_.advertise<sensor_msgs::Image>("test_publisher", 10);
+    test_publisher = nh_.advertise<sensor_msgs::Image>("/test_publisher", 10);
 }
 
 void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
@@ -44,8 +45,9 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
     cv_input_bridge_->image.copyTo(im_input_);
     cv::Mat detected_edges;
     sensor_msgs::Image output;
-    cv::Canny(im_input_, detected_edges, 50, 80, 3);
-
+    cv::Size Size;
+    //cv::Canny(im_input_, detected_edges, 50, 80, 3);
+    cv::blur(im_input_, detected_edges, cv::Size(3,3));
 
     cv_bridge::CvImage out_msg;
     out_msg.header   = msg.header; // Same timestamp and tf frame as input image
