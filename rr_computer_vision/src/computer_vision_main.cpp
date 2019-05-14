@@ -25,6 +25,13 @@ int main(int argc, char** argv)
   ComputerVision computer_vision(nh);
   LaneDetection lane_detection(nh);
 
-  ros::spin();
+  // Run this node at 1 hz
+  ros::Rate loop_rate(1);
+  while (ros::ok())
+  {
+    ros::spinOnce();
+    loop_rate.sleep();
+  }
+  
   return 0;
 }

@@ -32,11 +32,11 @@ LaneDetection::~LaneDetection() {
 }
 
 void LaneDetection::InitializeSubscribers() {
-    test_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 0, &LaneDetection::RGBCameraCallback, this);
+    test_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 1, &LaneDetection::RGBCameraCallback, this);
 }
 
 void LaneDetection::InitializePublishers() {
-    test_publisher = nh_.advertise<sensor_msgs::Image>("/test_publisher", 10);
+    test_publisher = nh_.advertise<sensor_msgs::Image>("/test_publisher", 1);
 }
 
 void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
