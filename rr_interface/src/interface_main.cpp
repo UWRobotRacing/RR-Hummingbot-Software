@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 
 		O_NOCTTY - When set and path identifies a terminal device, open() shall not cause the terminal device to become the controlling terminal for the process.
 	*/
-	uart0_filestream = open("/dev/ttyUSB1", O_RDWR | O_NOCTTY | O_NONBLOCK);		//Open in non blocking read/write mode
+	uart0_filestream = open("/dev/ttyACM0", O_RDWR | O_NOCTTY | O_NONBLOCK);		//Open in non blocking read/write mode
 
 	//ERROR - CAN'T OPEN SERIAL PORT
 	if (uart0_filestream == -1) ROS_ERROR("Error - Unable to open UART.  Ensure it is not in use by another application\n");
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 	options.c_lflag = 0;
 	tcflush(uart0_filestream, TCIFLUSH);
 	tcsetattr(uart0_filestream, TCSANOW, &options);
-	unsigned char rx_buffer[256];
+	unsigned char rx_buffer[512];
 
 	ros::init(argc, argv, "rr_interface");
 	ros::NodeHandle nh;
@@ -83,23 +83,24 @@ int main(int argc, char **argv)
 				regulator = 0;
 			}
 			int rx_length = read(uart0_filestream, (void*)rx_buffer, sizeof(rx_buffer));		//Filestream, buffer to store in, number of bytes to read (max)
-			while (rx_length < sizeof(rx_buffer)) {
-				if (rx_length < 0) {
-					ROS_WARN("Error Occurred as there are no bytes");
-				}
-				else if (rx_length == 0) {
-					ROS_INFO("No data waiting");
-				}
-				else {
-					//Bytes received
-					// Method 1
-					char payload[sizeof(interface.receiver_)];
-					memcpy(&interface.receiver_, &rx_length, sizeof(payload));
-					// Method 2
-					// interface.receiver_ = ntohl(rx_buffer);
-					rx_buffer[rx_length] = '\0';
-					ROS_INFO("%i bytes read : %s\n", rx_length, rx_buffer);
-				}
+			if (rx_length == 0) {
+				ROS_INFO("NO DATA WAITING");
+			}
+			else if (rx_length < 0) {
+				ROS_WARN("DATA INVALID");
+			}
+			else {
+				//Bytes received
+				// Method 1
+				//char payload[sizeof(interface.receiver_)];
+				
+				//memcpy(&interface.receiver_, &rx_length, sizeof(Interface::Receiver));
+				// Method 2
+				// interface.receiver_ = ntohl(rx_buffer);
+				rx_buffer[rx_length] = '\0';
+				//std::string r = "" + interface.receiver_.payload;
+				
+				ROS_INFO("%i bytes read : %s\n", rx_length, rx_buffer);
 			}
 		}
 

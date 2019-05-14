@@ -13,7 +13,13 @@
 
 class Interface
 {
-  private:
+  public:
+    Interface(ros::NodeHandle nh);
+    ~Interface();
+
+    std::vector<uint16_t> Serialize(std::vector<uint16_t> transmitter);
+    std::vector<uint16_t> Deserialize(std::vector<uint16_t> receiver);
+
     struct Transmitter {
       uint8_t speed;
       uint8_t steer;
@@ -21,14 +27,8 @@ class Interface
     };
 
     struct Receiver {
+      char payload;
     };
-
-  public:
-    Interface(ros::NodeHandle nh);
-    ~Interface();
-
-    std::vector<uint16_t> Serialize(std::vector<uint16_t> transmitter);
-    std::vector<uint16_t> Deserialize(std::vector<uint16_t> receiver);
 
     Transmitter transmitter_;
     Receiver receiver_;
