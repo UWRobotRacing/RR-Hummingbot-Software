@@ -20,11 +20,14 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "rr_computer_vision");
   ROS_INFO("Initializing Computer vision node");
   ros::NodeHandle nh;
-
+  ros::Rate r(15);
   // Construct neccesarry objects
   ComputerVision computer_vision(nh);
   LaneDetection lane_detection(nh);
 
-  ros::spin();
+  while(ros::ok()){
+    ros::spinOnce();
+    r.sleep();
+  }
   return 0;
 }

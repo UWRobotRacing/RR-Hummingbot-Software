@@ -32,98 +32,50 @@ LaneDetection::~LaneDetection() {
 }
 
 void LaneDetection::InitializeSubscribers() {
-    test_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 0, &LaneDetection::RGBCameraCallback, this);
+    test_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 1, &LaneDetection::RGBCameraCallback, this);
 }
 
 void LaneDetection::InitializePublishers() {
-    test_publisher = nh_.advertise<sensor_msgs::Image>("/test_publisher", 10);
+    test_publisher = nh_.advertise<sensor_msgs::Image>("/test_publisher", 1);
 }
 
 void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
-    cv_bridge::CvImagePtr cv_input_bridge_ = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    cv::Mat im_input_;
-    cv_input_bridge_->image.copyTo(im_input_);
-    cv::Mat detected_edges;
-    sensor_msgs::Image output;
-    cv::Size Size;
-    //cv::Canny(im_input_, detected_edges, 50, 80, 3);
-    cv::blur(im_input_, detected_edges, cv::Size(3,3));
-
-    cv_bridge::CvImage out_msg;
-    out_msg.header   = msg.header; // Same timestamp and tf frame as input image
-    out_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC1; // Or whatever
-    out_msg.image    = detected_edges; // Your cv::Mat
-
-    test_publisher.publish(out_msg.toImageMsg());
-    ros::spin();
-}
-
-/*
-void lane_detection_processor::FindLanes(const sensor_msgs::Image::ConstPtr &msg)
-{
-  try
-  {
     cv_input_bridge_ = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     cv_input_bridge_->image.copyTo(im_input_);
-
+/*
     cvtColor(im_input_, Im1_HSV_, CV_BGR2HSV, 3);
     cv::warpPerspective(Im1_HSV_, Im1_HSV_warped_, transform_matrix_, BEV_size_, cv::INTER_LINEAR, cv::BORDER_REPLICATE);
-
     Multithreshold(Im1_HSV_warped_, multibounds_, mask_warped_1_);
     FindWhite(Im1_HSV_warped_, bounds_, adapt_hsv_patch_size_, mask_warped_2_);
     cv::bitwise_or(mask_warped_1_, mask_warped_2_, mask_warped_1_);
 
-    // sets up the BEV mask for that camera to remove everything outside of them
-    // masked area
     if (!((mask_.cols == mask_warped_1_.cols) && (mask_.rows == mask_warped_1_.rows)))
     {
       mask_ = cv::Mat(im_input_.rows, im_input_.cols, CV_8U, cv::Scalar::all(255));
       cv::warpPerspective(mask_, mask_, transform_matrix_, BEV_size_);
     }
 
-    cv::Mat out;               // dst must be a different Mat
+    out = GetContours(mask_warped_1_, blob_size_);
 
-  
-    out = GetContours(mask_warped_1_ &mask_, blob_size_);
-  
-
-    //find mask_
-    //Copy to output bridge
     out.copyTo(cv_output_bridge_.image);
     cv_output_bridge_.encoding = "mono8";
+    test_publisher.publish(cv_output_bridge_.toImageMsg());
+*/
 
-    //Input Image has been processed and published
-    image_pub_.publish(cv_output_bridge_.toImageMsg());
 
-    if (point_out_)
-    {
-      occupancy_.clear();
-      occupancy_.reserve(out.cols * out.rows);
 
-      data_pointer_ = out.data;
-      for (int i = 0; i < out.rows * out.cols; i++)
-      {
-        value1_ = *data_pointer_;
-        data_pointer_++;
-        if (value1_ == 0)
-        {
-          occupancy_.push_back(-1);
-        }
-        else
-        {
-          occupancy_.push_back(100);
-        }
-      }
-      grid_msg_.data = occupancy_;
-      grid_msg_.info = meta_data_;
-      pointList_pub_.publish(grid_msg_);
-    }
-  }
-  catch (cv_bridge::Exception &e)
-  {
-    ROS_ERROR("cv_bridge exception: %s", e.what());
-    return;
-  }
+    //cv::Mat detected_edges;
+    //sensor_msgs::Image output;
+    //cv::blur(im_input_, detected_edges, cv::Size(3,3));
+    cv_bridge::CvImage out_msg;
+    //out_msg.header   = msg.header; // Same timestamp and tf frame as input image
+    //out_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC1; // Or whatever
+    //out_msg.image    = im_input_; // Your cv::Mat
+
+    im_input_.copyTo(cv_output_bridge_.image);
+    cv_output_bridge_.encoding = "mono8";
+    test_publisher.publish(cv_output_bridge_.toImageMsg());
+    test_publisher.publish(out_msg.toImageMsg());
 }
 
 void Multithreshold(const cv::Mat &input_image, const cv::Mat &bounds, cv::Mat &output_image) {
@@ -193,5 +145,3 @@ cv::Mat GetContours(const cv::Mat &image, int min_size) {
   }
   return filtered;
 }
-
-*/
