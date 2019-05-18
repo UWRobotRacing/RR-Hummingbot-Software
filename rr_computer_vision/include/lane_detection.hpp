@@ -29,11 +29,13 @@ class LaneDetection
   private:
     void InitializeSubscribers();
     void InitializePublishers();
+    void TestCallback(const sensor_msgs::Image& msg);
     void RGBCameraCallback(const sensor_msgs::Image& msg);
 
     int adapt_hsv_patch_size_;
     int blob_size_;
 
+    ros::Subscriber zed_subscriber;
     ros::Subscriber test_subscriber;
     ros::Publisher test_publisher;
     ros::NodeHandle nh_;
