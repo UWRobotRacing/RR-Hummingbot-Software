@@ -63,23 +63,23 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
     cv_output_bridge_.encoding = "mono8";
     test_publisher.publish(cv_output_bridge_.toImageMsg());
 */
-    cv::Mat camera_data = cv_bridge::toCvCopy(msg, "bgr8")->image;
-    cv::Mat mask_(camera_data.rows, camera_data.cols, CV_8U, cv::Scalar::all(255));
-    mask_.copyTo(camera_data);
+    // cv::Mat camera_data = cv_bridge::toCvCopy(msg, "bgr8")->image;
+    // cv::Mat mask_(camera_data.rows, camera_data.cols, CV_8U, cv::Scalar::all(255));
+    // mask_.copyTo(camera_data);
 
-    //cv::Canny(camera_data, camera_data, 30, 70, 3);
-    // cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
-    /*
-    ros::Time time = ros::Time::now();
-    cv_bridge::CvImagePtr cvImage(new cv_bridge::CvImage);
-    cvImage->encoding = "bgr8";
-    cvImage->header.stamp = time;
-    cvImage->header.frame_id = "/test_publisher";
-    cvImage->image = camera_data;
-    test_publisher.publish(cvImage->toImageMsg());
-*/
-    cv::namedWindow( "Display window", 50);// Create a window for display.
-    cv::imshow( "Display window", camera_data); 
+    // cv::Canny(camera_data, camera_data, 30, 70, 3);
+    //  cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
+    
+    // ros::Time time = ros::Time::now();
+    // cv_bridge::CvImagePtr cvImage(new cv_bridge::CvImage);
+    // cvImage->encoding = "bgr8";
+    // cvImage->header.stamp = time;
+    // cvImage->header.frame_id = "/test_publisher";
+    // cvImage->image = camera_data;
+    test_publisher.publish(msg);
+
+    // cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE);// Create a window for display.
+    // cv::imshow( "Display window", camera_data); 
 }
 
 void LaneDetection::TestCallback(const sensor_msgs::Image& msg) {
