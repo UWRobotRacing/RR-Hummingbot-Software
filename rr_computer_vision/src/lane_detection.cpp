@@ -63,23 +63,24 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
     cv_output_bridge_.encoding = "mono8";
     test_publisher.publish(cv_output_bridge_.toImageMsg());
 */
-    // cv::Mat camera_data = cv_bridge::toCvCopy(msg, "bgr8")->image;
-    // cv::Mat mask_(camera_data.rows, camera_data.cols, CV_8U, cv::Scalar::all(255));
-    // mask_.copyTo(camera_data);
 
-    // cv::Canny(camera_data, camera_data, 30, 70, 3);
-    //  cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
+    // Convert sensor_msgs::Image to a BGR8 cv::Mat
+    cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    cv::Mat img_bgr8 = cv_bridge_bgr->image;
     
-    // ros::Time time = ros::Time::now();
-    // cv_bridge::CvImagePtr cvImage(new cv_bridge::CvImage);
-    // cvImage->encoding = "bgr8";
-    // cvImage->header.stamp = time;
-    // cvImage->header.frame_id = "/test_publisher";
-    // cvImage->image = camera_data;
-    test_publisher.publish(msg);
+    // Convert to grayscale and apply canny edge detection
+    cv::Mat img_gray;
+    cv::cvtColor(img_bgr8, img_gray, cv::COLOR_BGR2GRAY);
+    cv::Canny(img_gray, img_gray, 30, 70, 3);
 
-    // cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE);// Create a window for display.
-    // cv::imshow( "Display window", camera_data); 
+    // Convert grayscale image back to sensor_msgs::Image
+    cv_bridge::CvImage img_bridge_gray;
+    std_msgs::Header header; // empty header
+    header.stamp = ros::Time::now(); // time
+    img_bridge_gray = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_gray);
+    
+    // Publish 
+    test_publisher.publish(img_bridge_gray.toImageMsg());
 }
 
 void LaneDetection::TestCallback(const sensor_msgs::Image& msg) {
