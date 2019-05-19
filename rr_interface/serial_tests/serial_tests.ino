@@ -1,52 +1,55 @@
-typedef struct Receiver {
-  byte speed;
-  byte steer;
-  byte position;
-};
+//typedef struct Receiver {
+//  byte speed;
+//  byte steer;
+//  byte position;
+//};
+//
+//typedef struct Transmitter {
+//  byte payload;  
+//};
+//
+//union Uni {
+//  Transmitter frame;
+//  uint8_t serialized_array[512];  
+//};
+//
+//Receiver rx_byte;
+//union Uni payloadunion;
+//Transmitter tx_byte;
 
-typedef struct Transmitter {
-  byte payload;  
-};
-
-union Uni {
-  Transmitter frame;
-  uint8_t serialized_array[512];  
-};
-
-Receiver rx_byte;
-union Uni payloadunion;
-Transmitter tx_byte;
+int receivedByte;
+String input;
 
 void setup() {
-  Serial.begin(115200);
+  // Setup serial communication with a baud rate of 115200
+  // and 8 data bits, no parity bits, 1 stop bit (default if not specified)
+  Serial.begin(115200, SERIAL_8N1);
 }
 
-//void read()
+void read()
+{
+  if (Serial.available() > 0) 
+  {
+    // Can only read one byte at a time
+    receivedByte = Serial.read();
+    Serial.print("Received data: ");
+    Serial.print(receivedByte);
+    Serial.println();
+  }
+}
+
+//void write()
 //{
-//  if (Serial.available()) 
-//  {
-//    // Can only read one byte at a time
-//    rx_byte = Serial.read();
-//    Serial.print("Received data: ");
-//    Serial.print(rx_byte);
-//    Serial.println();
-//  }
+//  //payloadunion.frame.payload = 1;
+//  tx_byte.payload = 1;
+//  Serial.write('P');
+//  Serial.write((uint8_t*)&tx_byte,sizeof(tx_byte));
+//  Serial.write('S');
+//  return;
 //}
 
-void write()
-{
-  //payloadunion.frame.payload = 1;
-  tx_byte.payload = 1;
-  Serial.write('P');
-  Serial.write((uint8_t*)&tx_byte,sizeof(tx_byte));
-  Serial.write('S');
-  return;
-}
-
 void loop() {
-  //read();
-  write();
-  delay(10);
+  read();
+  //write();
+  //delay(500);
 }
-
-

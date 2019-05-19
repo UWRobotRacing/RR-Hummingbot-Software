@@ -3,6 +3,6 @@
  -  @competition IARRC 2019
  -->
 <launch>    
-  <node pkg="rr_interface" name="interface" type="interface" output="screen">
+  <node pkg="rr_interface" name="rr_interface" type="rr_interface" output="screen">
   </node> 
 </launch>
