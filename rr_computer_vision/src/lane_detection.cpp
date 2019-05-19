@@ -46,17 +46,6 @@ void LaneDetection::InitializePublishers() {
 
 void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
 
-/*
-    cv::bitwise_or(mask_warped_1_, mask_warped_2_, mask_warped_1_);
-
-    if (!((mask_.cols == mask_warped_1_.cols) && (mask_.rows == mask_warped_1_.rows)))
-    { 
-      mask_ = cv::Mat(im_input_.rows, im_input_.cols, CV_8U, cv::Scalar::all(255));
-      cv::warpPerspective(mask_, mask_, transform_matrix_, BEV_size_);
-    }
-
-    out = GetContours(mask_warped_1_, blob_size_);
-*/
     // Convert sensor_msgs::Image to a BGR8 cv::Mat
     cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     cv::Mat img_bgr8 = cv_bridge_bgr->image;
@@ -65,30 +54,35 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
 
     src = (cv::Mat_<float>(4,2) << 500.0, 400.0, 750.0, 400.0, 1280.0, 600.0, 0, 600.0);
     dst = (cv::Mat_<float>(4,2) << 300.0, 0, 900.0, 0, 900.0, 730.0, 300.0, 730.0);
-
-    ROS_INFO("BUMP");
     
     M = cv::getPerspectiveTransform(src, dst);
-    cv::warpPerspective(img_gray,BEV_image,M,img_gray.size(), cv::INTER_LINEAR, cv::BORDER_REPLICATE);
+    ROS_INFO("BUMP");
+    cv::warpPerspective(Im1_HSV_,BEV_image,M,img_gray.size());
 
     multibounds_ = (cv::Mat_<double>(3,6) << 0, 100, 140, 120, 255, 255, 0, 0, 250, 255, 25, 255, 25, 5, 186, 130, 50, 255);
     Multithreshold(BEV_image, multibounds_, mask_warped_1_);
 
+    ROS_INFO("Double_BUMP");
     bounds_ = cv::Scalar(20, -40);
     adapt_hsv_patch_size_ = 25;
     FindWhite(BEV_image, bounds_, adapt_hsv_patch_size_, mask_warped_2_);
 
+    cv::bitwise_or(mask_warped_1_, mask_warped_2_, mask_warped_1_);
+
+    blob_size_ = 100;
+    out = GetContours(mask_warped_1_, blob_size_);
+    
     cv_bridge::CvImage img_bridge_output;
     std_msgs::Header header; // empty header
     header.stamp = ros::Time::now(); // time
-    img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, Im1_HSV_);
+    img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, out);
     
     // Publish 
     test_publisher.publish(img_bridge_output.toImageMsg());
 }
 
 
-void Multithreshold(const cv::Mat &input_image, const cv::Mat &bounds, cv::Mat &output_image) {
+void LaneDetection::Multithreshold(const cv::Mat &input_image, const cv::Mat &bounds, cv::Mat &output_image) {
   //Confirm Dims and define binary mask_
   cv::Mat mask_(input_image.rows, input_image.cols, CV_8U, cv::Scalar::all(0));
   mask_.copyTo(output_image);
@@ -127,7 +121,7 @@ void Multithreshold(const cv::Mat &input_image, const cv::Mat &bounds, cv::Mat &
   }
 }
 
-void FindWhite(const cv::Mat &input_image, const cv::Scalar bounds, int patch_size, cv::Mat &output_image) {
+void LaneDetection::FindWhite(const cv::Mat &input_image, const cv::Scalar bounds, int patch_size, cv::Mat &output_image) {
   cv::Mat threshim1, threshim2;
   std::vector<cv::Mat> channels;
   cv::split(input_image, channels);
@@ -141,7 +135,7 @@ void FindWhite(const cv::Mat &input_image, const cv::Scalar bounds, int patch_si
 //  @param min_size is the the minimum size of the contours in the image
 //  @return is the resulting binary image thresholded by min_size
 
-cv::Mat GetContours(const cv::Mat &image, int min_size) {
+cv::Mat LaneDetection::GetContours(const cv::Mat &image, int min_size) {
   //Draw onto a blank image based on found contours
   cv::Mat filtered(image.size(), CV_8UC1, cv::Scalar(0));
   std::vector<std::vector<cv::Point> > contours;
