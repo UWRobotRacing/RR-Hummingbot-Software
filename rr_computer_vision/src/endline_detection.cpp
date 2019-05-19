@@ -16,7 +16,7 @@
 #include "endline_detection.hpp"
 
 //constructor
-EndlineCounter::EndlineCounter (ros::NodeHandle nh_) 
+EndlineCounter::EndlineCounter(ros::NodeHandle nh_)
 {
   detection_status_ = false;
   hysteresis_counter_ = 0;
@@ -24,8 +24,8 @@ EndlineCounter::EndlineCounter (ros::NodeHandle nh_)
   client_ = nh_.serviceClient<std_srvs::Trigger>("/Supervisor/count_lap");
   
   image_transport::ImageTransport it(nh_);
-  image_transport::Subscriber test_subscriber=it.subscribe(¨/zed/rgb/image_rect_color¨, 1, &EndlineCounter::ImgCb, this)
-  test_publisher=nh_.advertise<sensor_msgs::Image>(¨/test_endline¨,1);
+  image_transport::Subscriber test_subscriber=it.subscribe("/zed/rgb/image_rect_color", 1, &EndlineCounter::ImgCb, this);
+  test_publisher=nh_.advertise<sensor_msgs::Image>("/test_endline",1);
 }
 
 //callback to handle detection
