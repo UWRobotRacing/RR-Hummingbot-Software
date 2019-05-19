@@ -47,10 +47,6 @@ void LaneDetection::InitializePublishers() {
 void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
 
 /*
-    cvtColor(im_input_, Im1_HSV_, CV_BGR2HSV, 3);
-    cv::warpPerspective(Im1_HSV_, Im1_HSV_warped_, transform_matrix_, BEV_size_, cv::INTER_LINEAR, cv::BORDER_REPLICATE);
-    Multithreshold(Im1_HSV_warped_, multibounds_, mask_warped_1_);
-    FindWhite(Im1_HSV_warped_, bounds_, adapt_hsv_patch_size_, mask_warped_2_);
     cv::bitwise_or(mask_warped_1_, mask_warped_2_, mask_warped_1_);
 
     if (!((mask_.cols == mask_warped_1_.cols) && (mask_.rows == mask_warped_1_.rows)))
@@ -64,28 +60,31 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
     // Convert sensor_msgs::Image to a BGR8 cv::Mat
     cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     cv::Mat img_bgr8 = cv_bridge_bgr->image;
-    
-    // Convert to grayscale and apply canny edge detection
-    cv::Mat img_gray;
-    cv::cvtColor(img_bgr8, img_gray, cv::COLOR_BGR2GRAY);
-    //cv::Canny(img_gray, img_gray, 30, 70, 3);
+    cv::cvtColor(img_bgr8, Im1_HSV_, CV_BGR2HSV, 3);
+    //cv::cvtColor(img_bgr8, img_gray, cv::COLOR_BGR2GRAY);
+
     src = (cv::Mat_<float>(4,2) << 500.0, 400.0, 750.0, 400.0, 1280.0, 600.0, 0, 600.0);
     dst = (cv::Mat_<float>(4,2) << 300.0, 0, 900.0, 0, 900.0, 730.0, 300.0, 730.0);
 
     ROS_INFO("BUMP");
     
     M = cv::getPerspectiveTransform(src, dst);
-    
     cv::warpPerspective(img_gray,BEV_image,M,img_gray.size(), cv::INTER_LINEAR, cv::BORDER_REPLICATE);
 
-    // Convert grayscale image back to sensor_msgs::Image
-    cv_bridge::CvImage img_bridge_gray;
+    multibounds_ = (cv::Mat_<double>(3,6) << 0, 100, 140, 120, 255, 255, 0, 0, 250, 255, 25, 255, 25, 5, 186, 130, 50, 255);
+    Multithreshold(BEV_image, multibounds_, mask_warped_1_);
+
+    bounds_ = cv::Scalar(20, -40);
+    adapt_hsv_patch_size_ = 25;
+    FindWhite(BEV_image, bounds_, adapt_hsv_patch_size_, mask_warped_2_);
+
+    cv_bridge::CvImage img_bridge_output;
     std_msgs::Header header; // empty header
     header.stamp = ros::Time::now(); // time
-    img_bridge_gray = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, BEV_image);
+    img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, Im1_HSV_);
     
     // Publish 
-    test_publisher.publish(img_bridge_gray.toImageMsg());
+    test_publisher.publish(img_bridge_output.toImageMsg());
 }
 
 
