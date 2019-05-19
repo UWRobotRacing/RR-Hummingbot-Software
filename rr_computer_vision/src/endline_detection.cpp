@@ -16,12 +16,16 @@
 #include "endline_detection.hpp"
 
 //constructor
-EndlineCounter::EndlineCounter (ros::NodeHandle nh_) : it_(nh_) 
+EndlineCounter::EndlineCounter (ros::NodeHandle nh_) 
 {
   detection_status_ = false;
   hysteresis_counter_ = 0;
   hysteresis_constant_ = 2;
   client_ = nh_.serviceClient<std_srvs::Trigger>("/Supervisor/count_lap");
+  
+  image_transport::ImageTransport it(nh_);
+  image_transport::Subscriber test_subscriber=it.subscribe(¨/zed/rgb/image_rect_color¨, 1, &EndlineCounter::ImgCb, this)
+  test_publisher=nh_.advertise<sensor_msgs::Image>(¨/test_endline¨,1);
 }
 
 //callback to handle detection
@@ -36,12 +40,15 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
   try
   {
     cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-
+    
     //filter for magenta
     init_img = cv_ptr->image;
     cv::cvtColor(init_img, hsv_img, CV_BGR2HSV);
     cv::inRange(hsv_img, cv::Scalar(iLowH, 0,0), cv::Scalar(iHighH,255,255), mag_img);
     cv::GaussianBlur(mag_img, mag_img, cv::Size(7,7), 0, 0);
+
+    // PUBLISH and visualize in rviz   
+    test_.publish(mag_img.toImageMsg());
 
     //calls BlobDetector to evaluate area
     if (BlobDetector(mag_img))
