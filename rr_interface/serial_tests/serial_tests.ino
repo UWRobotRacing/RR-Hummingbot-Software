@@ -50,7 +50,9 @@ void write()
 }
 
 void loop() {
-  //read();
   write();
+  delay(10);
+  read();
+  //write();
   //delay(500);
 }

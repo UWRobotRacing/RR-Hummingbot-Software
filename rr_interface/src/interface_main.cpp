@@ -120,11 +120,12 @@ int main(int argc, char **argv)
   {
     // Writing 
     unsigned char test = 'w';
-    //int written_bytes = write(serial_port_filestream, "w", sizeof(test));
+    int written_bytes = write(serial_port_filestream, (unsigned char *)test, sizeof(test));
+	usleep ((sizeof(test) + 25) * 100);
 
     // Reading 
     // Allocate memory for read buffer, set size according to your needs
-    char read_buf [256];
+    char read_buf [sizeof(test)];
     memset(&read_buf, '\0', sizeof(read_buf));
 
     // Read bytes. The behaviour of read() (e.g. does it block?,
