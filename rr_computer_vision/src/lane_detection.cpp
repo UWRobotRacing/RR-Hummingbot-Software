@@ -55,13 +55,11 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
     dst = (cv::Mat_<float>(4,2) << 300.0, 0, 900.0, 0, 900.0, 730.0, 300.0, 730.0);
     
     M = cv::getPerspectiveTransform(src, dst);
-    ROS_INFO("BUMP");
     cv::warpPerspective(Im1_HSV_,BEV_image,M,img_gray.size());
 
     multibounds_ = (cv::Mat_<double>(3,6) << 0, 100, 140, 120, 255, 255, 0, 0, 250, 255, 25, 255, 25, 5, 186, 130, 50, 255);
     Multithreshold(BEV_image, multibounds_, mask_warped_1_);
 
-    ROS_INFO("Double_BUMP");
     bounds_ = cv::Scalar(20, -40);
     adapt_hsv_patch_size_ = 25;
     FindWhite(BEV_image, bounds_, adapt_hsv_patch_size_, mask_warped_2_);
@@ -83,13 +81,13 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
     occupancy_.reserve(out.cols * out.rows);
 
     data_pointer_ = out.data;
-    for (int i = 0; i < out.rows * out.cols; i++)
+    for (int i = 0; i < (out.rows * out.cols); i++)
     {
       value1_ = *data_pointer_;
       data_pointer_++;
       if (value1_ == 0)
       {
-        occupancy_.push_back(1);
+        occupancy_.push_back(-1);
       }
       else
       {
@@ -97,9 +95,14 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
       }
     }
     grid_msg_.data = occupancy_;
+    meta_data_.height = 720;
+    meta_data_.width = 1280;
+    meta_data_.resolution = 0.01;
+    meta_data_.origin.position.x = 0;
+    meta_data_.origin.position.y = 0;
+
     grid_msg_.info = meta_data_;
     pointList_pub_.publish(grid_msg_);
-
 }
 
 
