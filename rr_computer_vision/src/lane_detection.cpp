@@ -13,7 +13,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 
-
+#include <vector>
+using namespace std;
 /*
  * @name LaneDetection 
  * @brief Constructor
@@ -36,7 +37,7 @@ LaneDetection::~LaneDetection() {
 
 void LaneDetection::InitializeSubscribers() {
     zed_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 1, &LaneDetection::RGBCameraCallback, this);
-    test_subscriber = nh_.subscribe("/test_publisher", 1, &LaneDetection::TestCallback, this);
+    //test_subscriber = nh_.subscribe("/test_publisher", 1, &LaneDetection::TestCallback, this);
 }
 
 void LaneDetection::InitializePublishers() {
@@ -44,6 +45,7 @@ void LaneDetection::InitializePublishers() {
 }
 
 void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
+
 /*
     cvtColor(im_input_, Im1_HSV_, CV_BGR2HSV, 3);
     cv::warpPerspective(Im1_HSV_, Im1_HSV_warped_, transform_matrix_, BEV_size_, cv::INTER_LINEAR, cv::BORDER_REPLICATE);
@@ -58,12 +60,7 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
     }
 
     out = GetContours(mask_warped_1_, blob_size_);
-
-    out.copyTo(cv_output_bridge_.image);
-    cv_output_bridge_.encoding = "mono8";
-    test_publisher.publish(cv_output_bridge_.toImageMsg());
 */
-
     // Convert sensor_msgs::Image to a BGR8 cv::Mat
     cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     cv::Mat img_bgr8 = cv_bridge_bgr->image;
@@ -71,20 +68,26 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
     // Convert to grayscale and apply canny edge detection
     cv::Mat img_gray;
     cv::cvtColor(img_bgr8, img_gray, cv::COLOR_BGR2GRAY);
-    cv::Canny(img_gray, img_gray, 30, 70, 3);
+    //cv::Canny(img_gray, img_gray, 30, 70, 3);
+    src = (cv::Mat_<float>(4,2) << 500.0, 400.0, 750.0, 400.0, 1280.0, 600.0, 0, 600.0);
+    dst = (cv::Mat_<float>(4,2) << 300.0, 0, 900.0, 0, 900.0, 730.0, 300.0, 730.0);
+
+    ROS_INFO("BUMP");
+    
+    M = cv::getPerspectiveTransform(src, dst);
+    
+    cv::warpPerspective(img_gray,BEV_image,M,img_gray.size(), cv::INTER_LINEAR, cv::BORDER_REPLICATE);
 
     // Convert grayscale image back to sensor_msgs::Image
     cv_bridge::CvImage img_bridge_gray;
     std_msgs::Header header; // empty header
     header.stamp = ros::Time::now(); // time
-    img_bridge_gray = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_gray);
+    img_bridge_gray = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, BEV_image);
     
     // Publish 
     test_publisher.publish(img_bridge_gray.toImageMsg());
 }
 
-void LaneDetection::TestCallback(const sensor_msgs::Image& msg) {
-}
 
 void Multithreshold(const cv::Mat &input_image, const cv::Mat &bounds, cv::Mat &output_image) {
   //Confirm Dims and define binary mask_

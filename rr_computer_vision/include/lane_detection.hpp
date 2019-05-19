@@ -29,7 +29,6 @@ class LaneDetection
   private:
     void InitializeSubscribers();
     void InitializePublishers();
-    void TestCallback(const sensor_msgs::Image& msg);
     void RGBCameraCallback(const sensor_msgs::Image& msg);
 
     int adapt_hsv_patch_size_;
@@ -49,11 +48,17 @@ class LaneDetection
     cv::Mat mask_warped_2_;
     cv::Mat mask_;
     cv::Mat out;
+    cv::Mat src;
+    cv::Mat dst;
+    cv::Mat M;
+    cv::Mat BEV_image;
+    cv::Mat img_gray;
 
     cv::Size BEV_size_;
     cv::Scalar bounds_;
     cv_bridge::CvImagePtr cv_input_bridge_;
     cv_bridge::CvImage cv_output_bridge_;
+    
     
 
 };
