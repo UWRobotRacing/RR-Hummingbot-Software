@@ -14,6 +14,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <cv_bridge/cv_bridge.h>
+#include <nav_msgs/OccupancyGrid.h>
 
 //LOCAL
 
@@ -35,8 +36,8 @@ class LaneDetection
     int blob_size_;
 
     ros::Subscriber zed_subscriber;
-    ros::Subscriber test_subscriber;
     ros::Publisher test_publisher;
+    ros::Publisher pointList_pub_;
     ros::NodeHandle nh_;
 
     cv::Mat im_input_;
@@ -59,7 +60,16 @@ class LaneDetection
     cv_bridge::CvImagePtr cv_input_bridge_;
     cv_bridge::CvImage cv_output_bridge_;
     
-    
+    nav_msgs::MapMetaData meta_data_;
+    nav_msgs::OccupancyGrid grid_msg_;
+
+    std::string point_vec_out_;
+
+    uchar* data_pointer_;
+    uchar value1_;
+
+
+    std::vector<int8_t> occupancy_;
 
 };
 

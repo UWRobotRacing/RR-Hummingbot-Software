@@ -37,11 +37,11 @@ LaneDetection::~LaneDetection() {
 
 void LaneDetection::InitializeSubscribers() {
     zed_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 1, &LaneDetection::RGBCameraCallback, this);
-    //test_subscriber = nh_.subscribe("/test_publisher", 1, &LaneDetection::TestCallback, this);
 }
 
 void LaneDetection::InitializePublishers() {
     test_publisher = nh_.advertise<sensor_msgs::Image>("/test_publisher", 1);
+    pointList_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>("/point_vec_out_", 1);
 }
 
 void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
@@ -50,7 +50,6 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
     cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     cv::Mat img_bgr8 = cv_bridge_bgr->image;
     cv::cvtColor(img_bgr8, Im1_HSV_, CV_BGR2HSV, 3);
-    //cv::cvtColor(img_bgr8, img_gray, cv::COLOR_BGR2GRAY);
 
     src = (cv::Mat_<float>(4,2) << 500.0, 400.0, 750.0, 400.0, 1280.0, 600.0, 0, 600.0);
     dst = (cv::Mat_<float>(4,2) << 300.0, 0, 900.0, 0, 900.0, 730.0, 300.0, 730.0);
@@ -79,6 +78,28 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
     
     // Publish 
     test_publisher.publish(img_bridge_output.toImageMsg());
+
+    occupancy_.clear();
+    occupancy_.reserve(out.cols * out.rows);
+
+    data_pointer_ = out.data;
+    for (int i = 0; i < out.rows * out.cols; i++)
+    {
+      value1_ = *data_pointer_;
+      data_pointer_++;
+      if (value1_ == 0)
+      {
+        occupancy_.push_back(1);
+      }
+      else
+      {
+        occupancy_.push_back(100);
+      }
+    }
+    grid_msg_.data = occupancy_;
+    grid_msg_.info = meta_data_;
+    pointList_pub_.publish(grid_msg_);
+
 }
 
 
