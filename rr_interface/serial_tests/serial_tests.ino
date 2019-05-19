@@ -19,6 +19,7 @@
 
 int receivedByte;
 String input;
+unsigned char output = 'w';
 
 void setup() {
   // Setup serial communication with a baud rate of 115200
@@ -30,7 +31,6 @@ void read()
 {
   if (Serial.available() > 0) 
   {
-    // Can only read one byte at a time
     receivedByte = Serial.read();
     Serial.print("Received data: ");
     Serial.print(receivedByte);
@@ -38,18 +38,19 @@ void read()
   }
 }
 
-//void write()
-//{
-//  //payloadunion.frame.payload = 1;
+void write()
+{
+  Serial.write(output);
+//  payloadunion.frame.payload = 1;
 //  tx_byte.payload = 1;
 //  Serial.write('P');
 //  Serial.write((uint8_t*)&tx_byte,sizeof(tx_byte));
 //  Serial.write('S');
 //  return;
-//}
+}
 
 void loop() {
-  read();
-  //write();
+  //read();
+  write();
   //delay(500);
 }
