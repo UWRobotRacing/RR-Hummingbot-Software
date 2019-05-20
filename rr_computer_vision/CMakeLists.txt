@@ -36,4 +36,4 @@ src/traffic_light.cpp include/traffic_light.hpp
 src/endline_detection.cpp include/endline_detection.hpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(rr_computer_vision computer_vision ${catkin_LIBRARIES})
+target_link_libraries(rr_computer_vision computer_vision ${catkin_LIBRARIES} ${OpenCV_LIBS})

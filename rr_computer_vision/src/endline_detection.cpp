@@ -16,16 +16,15 @@
 #include "endline_detection.hpp"
 
 //constructor
-EndlineCounter::EndlineCounter(ros::NodeHandle nh)    
+EndlineCounter::EndlineCounter(ros::NodeHandle nh) : it_(nh_) 
 {
   detection_status_ = false;
   hysteresis_counter_ = 0;
   hysteresis_constant_ = 2;
-  client_ = nh.serviceClient<std_srvs::Trigger>("/Supervisor/count_lap");
+  client_ = nh_.serviceClient<std_srvs::Trigger>("/Supervisor/count_lap");
   
-  image_transport::ImageTransport it(nh);
-  test_subscriber=it.subscribe("/zed/rgb/image_rect_color", 1, &EndlineCounter::ImgCb, this);
-  test_publisher=it.advertise <sensor_msgs::Image> ("/test_endline",1);
+  test_subscriber = it_.subscribe("/zed/rgb/image_rect_color", 1, &EndlineCounter::ImgCb, this);
+  test_publisher = it_.advertise("/test_endline", 1);
 }
 
 //callback to handle detection
@@ -51,7 +50,7 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
     cv_bridge::CvImage img_bridge_output;
     std_msgs::Header header;
     header.stamp=ros::Time::now();
-    img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8,mag_img);
+    img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, mag_img);
     test_publisher.publish(img_bridge_output.toImageMsg());
 
     //calls BlobDetector to evaluate area
