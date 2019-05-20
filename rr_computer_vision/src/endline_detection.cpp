@@ -50,7 +50,7 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
     cv_bridge::CvImage img_bridge_output;
     std_msgs::Header header;
     header.stamp=ros::Time::now();
-    img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, mag_img);
+    img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, mag_img);
     test_publisher.publish(img_bridge_output.toImageMsg());
 
     //calls BlobDetector to evaluate area
