@@ -16,16 +16,16 @@
 #include "endline_detection.hpp"
 
 //constructor
-EndlineCounter::EndlineCounter(ros::NodeHandle nh_)
+EndlineCounter::EndlineCounter(ros::NodeHandle nh)    
 {
   detection_status_ = false;
   hysteresis_counter_ = 0;
   hysteresis_constant_ = 2;
-  client_ = nh_.serviceClient<std_srvs::Trigger>("/Supervisor/count_lap");
+  client_ = nh.serviceClient<std_srvs::Trigger>("/Supervisor/count_lap");
   
-  image_transport::ImageTransport it(nh_);
-  image_transport::Subscriber test_subscriber=it.subscribe("/zed/rgb/image_rect_color", 1, &EndlineCounter::ImgCb, this);
-  test_publisher=nh_.advertise<sensor_msgs::Image>("/test_endline",1);
+  image_transport::ImageTransport it(nh);
+  test_subscriber=it.subscribe("/zed/rgb/image_rect_color", 1, &EndlineCounter::ImgCb, this);
+  test_publisher=it.advertise <sensor_msgs::Image> ("/test_endline",1);
 }
 
 //callback to handle detection
@@ -48,7 +48,11 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
     cv::GaussianBlur(mag_img, mag_img, cv::Size(7,7), 0, 0);
 
     // PUBLISH and visualize in rviz   
-    test_.publish(mag_img.toImageMsg());
+    cv_bridge::CvImage img_bridge_output;
+    std_msgs::Header header;
+    header.stamp=ros::Time::now();
+    img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8,mag_img);
+    test_publisher.publish(img_bridge_output.toImageMsg());
 
     //calls BlobDetector to evaluate area
     if (BlobDetector(mag_img))

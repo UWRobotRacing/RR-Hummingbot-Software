@@ -16,8 +16,8 @@
 
 class EndlineCounter {
   private :
-    ros::NodeHandle nh_;
-    image_transport::ImageTransport it_;
+    //ros::NodeHandle nh_;
+    //image_transport::ImageTransport it_;
     
     ros::ServiceClient client_;
     bool detection_status_;
@@ -26,6 +26,10 @@ class EndlineCounter {
   
   public :
     EndlineCounter(ros::NodeHandle);
+
+    image_transport::Subscriber test_subscriber;
+    image_transport::Publisher test_publisher;
+
     void ImgCb(const sensor_msgs::ImageConstPtr&);
     bool BlobDetector(cv::Mat);
 };
