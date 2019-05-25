@@ -31,6 +31,13 @@ class EndlineCounter {
     bool detection_status_;
     int hysteresis_counter_;
     int hysteresis_constant_;
+
+    const int HighHue= 180;
+    const int LowHue= 130;
+    const int HighSat= 255;
+    const int LowSat= 82;
+    const int HighVal= 255;
+    const int LowVal= 158;
 };
 
 #endif /*ENDLINE_DETECTION_HPP*/

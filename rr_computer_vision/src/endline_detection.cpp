@@ -32,8 +32,6 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
 {
   cv::Mat init_img, hsv_img, mag_img, blur_img;
   cv_bridge::CvImagePtr cv_ptr;
-  int iLowH = 145;
-  int iHighH = 165;
   std_srvs::Trigger srv;
 
   try
@@ -43,7 +41,7 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
     //filter for magenta
     init_img = cv_ptr->image;
     cv::cvtColor(init_img, hsv_img, CV_BGR2HSV);
-    cv::inRange(hsv_img, cv::Scalar(iLowH, 0,0), cv::Scalar(iHighH,255,255), mag_img);
+    cv::inRange(hsv_img, cv::Scalar(LowHue, LowSat,LowVal), cv::Scalar(HighHue, HighSat,HighVal), mag_img);
     cv::GaussianBlur(mag_img, mag_img, cv::Size(7,7), 0, 0);
 
     // PUBLISH and visualize in rviz   

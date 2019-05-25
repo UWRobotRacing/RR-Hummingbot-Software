@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rr_computer_vision)
 
+
 set(CMAKE_BUILD_TYPE Release)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -28,6 +29,7 @@ src/sign_detection.cpp include/sign_detection.hpp
 src/traffic_light.cpp include/traffic_light.hpp
 src/endline_detection.cpp include/endline_detection.hpp)
 
+add_compile_options(-std=c++11)
 add_executable(rr_computer_vision src/computer_vision_main.cpp)
 add_library(computer_vision src/computer_vision.cpp include/computer_vision.hpp 
 src/lane_detection.cpp include/lane_detection.hpp
