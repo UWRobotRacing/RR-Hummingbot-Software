@@ -51,7 +51,8 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
     cv::Mat img_bgr8 = cv_bridge_bgr->image;
     cv::cvtColor(img_bgr8, Im1_HSV_, CV_BGR2HSV, 3);
 
-    src = (cv::Mat_<float>(4,2) << 500.0, 400.0, 750.0, 400.0, 1280.0, 600.0, 0, 600.0);
+    //src = (cv::Mat_<float>(4,2) << 500.0, 400.0, 750.0, 400.0, 1280.0, 600.0, 0, 600.0);
+    src = (cv::Mat_<float>(4,2) << 200.0, 400.0, 1150.0, 400.0, 1280.0, 500.0, 20, 580.0);
     dst = (cv::Mat_<float>(4,2) << 300.0, 0, 900.0, 0, 900.0, 730.0, 300.0, 730.0);
     
     M = cv::getPerspectiveTransform(src, dst);
@@ -72,7 +73,7 @@ void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
     cv_bridge::CvImage img_bridge_output;
     std_msgs::Header header; // empty header
     header.stamp = ros::Time::now(); // time
-    img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, out);
+    img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, out;
     
     // Publish 
     test_publisher.publish(img_bridge_output.toImageMsg());
