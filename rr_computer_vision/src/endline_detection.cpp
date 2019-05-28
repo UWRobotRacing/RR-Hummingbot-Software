@@ -6,9 +6,6 @@
  *
  * Service called:
  *   /Supervisor/count_lap         --used by supervisor node
- *
- * @author Angela Gu (angegu)    
- * @author Toni Ogunmade (oluwatoni)
  * @author Yuchi(Allan) Zhao
  */
 
@@ -19,8 +16,6 @@
 EndlineCounter::EndlineCounter(ros::NodeHandle nh) : it_(nh_) 
 {
   detection_status_ = false;
-  // hysteresis_counter_ = 0;
-  // hysteresis_constant_ = 2;
   client_ = nh_.serviceClient<std_srvs::Trigger>("/Supervisor/count_lap");
   
   test_subscriber = it_.subscribe("/zed/rgb/image_rect_color", 1, &EndlineCounter::ImgCb, this);
@@ -94,77 +89,3 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
     return;
   }
 }
-
-
-
-
-
-
-//--------------------------------------------------------------
-//old code
-
-
-//    //calls BlobDetector to evaluate area
-//     if (BlobDetector(mag_img))
-//     {
-//       if (!detection_status_)
-//       {
-//         //increment when endline not confirmed
-//         hysteresis_counter_++;
-//         if (hysteresis_counter_ > hysteresis_constant_)
-//         {
-//           //counter has passed threshold constant
-//           hysteresis_counter_ = 0;
-//           detection_status_ = true;
-//           ROS_INFO("DETECTED");
-//         }
-//       }
-//       else
-//       {
-//         //decay if detection not true
-//         if (hysteresis_counter_)
-//         {
-//           hysteresis_counter_--;
-//         }
-//       }
-//     }
-//     else
-//     {
-//       //BlobCounter did not detect anything
-//       if (!detection_status_)
-//       {
-//         //decay
-//         if (hysteresis_counter_)
-//         {
-//           hysteresis_counter_--;
-//         }
-//       }
-//       else
-//       {
-//         //post detection, detect when endline no longer in sight
-//         hysteresis_counter_++;
-//         if (hysteresis_counter_ > hysteresis_constant_)
-//         {
-//           hysteresis_counter_ = 0;
-//           detection_status_ = false;
-//           ROS_INFO("NO LONGER DETECTED");
-
-//           //make service call
-//           if (client_.call(srv))
-//           {
-//             if (srv.response.success)
-//             {
-//               ROS_INFO("SUCCESS");
-//               ros::shutdown();
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-//   catch (cv_bridge::Exception& e)
-//   {
-//     ROS_ERROR("cv_bridge exception: %s", e.what());
-//     return;
-//   }
-// }
