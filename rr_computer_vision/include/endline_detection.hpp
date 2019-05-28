@@ -28,7 +28,7 @@ class EndlineCounter {
     image_transport::Subscriber test_subscriber;
     image_transport::Publisher test_publisher;
 
-    bool detection_status_;
+    bool detection_status_, flag;
     int hysteresis_counter_;
     int hysteresis_constant_;
 
