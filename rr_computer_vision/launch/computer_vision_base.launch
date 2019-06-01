@@ -7,9 +7,9 @@
 <launch>
   <arg name="camera" default=""/>
   <arg name="config_file" default=""/>
-    
-  <!-- Launch ZED camera wrapper -->
-  <include file="$(find zed_wrapper)/launch/zed.launch"> </include>
 
-  <node pkg="rr_computer_vision" type="computer_vision" name="computer_vision" output="screen"/>
+  <!-- Launch ZED camera wrapper -->
+  <!-- <include file="$(find zed_wrapper)/launch/zed.launch"> </include> -->
+
+  <node pkg="rr_computer_vision" type="rr_computer_vision" name="rr_computer_vision" output="screen"/>
 </launch>

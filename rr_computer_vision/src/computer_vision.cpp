@@ -54,7 +54,7 @@ void ComputerVision::InitializeSubscribers() {
 }
 
 void ComputerVision::InitializePublishers() {
-  test_publisher = nh_.advertise<sensor_msgs::Image>("/test_publisher", 1);
+  test_publisher = nh_.advertise<sensor_msgs::Image>("/test_stitching", 1);
 }
 
 void ComputerVision::RGBCameraCallback(const sensor_msgs::Image& msg){
@@ -62,6 +62,8 @@ void ComputerVision::RGBCameraCallback(const sensor_msgs::Image& msg){
 }
 
 void ComputerVision::LeftRightSyncCameraCallback(const sensor_msgs::ImageConstPtr& left_msg, const sensor_msgs::ImageConstPtr& right_msg) {
+  ROS_INFO("SYNCHRONIZED POLICY CALLBACK");
+
   // Convert sensor_msgs::Image to a BGR8 cv::Mat 
   cv::Mat left_img_bgr8 = (cv_bridge::toCvCopy(left_msg, sensor_msgs::image_encodings::BGR8))->image;
   cv::Mat right_img_bgr8 = (cv_bridge::toCvCopy(right_msg, sensor_msgs::image_encodings::BGR8))->image;
