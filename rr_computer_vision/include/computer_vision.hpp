@@ -32,7 +32,7 @@ class ComputerVision
     void InitializePublishers();
 
     void RGBCameraCallback(const sensor_msgs::Image& msg);
-    void LeftRightSyncCameraCallback(const sensor_msgs::Image& left_msg, const sensor_msgs::Image& right_msg);
+    void LeftRightSyncCameraCallback(const sensor_msgs::ImageConstPtr& left_msg, const sensor_msgs::ImageConstPtr& right_msg);
     void LeftCameraCallback(const sensor_msgs::Image& msg);
     void RightCameraCallback(const sensor_msgs::Image& msg);
     void DepthCameraCallback(const sensor_msgs::Image& msg);

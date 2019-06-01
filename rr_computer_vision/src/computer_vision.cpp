@@ -61,7 +61,7 @@ void ComputerVision::RGBCameraCallback(const sensor_msgs::Image& msg){
 
 }
 
-void ComputerVision::LeftRightSyncCameraCallback(const sensor_msgs::Image& left_msg, const sensor_msgs::Image& right_msg) {
+void ComputerVision::LeftRightSyncCameraCallback(const sensor_msgs::ImageConstPtr& left_msg, const sensor_msgs::ImageConstPtr& right_msg) {
   // Convert sensor_msgs::Image to a BGR8 cv::Mat 
   cv::Mat left_img_bgr8 = (cv_bridge::toCvCopy(left_msg, sensor_msgs::image_encodings::BGR8))->image;
   cv::Mat right_img_bgr8 = (cv_bridge::toCvCopy(right_msg, sensor_msgs::image_encodings::BGR8))->image;
