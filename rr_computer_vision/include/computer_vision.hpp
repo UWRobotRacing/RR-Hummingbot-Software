@@ -22,22 +22,26 @@ class ComputerVision
   public:
     ComputerVision(ros::NodeHandle nh);
     ~ComputerVision();
-    void InitializeSubscribers();
+    
   private:
-    //void RGBCameraCallback(const sensor_msgs::Image& msg);
+    void InitializeSubscribers();
+    void InitializePublishers();
+
+    void RGBCameraCallback(const sensor_msgs::Image& msg);
     void LeftRightSyncCameraCallback(const sensor_msgs::Image& left_msg, const sensor_msgs::Image& right_msg);
     void LeftCameraCallback(const sensor_msgs::Image& msg);
     void RightCameraCallback(const sensor_msgs::Image& msg);
     void DepthCameraCallback(const sensor_msgs::Image& msg);
     ros::Subscriber rgb_camera_subscriber_;
 
-    message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_;
-    message_filters::Subscriber<sensor_msgs::Image> right_camera_subscriber_;
-    TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> sync;
+    // message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_;
+    // message_filters::Subscriber<sensor_msgs::Image> right_camera_subscriber_;
+    // TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> sync;
 
-    //ros::Subscriber left_camera_subscriber_;
-    //ros::Subscriber right_camera_subscriber_;
+    ros::Subscriber left_camera_subscriber_;
+    ros::Subscriber right_camera_subscriber_;
     ros::Subscriber depth_camera_subscriber_;
+    ros::Publisher test_publisher;
     ros::NodeHandle nh_;
 };
 
