@@ -22,14 +22,13 @@ ComputerVision::ComputerVision(ros::NodeHandle nh) {
   nh_ = nh;
   InitializeSubscribers();
   InitializePublishers();
+
+  sync.reset(new Sync(left_right_sync_policy(10), left_camera_subscriber_, right_camera_subscriber_));
+  sync->registerCallback(boost::bind(&ComputerVision::LeftRightSyncCameraCallback, this, _1, _2));
   // left_camera_subscriber_.subscribe(nh, "left/image_rect_color", 1);
   // right_camera_subscriber_.subscribe(nh, "right/image_rect_color", 1);
   // TimeSynchronizer<Image, CameraInfo> sync(image_sub, info_sub, 10);
   // sync.registerCallback(boost::bind(&LeftRightSyncCameraCallback, _1, _2));
-
-  // message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_(nh, "left/image_rect_color", 1);
-  // message_filters::Subscriber<sensor_msgs::Image> right_camera_subscriber_(nh, "right/image_rect_color", 1);
-  // TimeSynchronizer<Image, CameraInfo> sync(image_sub, info_sub, 10);
 }
 
 /*
@@ -45,10 +44,13 @@ ComputerVision::~ComputerVision() {
  * @brief 
 */
 void ComputerVision::InitializeSubscribers() {
-  rgb_camera_subscriber_ = nh_.subscribe("rgb/image_rect_color", 0, &ComputerVision::RGBCameraCallback, this);
-  left_camera_subscriber_ = nh_.subscribe("left/image_rect_color", 0, &ComputerVision::LeftCameraCallback, this);
-  right_camera_subscriber_ = nh_.subscribe("left/image_rect_color", 0, &ComputerVision::RightCameraCallback, this);
-  depth_camera_subscriber_ = nh_.subscribe("depth/depth_registered", 0, &ComputerVision::DepthCameraCallback, this);
+  message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_(nh_, "left/image_rect_color", 1);
+  message_filters::Subscriber<sensor_msgs::Image> right_camera_subscriber_(nh_, "right/image_rect_color", 1);
+    
+  // rgb_camera_subscriber_ = nh_.subscribe("rgb/image_rect_color", 0, &ComputerVision::RGBCameraCallback, this);
+  // left_camera_subscriber_ = nh_.subscribe("left/image_rect_color", 0, &ComputerVision::LeftCameraCallback, this);
+  // right_camera_subscriber_ = nh_.subscribe("left/image_rect_color", 0, &ComputerVision::RightCameraCallback, this);
+  // depth_camera_subscriber_ = nh_.subscribe("depth/depth_registered", 0, &ComputerVision::DepthCameraCallback, this);
 }
 
 void ComputerVision::InitializePublishers() {

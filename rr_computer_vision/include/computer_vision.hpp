@@ -9,8 +9,12 @@
 //ROS
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+// #include <message_filters/subscriber.h>
+// #include <message_filters/time_synchronizer.h>
+
 #include <message_filters/subscriber.h>
-#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 //OPENCV includes
 #include <opencv2/opencv.hpp>
@@ -22,7 +26,7 @@ class ComputerVision
   public:
     ComputerVision(ros::NodeHandle nh);
     ~ComputerVision();
-    
+
   private:
     void InitializeSubscribers();
     void InitializePublishers();
@@ -34,12 +38,15 @@ class ComputerVision
     void DepthCameraCallback(const sensor_msgs::Image& msg);
     ros::Subscriber rgb_camera_subscriber_;
 
-    // message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_;
-    // message_filters::Subscriber<sensor_msgs::Image> right_camera_subscriber_;
-    // TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> sync;
+    // Stuff for synchronized policy
+    message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_;
+    message_filters::Subscriber<sensor_msgs::Image> right_camera_subscriber_;    
+    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> left_right_sync_policy;
+    typedef message_filters::Synchronizer<left_right_sync_policy> Sync;
+    boost::shared_ptr<Sync> sync;
 
-    ros::Subscriber left_camera_subscriber_;
-    ros::Subscriber right_camera_subscriber_;
+    // ros::Subscriber left_camera_subscriber_;
+    // ros::Subscriber right_camera_subscriber_;
     ros::Subscriber depth_camera_subscriber_;
     ros::Publisher test_publisher;
     ros::NodeHandle nh_;
