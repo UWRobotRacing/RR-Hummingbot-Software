@@ -9,7 +9,14 @@
   <arg name="config_file" default=""/>
     
   <!-- Launch ZED camera wrapper -->
-  <include file="$(find zed_wrapper)/launch/zed.launch"> </include>
+  <include file="$(find zed_wrapper)/launch/zed_camera.launch"> 
+    <arg name="frame_rate"              value="15" /> 
+    <param name="quality"               value="3" />
+    <param name="sensing_mode"          value="1" />
+    <param name="confidence"            value="90" />
+  </include>
 
   <node pkg="rr_computer_vision" type="computer_vision" name="computer_vision" output="screen"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find zed_display_rviz)/rviz/zed.rviz" output="screen" />
+
 </launch>
