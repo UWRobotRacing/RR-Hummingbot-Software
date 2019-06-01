@@ -45,8 +45,9 @@ class ComputerVision
     typedef message_filters::Synchronizer<left_right_sync_policy> Sync;
     boost::shared_ptr<Sync> sync;
 
-    // ros::Subscriber left_camera_subscriber_;
-    // ros::Subscriber right_camera_subscriber_;
+    ros::Subscriber left_header_subscriber_;
+    ros::Subscriber right_header_subscriber_;
+
     ros::Subscriber depth_camera_subscriber_;
     ros::Publisher test_publisher;
     ros::NodeHandle nh_;

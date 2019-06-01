@@ -44,12 +44,15 @@ ComputerVision::~ComputerVision() {
  * @brief 
 */
 void ComputerVision::InitializeSubscribers() {
-  message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_(nh_, "left/image_rect_color", 1);
-  message_filters::Subscriber<sensor_msgs::Image> right_camera_subscriber_(nh_, "right/image_rect_color", 1);
+  // message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_(nh_, "/zed/left/image_rect_color", 1);
+  // message_filters::Subscriber<sensor_msgs::Image> right_camera_subscriber_(nh_, "/zed/left/image_rect_color", 1);
+
+  left_camera_subscriber_.subscribe(nh_, "/zed/left/image_rect_color", 1);
+  right_camera_subscriber_.subscribe(nh_, "/zed/right/image_rect_color", 1);
     
   // rgb_camera_subscriber_ = nh_.subscribe("rgb/image_rect_color", 0, &ComputerVision::RGBCameraCallback, this);
-  // left_camera_subscriber_ = nh_.subscribe("left/image_rect_color", 0, &ComputerVision::LeftCameraCallback, this);
-  // right_camera_subscriber_ = nh_.subscribe("left/image_rect_color", 0, &ComputerVision::RightCameraCallback, this);
+  // left_header_subscriber_ = nh_.subscribe("/zed/left/image_rect_color", 0, &ComputerVision::LeftCameraCallback, this);
+  // right_header_subscriber_ = nh_.subscribe("/zed/right/image_rect_color", 0, &ComputerVision::RightCameraCallback, this);
   // depth_camera_subscriber_ = nh_.subscribe("depth/depth_registered", 0, &ComputerVision::DepthCameraCallback, this);
 }
 
@@ -87,11 +90,21 @@ void ComputerVision::LeftRightSyncCameraCallback(const sensor_msgs::ImageConstPt
 }
 
 void ComputerVision::LeftCameraCallback(const sensor_msgs::Image& msg) {
-    
+    ROS_INFO("LEFT FRAME HEADER:");
+    //get header info
+    std_msgs::Header h = msg.header;
+    std::cout << h << std::endl; //all at once
+    // std::cout<<h.stamp<<endl; //specific parts of it
+    // std::cout<<h.stamp.sec<<endl;
+    // std::cout<<h.stamp.nsec<<endl;
+    // std::cout<<h.seq<<endl;
 }
 
 void ComputerVision::RightCameraCallback(const sensor_msgs::Image& msg) {
-    
+    ROS_INFO("RIGHT FRAME HEADER:");
+    //get header info
+    std_msgs::Header h = msg.header;
+    std::cout << h << std::endl; //all at once
 }
 
 void ComputerVision::DepthCameraCallback(const sensor_msgs::Image& msg) {
