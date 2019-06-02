@@ -11,6 +11,9 @@
 
 
 #include "endline_detection.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include <vector>
 
 //constructor
 EndlineCounter::EndlineCounter(ros::NodeHandle nh) : it_(nh_) 
@@ -28,9 +31,9 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
   cv::Mat init_img, hsv_img, mag_img, blur_img;
   cv_bridge::CvImagePtr cv_ptr;
   std_srvs::Trigger srv;
-  cv::vector<vector<Point> > contours;
-  cv::vector<Vec4i> hierarchy;
-  cv::vector<Point> approx;
+  std::vector<std::vector<cv::Point>> contours;
+  std::vector<cv::Vec4i> hierarchy;
+  std::vector<cv::Point> approx;
 
   try
   {
@@ -50,31 +53,42 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
     test_publisher.publish(img_bridge_output.toImageMsg());
 
     //contour 
-    cv::findContours( mag_img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
-    for (int i = 0; i < contours.size(); i++){
-      cv::approxPolyDP(Mat(contours[i]), approx, 0.01*arcLength(Mat(contours[i], true),true)
-      if (approx.size()==4){
+    cv::findContours(mag_img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+    for (int i = 0; i < contours.size(); i++)
+    {
+      cv::approxPolyDP(cv::Mat(contours[i]), approx, 0.01*arcLength(cv::Mat(contours[i]), true), true);
+
+      if (approx.size()==4)
+      {
         //bound with a rectangle
-        cv::vector<Rect> boundRect;
-        boundRect = cv::boundingRect( Mat(contours[i]));
+        //std::vector<cv::Rect> boundRect;
+        cv::Rect boundRect = cv::boundingRect(cv::Mat(contours[i]));
         
         //check the ratio  if it is an endline
-        if((boundRect.width/boundRect.height)>22.5){
+        if ((boundRect.width/boundRect.height)>22.5)
+        {
           ROS_INFO("DETECTED");
           //check and change status
-          if (!detection_status_){
+          if (!detection_status_)
+          {
             detection_status_ = true;
           }
           //get out of looping
           break;
-        }else{     //not detected or not an endline
+        }
+        else
+        {
+          //not detected or not an endline
           //if the endline is not detected, NOTHING CHANGED!!! Keep looping.
           //check if the endline is no longer detected
-          if(detection_status_ ){
+          if (detection_status_ )
+          {
             ROS_INFO("Ready to stop!!!");
              //make service call
-            if (client_.call(srv)){
-              if (srv.response.success){
+            if (client_.call(srv))
+            {
+              if (srv.response.success)
+              {
                 ROS_INFO("SUCCESS");
                 ros::shutdown();
               }
@@ -84,6 +98,7 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
       } 
     }
   }
+
   catch (cv_bridge::Exception& e){
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
