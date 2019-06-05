@@ -20,7 +20,8 @@ class EndlineCounter {
   public :
     EndlineCounter(ros::NodeHandle);
     void ImgCb(const sensor_msgs::ImageConstPtr&);
-    bool BlobDetector(cv::Mat);
+    static bool compareContourAreas( std::vector<cv::Point> contour1, std::vector<cv::Point> contour2 );
+    
   private :
     ros::NodeHandle nh_;
     ros::ServiceClient client_;
@@ -28,9 +29,7 @@ class EndlineCounter {
     image_transport::Subscriber test_subscriber;
     image_transport::Publisher test_publisher;
 
-    bool detection_status_, flag;
-    int hysteresis_counter_;
-    int hysteresis_constant_;
+    bool detection_status_;
 
     const int HighHue= 180;
     const int LowHue= 130;
