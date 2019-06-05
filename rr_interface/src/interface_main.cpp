@@ -119,14 +119,16 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
     // Writing 
-    unsigned char test = 'w';
-    int written_bytes = write(serial_port_filestream, (unsigned char *)test, sizeof(test));
-	usleep ((sizeof(test) + 25) * 100);
+    //unsigned char test = 'w';
+    Interface::Transmitter packet = interface.transmitter_;
+    int written_bytes = write(serial_port_filestream, &packet, sizeof(packet));
+	  usleep ((sizeof(packet) + 25) * 100);
 
     // Reading 
     // Allocate memory for read buffer, set size according to your needs
-    char read_buf [sizeof(test)];
-    memset(&read_buf, '\0', sizeof(read_buf));
+
+    char read_buf [sizeof(Interface::Receiver)];
+    memset(&read_buf, '\0', sizeof(Interface::Receiver));
 
     // Read bytes. The behaviour of read() (e.g. does it block?,
     // how long does it block for?) depends on the configuration
@@ -135,6 +137,7 @@ int main(int argc, char **argv)
 
     // n is the number of bytes read. n may be 0 if no bytes were received, and can also be negative to signal an error.
     ROS_INFO("%i bytes read : %s\n", read_bytes, read_buf);
+    ROS_INFO("Receiver: Data");
 
     ros::spinOnce();
     r.sleep();
@@ -144,79 +147,4 @@ int main(int argc, char **argv)
   close(serial_port_filestream);
   ROS_INFO("Closed Serial Port");
   return 0;
-
-// 	//CONFIGURE THE UART
-// 	//The flags (defined in /usr/include/termios.h - see http://pubs.opengroup.org/onlinepubs/007908799/xsh/termios.h.html):
-// 	//	Baud rate:- B1200, B2400, B4800, B9600, B19200, B38400, B57600, B115200, B230400, B460800, B500000, B576000, B921600, B1000000, B1152000, B1500000, B2000000, B2500000, B3000000, B3500000, B4000000
-// 	//	CSIZE:- CS5, CS6, CS7, CS8
-// 	//	CLOCAL - Ignore modem status lines
-// 	//	CREAD - Enable receiver
-// 	//	IGNPAR = Ignore characters with parity errors
-// 	//	ICRNL - Map CR to NL on input (Use for ASCII comms where you want to auto correct end of line characters - don't use for bianry comms!)
-// 	//	PARENB - Parity enable
-// 	//	PARODD - Odd parity (else even)
-// 	struct termios options;
-// 	tcgetattr(uart0_filestream, &options);
-// 	options.c_cflag = B115200 | CS8 | PARENB | CLOCAL | CREAD;		//<Set baud rate
-// 	options.c_iflag = IGNPAR;
-// 	options.c_oflag = 0;
-// 	options.c_lflag = 0;
-// 	tcflush(uart0_filestream, TCIFLUSH);
-// 	tcsetattr(uart0_filestream, TCSANOW, &options);
-// 	char rx_buffer[256];
-// 	memset(&rx_buffer, '\0', sizeof(rx_buffer));
-
-
-// 	ros::init(argc, argv, "rr_interface");
-// 	ros::NodeHandle nh;
-// 	Interface interface(nh);
-
-// 	ROS_INFO("Interface: Interface Node Initialized");
-// 	ros::Rate r(20);
-// 	int regulator = 0;
-
-// 	// Infinite Loop
-// 	while(ros::ok()) {
-// 		if (uart0_filestream != -1) {
-// 			if (regulator%2 == 0) {
-// 				char payload[sizeof(interface.transmitter_)];
-// 				//Method 1
-// 				memcpy(&payload, &(interface.transmitter_), sizeof(payload));
-// 				int n = write(uart0_filestream, payload, sizeof(payload));
-// 				// Method 2
-// 				// int n = write(uart0_filestream, htonl(payload), sizeof(payload));
-// 				usleep ((sizeof(payload) + 25) * 100);
-// 				regulator = 0;
-// 			}
-// 			int rx_length = read(uart0_filestream, &rx_buffer, sizeof(rx_buffer));		//Filestream, buffer to store in, number of bytes to read (max)
-// 			if (rx_length == 0) {
-// 				ROS_INFO("NO DATA WAITING");
-// 			}
-// 			else if (rx_length < 0) {
-// 				ROS_WARN("DATA INVALID");
-// 			}
-// 			else {
-// 				//Bytes received
-// 				// Method 1
-// 				//char payload[sizeof(interface.receiver_)];
-        
-// 				//memcpy(&interface.receiver_, &rx_length, sizeof(Interface::Receiver));
-// 				// Method 2
-// 				// interface.receiver_ = ntohl(rx_buffer);
-// 				// rx_buffer[rx_length] = '\0';
-// 				//std::string r = "" + interface.receiver_.payload;
-        
-// 				ROS_INFO("%i bytes read : %s\n", rx_length, rx_buffer);
-// 			}
-// 		}
-
-// 		regulator++;
-// 		ros::spinOnce();
-// 		r.sleep();
-// 	}
-
-// 	//----- CLOSE THE UART -----
-// 	close(uart0_filestream);
-  
-// 	return 0;
 }
