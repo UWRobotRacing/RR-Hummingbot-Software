@@ -41,9 +41,9 @@ class ComputerVision
     // Stuff for synchronized policy
     message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_;
     message_filters::Subscriber<sensor_msgs::Image> right_camera_subscriber_;    
-    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> left_right_sync_policy;
-    typedef message_filters::Synchronizer<left_right_sync_policy> Sync;
-    boost::shared_ptr<Sync> sync;
+    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> LRPOLICY;
+    typedef message_filters::Synchronizer<LRPOLICY> LRSYNC;
+    boost::shared_ptr<LRSYNC> lrsync_;
 
     ros::Subscriber left_header_subscriber_;
     ros::Subscriber right_header_subscriber_;

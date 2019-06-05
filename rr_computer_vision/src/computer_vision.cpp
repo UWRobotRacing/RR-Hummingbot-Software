@@ -18,13 +18,14 @@
  * @brief Constructor
  * @param nh: ROS node handler
 */
-ComputerVision::ComputerVision(ros::NodeHandle nh) {
-  nh_ = nh;
+ComputerVision::ComputerVision(ros::NodeHandle nh) :
+nh_(nh)
+{
   InitializeSubscribers();
   InitializePublishers();
 
-  sync.reset(new Sync(left_right_sync_policy(10), left_camera_subscriber_, right_camera_subscriber_));
-  sync->registerCallback(boost::bind(&ComputerVision::LeftRightSyncCameraCallback, this, _1, _2));
+  //sync.reset(new Sync(left_right_sync_policy(10), left_camera_subscriber_, right_camera_subscriber_));
+  //sync->registerCallback(boost::bind(&ComputerVision::LeftRightSyncCameraCallback, this, _1, _2));
   // left_camera_subscriber_.subscribe(nh, "left/image_rect_color", 1);
   // right_camera_subscriber_.subscribe(nh, "right/image_rect_color", 1);
   // TimeSynchronizer<Image, CameraInfo> sync(image_sub, info_sub, 10);
@@ -44,12 +45,14 @@ ComputerVision::~ComputerVision() {
  * @brief 
 */
 void ComputerVision::InitializeSubscribers() {
-  // message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_(nh_, "/zed/left/image_rect_color", 1);
-  // message_filters::Subscriber<sensor_msgs::Image> right_camera_subscriber_(nh_, "/zed/left/image_rect_color", 1);
+  //message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_(nh_, "/zed/left/image_rect_color", 1);
+  //message_filters::Subscriber<sensor_msgs::Image> right_camera_subscriber_(nh_, "/zed/right/image_rect_color", 1);
 
   left_camera_subscriber_.subscribe(nh_, "/zed/left/image_rect_color", 1);
   right_camera_subscriber_.subscribe(nh_, "/zed/right/image_rect_color", 1);
-    
+  lrsync_.reset(new LRSYNC(LRPOLICY(0), left_camera_subscriber_, right_camera_subscriber_));
+  lrsync_->registerCallback(boost::bind(&ComputerVision::LeftRightSyncCameraCallback, this, _1, _2));
+  
   // rgb_camera_subscriber_ = nh_.subscribe("rgb/image_rect_color", 0, &ComputerVision::RGBCameraCallback, this);
   // left_header_subscriber_ = nh_.subscribe("/zed/left/image_rect_color", 0, &ComputerVision::LeftCameraCallback, this);
   // right_header_subscriber_ = nh_.subscribe("/zed/right/image_rect_color", 0, &ComputerVision::RightCameraCallback, this);
@@ -87,6 +90,7 @@ void ComputerVision::LeftRightSyncCameraCallback(const sensor_msgs::ImageConstPt
   img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, result);
 
   test_publisher.publish(img_bridge_output.toImageMsg());
+  ROS_INFO("SYNCHRONIZED DATA PUBLUISHED");
 }
 
 void ComputerVision::LeftCameraCallback(const sensor_msgs::Image& msg) {
@@ -104,7 +108,7 @@ void ComputerVision::RightCameraCallback(const sensor_msgs::Image& msg) {
     ROS_INFO("RIGHT FRAME HEADER:");
     //get header info
     std_msgs::Header h = msg.header;
-    std::cout << h << std::endl; //all at once
+    //std::cout << h << std::endl; //all at once
 }
 
 void ComputerVision::DepthCameraCallback(const sensor_msgs::Image& msg) {
