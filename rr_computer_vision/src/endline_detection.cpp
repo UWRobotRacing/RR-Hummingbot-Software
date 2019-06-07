@@ -59,7 +59,9 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
 
     //contour 
     cv::findContours(mag_img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
-    std::sort(contours.begin(), contours.end(), EndlineCounter::compareContourAreas);
+    int conSize=contours.size();
+    ROS_INFO("size: ",conSize);
+    std::sort(contours.begin(), contours.end(), compareContourAreas);
 
     
     double maxArea=cv::contourArea(cv::Mat(contours[contours.size()-1]));
