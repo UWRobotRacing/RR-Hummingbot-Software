@@ -7,14 +7,20 @@
  * @competition IARRC 2018
  */
 
-#include "rr_traffic_light.hpp"
+#include "traffic_light.hpp"
 
 /**@name TrafficLightDetector
  * @brief Constructor
  */
-TrafficLightProcessor::TrafficLightProcessor(ros::NodeHandle nh) : nh_(nh) {
+TrafficLightProcessor::TrafficLightProcessor(ros::NodeHandle nh) : it_(nh_)  {
   ROS_INFO("TrafficLightProcessor::TrafficLightProcessor");
+  std::string camera_source;
+  nh_.param<std::string>("Camera_Source_Topic", camera_source, "/traffic_light/image_raw");
 
+
+  ROS_INFO("Traffic Light Node: Exposure Delay Ended. Ready for Detection.");
+
+  ros::Rate r(CAMERA_FRAMERATE);
   Initialize();
 }
 
