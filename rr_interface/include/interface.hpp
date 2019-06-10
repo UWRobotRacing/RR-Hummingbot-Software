@@ -20,14 +20,29 @@ class Interface
     std::vector<uint16_t> Serialize(std::vector<uint16_t> transmitter);
     std::vector<uint16_t> Deserialize(std::vector<uint16_t> receiver);
 
+    // struct Transmitter {
+    //   uint8_t speed;
+    //   uint8_t steer;
+    //   uint8_t position;
+    // };
+
     struct Transmitter {
-      uint8_t speed;
-      uint8_t steer;
-      uint8_t position;
+      uint16_t butt;
+      uint16_t butter;
+      uint16_t booter;
     };
 
     struct Receiver {
-      char payload;
+      uint16_t butt;
+      uint16_t butter;
+    };
+
+    union RecUni {
+      char *Buffer;
+      struct Reciever {
+        uint16_t butt;
+        uint16_t butter;
+      };
     };
 
     Transmitter transmitter_;

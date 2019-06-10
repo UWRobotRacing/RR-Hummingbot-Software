@@ -30,7 +30,7 @@ int main(int argc, char **argv)
   Interface interface(nh);
 
   ROS_INFO("Interface: Interface Node Initialized");
-  ros::Rate r(20);
+  ros::Rate r(40);
 
   // The following tutorial was followed to set up this serial UART communcation: 
   // https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 
     O_NOCTTY - When set and path identifies a terminal device, open() shall not cause the terminal device to become the controlling terminal for the process.
   */
-  std::string serial_port_name = "/dev/ttyACM0";
+  std::string serial_port_name = "/dev/ttyUSB0";
   // Everything in linux is considered a file, hence why this varaible is referred to as a file stream
   int serial_port_filestream = open(serial_port_name.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
 
@@ -121,23 +121,41 @@ int main(int argc, char **argv)
     // Writing 
     //unsigned char test = 'w';
     Interface::Transmitter packet = interface.transmitter_;
-    int written_bytes = write(serial_port_filestream, &packet, sizeof(packet));
-	  usleep ((sizeof(packet) + 25) * 100);
+    // int written_bytes = write(serial_port_filestream, &packet, sizeof(packet));
+	  // usleep ((sizeof(packet) + 25) * 10);
 
     // Reading 
     // Allocate memory for read buffer, set size according to your needs
 
     char read_buf [sizeof(Interface::Receiver)];
-    memset(&read_buf, '\0', sizeof(Interface::Receiver));
+    //char read_buf[sizeof(uint8_t)];
+    memset(&read_buf, '\0', sizeof(read_buf));
+    
 
     // Read bytes. The behaviour of read() (e.g. does it block?,
     // how long does it block for?) depends on the configuration
     // settings above, specifically VMIN and VTIME
     int read_bytes = read(serial_port_filestream, &read_buf, sizeof(read_buf));
 
+    //char conv[sizeof(uint8_t)];
+    char conv[sizeof(Interface::Receiver)];
+    for(int i = 0; i < sizeof(conv); i++)
+    {
+      conv[i] = (read_buf[i] >> (i*8)) & 0xFF;
+    }
+
+    //std::stringstream stream;
+    //stream << std::hex << read_buf;
     // n is the number of bytes read. n may be 0 if no bytes were received, and can also be negative to signal an error.
     ROS_INFO("%i bytes read : %s\n", read_bytes, read_buf);
-    ROS_INFO("Receiver: Data");
+    /*
+    Interface::Receiver *payload2 = (Interface::Receiver*)read_buf;    
+    ROS_INFO("1st %d", payload2->butt);
+    ROS_INFO("2nd %d", payload2->butter);
+    ROS_INFO("3rd %d", payload2->booter);
+    */
+
+    //ROS_INFO("Receiver: Data");
 
     ros::spinOnce();
     r.sleep();

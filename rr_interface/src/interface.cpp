@@ -24,8 +24,14 @@ Interface::~Interface() {
 }
 
 
+// void Interface::TransmitterCallback(const rr_interface::Transmitter &msg) {
+//     transmitter_.speed = msg.speed;
+//     transmitter_.steer = msg.steer;
+//     transmitter_.position = msg.position;
+// }
+
 void Interface::TransmitterCallback(const rr_interface::Transmitter &msg) {
-    transmitter_.speed = msg.speed;
-    transmitter_.steer = msg.steer;
-    transmitter_.position = msg.position;
+    transmitter_.butt = msg.butt;
+    transmitter_.butter = msg.butter;
+    transmitter_.booter = msg.booter;
 }
