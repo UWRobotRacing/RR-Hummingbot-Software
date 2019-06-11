@@ -30,8 +30,22 @@ Interface::~Interface() {
 //     transmitter_.position = msg.position;
 // }
 
+Interface::Receiver Interface::Deserialize(char* buffer)
+{
+    Interface::Receiver rReceiver;
+
+    // Converts the data to the correct struct
+    Receiver *fromChar = (Receiver*)buffer;
+    rReceiver.butt = fromChar->butt;
+    rReceiver.butter = fromChar->butter;
+
+    // ensures no dangling
+    fromChar = nullptr;
+
+    return rReceiver;
+}
+
 void Interface::TransmitterCallback(const rr_interface::Transmitter &msg) {
     transmitter_.butt = msg.butt;
     transmitter_.butter = msg.butter;
-    transmitter_.booter = msg.booter;
 }

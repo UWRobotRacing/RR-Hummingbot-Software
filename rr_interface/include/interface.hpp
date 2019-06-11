@@ -17,33 +17,24 @@ class Interface
     Interface(ros::NodeHandle nh);
     ~Interface();
 
+    struct Transmitter {
+      float butt;
+      float butter;
+    };
+
+    struct Receiver {
+      float butt;
+      float butter;
+    };
+
     std::vector<uint16_t> Serialize(std::vector<uint16_t> transmitter);
-    std::vector<uint16_t> Deserialize(std::vector<uint16_t> receiver);
+    Receiver Deserialize(char* buffer);
 
     // struct Transmitter {
     //   uint8_t speed;
     //   uint8_t steer;
     //   uint8_t position;
     // };
-
-    struct Transmitter {
-      uint16_t butt;
-      uint16_t butter;
-      uint16_t booter;
-    };
-
-    struct Receiver {
-      uint16_t butt;
-      uint16_t butter;
-    };
-
-    union RecUni {
-      char *Buffer;
-      struct Reciever {
-        uint16_t butt;
-        uint16_t butter;
-      };
-    };
 
     Transmitter transmitter_;
     Receiver receiver_;

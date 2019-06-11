@@ -7,6 +7,7 @@
 
 // GLOBAL
 #include <iostream>
+#include <cctype>
 
 // UART
 #include <fcntl.h> // Contains file controls like O_RDWR
@@ -102,7 +103,7 @@ int main(int argc, char **argv)
   // Setting VMIn and VTIME to 0 means no blocking, return immediately 
   // with what is availalbe on the port, which is what we want
   tty.c_cc[VTIME] = 0;
-  tty.c_cc[VMIN] = 0;
+  tty.c_cc[VMIN] = sizeof(Interface::Receiver);
 
   // Baud Rate
   // UNIX compliant baud rates are: 
@@ -116,46 +117,53 @@ int main(int argc, char **argv)
   }
   ROS_INFO("Successfully configured serial port settings for UART communication");
 
+  int counter = 0;
   while (ros::ok())
   {
-    // Writing 
-    //unsigned char test = 'w';
-    Interface::Transmitter packet = interface.transmitter_;
-    // int written_bytes = write(serial_port_filestream, &packet, sizeof(packet));
-	  // usleep ((sizeof(packet) + 25) * 10);
-
-    // Reading 
-    // Allocate memory for read buffer, set size according to your needs
-
-    char read_buf [sizeof(Interface::Receiver)];
-    //char read_buf[sizeof(uint8_t)];
-    memset(&read_buf, '\0', sizeof(read_buf));
-    
-
-    // Read bytes. The behaviour of read() (e.g. does it block?,
-    // how long does it block for?) depends on the configuration
-    // settings above, specifically VMIN and VTIME
-    int read_bytes = read(serial_port_filestream, &read_buf, sizeof(read_buf));
-
-    //char conv[sizeof(uint8_t)];
-    char conv[sizeof(Interface::Receiver)];
-    for(int i = 0; i < sizeof(conv); i++)
+    if (counter == 0)
     {
-      conv[i] = (read_buf[i] >> (i*8)) & 0xFF;
+      // Writing 
+      //Interface::Transmitter packet = interface.transmitter_;
+      Interface::Transmitter packet;
+      packet.butt = 1.1;
+      packet.butter = 2.2;
+
+      unsigned char *payload = new unsigned char [sizeof(packet)];
+      unsigned char *convert = (unsigned char *)&packet;
+      for (int i = 0; i < sizeof(packet); i++)
+      {
+        payload[i] = convert[sizeof(payload)-i-1];
+      }
+      int written_bytes = write(serial_port_filestream, payload, sizeof(packet));
     }
+    else
+    {
+      // Reading 
+      // Allocate memory for read buffer, set size according to your needs
+      char read_buf [sizeof(Interface::Receiver)];
+      memset(&read_buf, '/0', sizeof(read_buf));
+      
+      // Read bytes. The behaviour of read() (e.g. does it block?,
+      // how long does it block for?) depends on the configuration
+      // settings above, specifically VMIN and VTIME
+      int read_bytes = read(serial_port_filestream, &read_buf, sizeof(read_buf));
 
-    //std::stringstream stream;
-    //stream << std::hex << read_buf;
-    // n is the number of bytes read. n may be 0 if no bytes were received, and can also be negative to signal an error.
-    ROS_INFO("%i bytes read : %s\n", read_bytes, read_buf);
-    /*
-    Interface::Receiver *payload2 = (Interface::Receiver*)read_buf;    
-    ROS_INFO("1st %d", payload2->butt);
-    ROS_INFO("2nd %d", payload2->butter);
-    ROS_INFO("3rd %d", payload2->booter);
-    */
-
-    //ROS_INFO("Receiver: Data");
+      if (read_bytes != -1)
+      { 
+        interface.receiver_ = interface.Deserialize(read_buf);
+        ROS_INFO("Data 1: %f", interface.receiver_.butt);
+        ROS_INFO("Data 2: %f", interface.receiver_.butter);
+      }
+      
+      if (counter == 2)
+      {
+        counter = 0;
+      }
+      else 
+      {
+        counter++;
+      }
+    }
 
     ros::spinOnce();
     r.sleep();
