@@ -18,7 +18,8 @@
 //constructor
 EndlineCounter::EndlineCounter(ros::NodeHandle nh) : it_(nh_) 
 {
-  detection_status_ = false;
+  detection_status = false;
+  endline_counter = 0;
   client_ = nh_.serviceClient<std_srvs::Trigger>("/Supervisor/count_lap");
   
   test_subscriber = it_.subscribe("/zed/rgb/image_rect_color", 1, &EndlineCounter::ImgCb, this);
@@ -47,7 +48,7 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
     //filter for magenta
     init_img = cv_ptr->image;
     cv::cvtColor(init_img, hsv_img, CV_BGR2HSV);
-    cv::inRange(hsv_img, cv::Scalar(LowHue, LowSat,LowVal), cv::Scalar(HighHue, HighSat,HighVal), mag_img);
+    cv::inRange(hsv_img, cv::Scalar(low_hue, low_sat, low_val), cv::Scalar(high_hue, high_sat, high_val), mag_img);
     cv::GaussianBlur(mag_img, mag_img, cv::Size(7,7), 0, 0);
 
     // PUBLISH and visualize in rviz   
@@ -69,46 +70,93 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
     double maxArea=cv::contourArea(cv::Mat(contours[contours.size()-1]));
     ROS_INFO("Max contour area: %f", maxArea);
 
-    cv::approxPolyDP(cv::Mat(contours[contours.size()-1]), approx, 0.1*arcLength(cv::Mat(contours[contours.size()-1]), true), true);
-    int polyLength = approx.size();
-    ROS_INFO("Polygon length: %d", polyLength);
+    // cv::approxPolyDP(cv::Mat(contours[contours.size()-1]), approx, 0.1*arcLength(cv::Mat(contours[contours.size()-1]), true), true);
+    // int polyLength = approx.size();
+    // ROS_INFO("Polygon length: %d", polyLength);
 
-    if (approx.size()==4)
+    if (!detection_status)
     {
-        //bound with a rectangle
-        //std::vector<cv::Rect> boundRect;
-        cv::Rect boundRect = cv::boundingRect(cv::Mat(contours[contours.size()-1]));
+      if (maxArea > 1500.00 && endline_counter < 10)
+      {
+        endline_counter++;
+      }
+      else
+      {
+        endline_counter = 0;
+      }
+
+      if (endline_counter == 10)
+      {
+        ROS_INFO("ENDLINE DETECTED");
+        detection_status = true;
+        endline_counter = 0;
+      }
+    }
+    else 
+    {
+      if (maxArea < 1500.00 && endline_counter < 10)
+      {
+        endline_counter++;
+      }
+      else
+      {
+        endline_counter = 0;
+      }
+
+      if (endline_counter == 10)
+      {
+        ROS_INFO("ENDLINE GONE");
+        detection_status = false;
+        endline_counter = 0;
+
+        //make service call
+        if (client_.call(srv))
+        {
+          if (srv.response.success)
+          {
+            ROS_INFO("SUCCESS");
+            ros::shutdown();
+          }
+        }
+      }
+    }
+
+    // if (approx.size()==4)
+    // {
+    //   //bound with a rectangle
+    //   //std::vector<cv::Rect> boundRect;
+    //   cv::Rect boundRect = cv::boundingRect(cv::Mat(contours[contours.size()-1]));
   
-        //check the ratio  if it is an endline
-        if ((boundRect.width/boundRect.height)>22.5)
-        {
-          ROS_INFO("DETECTED");
-          //check and change status
-          if (!detection_status_)
-          {
-            detection_status_ = true;
-          }
-        }
-        else
-        {
-          //not detected or not an endline
-          //if the endline is not detected, NOTHING CHANGED!!! Keep looping.
-          //check if the endline is no longer detected
-          if (detection_status_ )
-          {
-            ROS_INFO("Ready to stop!!!");
-             //make service call
-            if (client_.call(srv))
-            {
-              if (srv.response.success)
-              {
-                ROS_INFO("SUCCESS");
-                ros::shutdown();
-              }
-            }
-          }
-        }
-    } 
+    //   //check the ratio  if it is an endline
+    //   if ((boundRect.width/boundRect.height)>22.5)
+    //   {
+    //     ROS_INFO("DETECTED");
+    //     //check and change status
+    //     if (!detection_status_)
+    //     {
+    //       detection_status_ = true;
+    //     }
+    //   }
+    //   else
+    //   {
+    //     //not detected or not an endline
+    //     //if the endline is not detected, NOTHING CHANGED!!! Keep looping.
+    //     //check if the endline is no longer detected
+    //     if (detection_status_ )
+    //     {
+    //       ROS_INFO("Ready to stop!!!");
+    //       //make service call
+    //       if (client_.call(srv))
+    //       {
+    //         if (srv.response.success)
+    //         {
+    //           ROS_INFO("SUCCESS");
+    //           ros::shutdown();
+    //         }
+    //       }
+    //     }
+    //   }
+    // } 
   }
   catch (cv_bridge::Exception& e){
     ROS_ERROR("cv_bridge exception: %s", e.what());

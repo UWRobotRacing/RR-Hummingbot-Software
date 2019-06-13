@@ -29,14 +29,15 @@ class EndlineCounter {
     image_transport::Subscriber test_subscriber;
     image_transport::Publisher test_publisher;
 
-    bool detection_status_;
+    bool detection_status;
+    int endline_counter; 
 
-    const int HighHue= 180;
-    const int LowHue= 130;
-    const int HighSat= 255;
-    const int LowSat= 82;
-    const int HighVal= 255;
-    const int LowVal= 158;
+    const int high_hue = 180;
+    const int low_hue = 130;
+    const int high_sat = 255;
+    const int low_sat = 82;
+    const int high_val = 255;
+    const int low_val = 158;
 };
 
 #endif /*ENDLINE_DETECTION_HPP*/

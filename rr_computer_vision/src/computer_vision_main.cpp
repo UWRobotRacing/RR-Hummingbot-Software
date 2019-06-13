@@ -18,7 +18,6 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "rr_computer_vision");
   ros::NodeHandle nh;
   ROS_INFO("Starting Computer Vision Node");
-  ROS_INFO("NEXT");
   
   ComputerVision computer_vision(nh);
   EndlineCounter ec(nh);
