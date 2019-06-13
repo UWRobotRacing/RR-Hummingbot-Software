@@ -57,16 +57,22 @@ void EndlineCounter::ImgCb(const sensor_msgs::ImageConstPtr& msg)
     img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, mag_img);
     test_publisher.publish(img_bridge_output.toImageMsg());
 
-    //contour 
+    // Find Contours
     cv::findContours(mag_img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
-    int conSize=contours.size();
-    ROS_INFO("size: ",conSize);
-    std::sort(contours.begin(), contours.end(), compareContourAreas);
+    int conSize = contours.size();
+    ROS_INFO("Number of contours: %d", conSize);
 
+    // Sort contours by area (smallest to largest)
+    std::sort(contours.begin(), contours.end(), compareContourAreas);
     
+    // contours[contours.size()-1] will be the contour with the largest area
     double maxArea=cv::contourArea(cv::Mat(contours[contours.size()-1]));
-    ROS_INFO("area: ", maxArea);
+    ROS_INFO("Max contour area: %f", maxArea);
+
     cv::approxPolyDP(cv::Mat(contours[contours.size()-1]), approx, 0.1*arcLength(cv::Mat(contours[contours.size()-1]), true), true);
+    int polyLength = approx.size();
+    ROS_INFO("Polygon length: %d", polyLength);
+
     if (approx.size()==4)
     {
         //bound with a rectangle
