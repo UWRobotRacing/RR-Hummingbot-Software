@@ -1,0 +1,23 @@
+# @file rr_mapper.yaml
+# @author Sirui Song
+# @author Jungwook Lee
+# @author Raymond Kuo
+# @author Toni Ogunmade(oluwatoni)
+# @competition IARRC 2018
+
+#Obstacle#
+LaserMapper/INFLATE_OBS:                    8
+LaserMapper/LASER_ORIENTATION:              -1
+
+#Map Parameters#
+#map_res in meter
+LaserMapper/map_res:                        0.01
+LaserMapper/map_W:                          1280
+LaserMapper/map_H:                          720
+
+#Scan parameters#
+#Angles are in radian, range in meter
+LaserMapper/max_angle:                      1.35
+LaserMapper/min_angle:                      -1.35
+LaserMapper/minrange:                       0.20
+LaserMapper/maxrange:                       8
