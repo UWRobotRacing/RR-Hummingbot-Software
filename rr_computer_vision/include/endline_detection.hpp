@@ -1,6 +1,4 @@
 /** @file endline_detection.hpp
- * @author Angela Gu (angegu)
- * @author Toni Ogunmade (oluwatoni)
  * @author Waleed Ahmed (w29ahmed)
  * @author Yuchi(Allan) Zhao
  */
@@ -16,9 +14,10 @@
 #include <std_srvs/Trigger.h>
 // #include "msg_srv_names.hpp"
 
-class EndlineCounter {
+class EndlineDetection
+{
   public :
-    EndlineCounter(ros::NodeHandle);
+    EndlineDetection(ros::NodeHandle);
     void ImgCb(const sensor_msgs::ImageConstPtr&);
     static bool compareContourAreas( std::vector<cv::Point> contour1, std::vector<cv::Point> contour2 );
     
@@ -30,7 +29,7 @@ class EndlineCounter {
     image_transport::Publisher test_publisher;
 
     bool detection_status;
-    int endline_counter; 
+    int endline_counter;
 
     const int high_hue = 180;
     const int low_hue = 130;

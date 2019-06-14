@@ -20,7 +20,7 @@ int main(int argc, char** argv)
   ROS_INFO("Starting Computer Vision Node");
   
   ComputerVision computer_vision(nh);
-  EndlineCounter ec(nh);
+  // EndlineDetection ec(nh);
 
   ros::spin();
   return 0;
