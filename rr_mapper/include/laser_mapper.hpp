@@ -42,7 +42,11 @@ class LaserMapper
     void GetParam();
     void UpdateLaserMap(const int& x, const int& y, const double& value);
     double CheckMap(const int& x, const int& y);
-    void RayTracing(const float& angle, const float& range, const int& inflate_factor);
+    void DrawLine(const float& angle, const float& range, const int& inflate_factor);
+    void CombineOccupancyGrid(nav_msgs::OccupancyGrid &to_grid,
+                              const nav_msgs::OccupancyGrid &from_grid,
+                              const int offsetHeight, const int offsetWidth);
+    int ijToIndex(const int i, const int j, const int max_width);
     std::vector<int> ShiftMap(std::vector<int> prev_map);
     std::vector<int> RotateMap(std::vector<int> curr_map, double new_ang); 
     
@@ -72,6 +76,7 @@ class LaserMapper
     double min_angle_;
     double min_range_;
     double max_range_;
+
     int samplerate_;
     int inflate_obstacle_;
     int scan_subsample_;
@@ -81,15 +86,26 @@ class LaserMapper
     const double OBS_SCALE_ = 1;
 
     // lane_detection Map Values
-    int offset_height_left_;
-    int offset_height_right_;
-    int offset_width_left_;
-    int offset_width_right_;
+    int offset_height_;
+    int offset_width_;
 
     enum CellState {
     NO_OBS_ = 0,
     OBS_ = 100,
     UNKNOWN_ = -1
+    };
+
+    struct CellEntity {
+      //Occupancy Grid Value (Subject to Change)
+      int val;
+      
+      //Cartesian Coordinates
+      double xloc;
+      double yloc;
+
+      //Polar Coordinates
+      double length;
+      double angle;
     };
 
     //Storing values

@@ -13,11 +13,9 @@
  * @brief initiliazes the LaserMapper class
  * @return NONE
  */
-LaserMapper::LaserMapper(ros::NodeHandle nh)
-{
+LaserMapper::LaserMapper(ros::NodeHandle nh) {
     GetParam();
     InitializeSubscribersandPublishers();
-
 }
 
 /**
@@ -49,13 +47,14 @@ void LaserMapper::PublishMap() {
         // Check for NaN ranges
         if (std::isnan (lidar_msg_.ranges[n]) == false)
         {
-        RayTracing(i, lidar_msg_.ranges[n], inflate_obstacle_);
+          DrawLine(i, lidar_msg_.ranges[n], inflate_obstacle_);
         }
         n++;
     }
     prev_header_ = lidar_msg_.header;
     } 
 
+    // Initialize the new map to be published
     full_map.header.frame_id = "/base_link";
     full_map.info.resolution = map_res_;
     full_map.info.width = map_width_;
@@ -71,20 +70,8 @@ void LaserMapper::PublishMap() {
         full_map.data[i] = belief_map_[i];
     }
 
-    //TODO: Join occupancy with laser
-    /*
-    //Checks for left lane msg
-    {
-    JoinOccupancyGrid(full_map, lane_detection_left_msg_, 
-                        offset_height_left_, offset_width_left_);
-    }
-
-    //Checks for right lane msg
-    {
-    JoinOccupancyGrid(full_map, lane_detection_right_msg_,
-                        offset_height_right_, offset_width_right_);
-    } 
-    */
+    //Joins the occupancy grid of the lane and the lidar
+    CombineOccupancyGrid(full_map, lane_detection_msg_, offset_height_, offset_width_);
 
     map_pub_.publish(full_map);
     belief_map_.clear();
@@ -178,15 +165,19 @@ double LaserMapper::CheckMap(const int& x, const int& y)
 }
 
 /**
- * @name RayTracing
+ * @name DrawLine
  * @brief Checks value of the cell of occupancy grid 
+ *        The algorithm used below is called the Bresenham's line algorithm
+ *        Wiki Lik: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+ * This function is used for defining 3D objects onto a 2D space on the occupancy grid
  * @param[in] angle: width comparator
  * @param[in] range: height comparator
  * @param[in] inflate_factor: magnification value
- *  @return NONE
+ * @return NONE
  */
-void LaserMapper::RayTracing(const float& angle, const float& range, const int& inflate_factor)
+void LaserMapper::DrawLine(const float& angle, const float& range, const int& inflate_factor)
 {
+  // Checks if the range is reasonable
   if (range < min_range_ || range > max_range_)
     return;
   
@@ -244,6 +235,81 @@ void LaserMapper::RayTracing(const float& angle, const float& range, const int& 
     }
   } 
 }
+
+/** 
+ *  @name CombineOccupancyGrid
+ *  @brief joins two occupancy grids with the same resolution
+ * 
+ *  Joints 2 occupancy grid given a set of grid. The from_grid will be resized based on 
+ *  the size of the old grid and the values will be added to the occupancy grid. In our
+ *  case we use binary, so no need to actually add but do a bitwise or. Once the grid has 
+ *  been joined, the pointer to the occupancy grid is returned.
+ *  
+ *  @param to_grid a grid to be joined
+ *  @param from_grid destination grid to be joined
+ *  @param offsetHeight an offset factored into the join
+ *  @param offsetWidth an offset factored into the join
+ *  @param start_val the starting value to slot into
+ *         (Used for storing previous values)
+ *  @return NONE
+*/
+void LaserMapper::CombineOccupancyGrid(nav_msgs::OccupancyGrid &to_grid, 
+                                      const nav_msgs::OccupancyGrid &from_grid, 
+                                      const int offset_height, 
+                                      const int offset_width) 
+{
+    // Load The two grids
+  if (&to_grid == NULL || &from_grid == NULL)
+  {
+    ROS_ERROR("CombineOccupancyGrid: Grid object NULL.");
+    return;
+  }
+
+  int resolution = to_grid.info.resolution;
+
+  // TODO(jungwook): Handle Resolution Change
+  if (to_grid.info.resolution != from_grid.info.resolution)
+  {
+    ROS_ERROR("CombineOccupancyGrid: Resolution mismatch.");
+    return;
+  }
+
+  // Copy content to the to the original grid
+  for (int j = 0; j < from_grid.info.height; j++)
+  {
+    for (int i = 0; i < from_grid.info.width; i++)
+    {
+      // Check for valid size before modifications
+      if (i+offset_width < to_grid.info.width && j+offset_height < to_grid.info.height)
+      {
+        // Do operation
+        int index = ijToIndex(i+offset_width, j+offset_height, to_grid.info.width);
+        int from_index = ijToIndex(i, j, from_grid.info.width);
+        if (from_grid.data[from_index] > 0) // OBS are larger than 0
+          to_grid.data[index] = from_grid.data[from_index];
+      }
+    }
+  }
+  return;
+}
+
+/** 
+ * @name ijToIndex
+ * @brief Returns index of given (i,j) from a grid given max_width and max_height
+ * 
+ *  Parameters: starting location of the grid and the height and width of the new grid.
+ *  Starts from (0,0)
+ *  --------> i
+ *  ********* |
+ *  ********* |
+ *  ********* |
+ *  ********* v j 
+ *
+ *  @parma i starting location of the grid(x-axis)
+ *  @parma j starting location of the grid(y-axis)
+ *  @parma max_width the width of the new grid.
+*/
+int LaserMapper::ijToIndex(const int i, const int j, const int max_width ) { return floor(((max_width*j)-1)+i); }
 
 /**
  * @name ShiftMap
