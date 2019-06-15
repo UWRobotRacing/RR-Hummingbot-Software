@@ -11,20 +11,25 @@
  * @author Yuchi(Allan) Zhao
 */
 
+// Helper incldues
 #include "endline_detection.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
 #include <vector>
 
+// OpenCV includes
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+
+// Ros includes
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include <std_srvs/Trigger.h>
+
 // Constructor
-EndlineDetection::EndlineDetection(ros::NodeHandle nh) : it_(nh_)
+EndlineDetection::EndlineDetection(ros::NodeHandle nh) : it_(nh_), detection_status_(false), endline_counter_(0)
 {
-  detection_status = false;
-  endline_counter = 0;
   client_ = nh_.serviceClient<std_srvs::Trigger>("/Supervisor/count_lap");
-  
-  test_subscriber = it_.subscribe("/zed/rgb/image_rect_color", 1, &EndlineDetection::ImgCb, this);
-  // test_publisher = it_.advertise("/test_endline", 1);
+  img_subscriber_ = it_.subscribe("/zed/rgb/image_rect_color", 1, &EndlineDetection::EndlineImgCallback, this);
+  // img_publisher_ = it_.advertise("/test_endline", 1);
 }
 
 // Function used to sort by contour area
@@ -35,7 +40,7 @@ bool EndlineDetection::compareContourAreas ( std::vector<cv::Point> contour1, st
 }
 
 // Callback to detect endline
-void EndlineDetection::ImgCb(const sensor_msgs::ImageConstPtr& msg)
+void EndlineDetection::EndlineImgCallback(const sensor_msgs::ImageConstPtr& msg)
 {
   cv::Mat init_img, hsv_img, mag_img, blur_img;
   cv_bridge::CvImagePtr cv_ptr;
@@ -52,7 +57,7 @@ void EndlineDetection::ImgCb(const sensor_msgs::ImageConstPtr& msg)
 
     // Colour thresholding to filter out magenta (colour of the endline)
     cv::cvtColor(init_img, hsv_img, CV_BGR2HSV);
-    cv::inRange(hsv_img, cv::Scalar(low_hue, low_sat, low_val), cv::Scalar(high_hue, high_sat, high_val), mag_img);
+    cv::inRange(hsv_img, cv::Scalar(low_hue_, low_sat_, low_val_), cv::Scalar(high_hue_, high_sat_, high_val_), mag_img);
     cv::GaussianBlur(mag_img, mag_img, cv::Size(7,7), 0, 0);
 
     // Publish thresholded image (For testing purposes)
@@ -60,7 +65,7 @@ void EndlineDetection::ImgCb(const sensor_msgs::ImageConstPtr& msg)
     // std_msgs::Header header;
     // header.stamp=ros::Time::now();
     // img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, mag_img);
-    // test_publisher.publish(img_bridge_output.toImageMsg());
+    // img_publisher_.publish(img_bridge_output.toImageMsg());
 
     // Find Contours in thersholded image
     cv::findContours(mag_img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
@@ -88,40 +93,40 @@ void EndlineDetection::ImgCb(const sensor_msgs::ImageConstPtr& msg)
     // threshold as that is what the area of the contour is when the endline first comes into
     // view. For the endline to be gone, we need 10 frames in a row below that 1500 threshold.
     // This counter approach ensures no false positives arise from noisy frames
-    if (!detection_status)
+    if (!detection_status_)
     {
-      if (maxArea > 1500.00 && endline_counter < 10)
+      if (maxArea > 1500.00 && endline_counter_ < 10)
       {
-        endline_counter++;
+        endline_counter_++;
       }
       else
       {
-        endline_counter = 0;
+        endline_counter_ = 0;
       }
 
-      if (endline_counter == 10)
+      if (endline_counter_ == 10)
       {
         ROS_INFO("ENDLINE DETECTED");
-        detection_status = true;
-        endline_counter = 0;
+        detection_status_ = true;
+        endline_counter_ = 0;
       }
     }
     else 
     {
-      if (maxArea < 1500.00 && endline_counter < 10)
+      if (maxArea < 1500.00 && endline_counter_ < 10)
       {
-        endline_counter++;
+        endline_counter_++;
       }
       else
       {
-        endline_counter = 0;
+        endline_counter_ = 0;
       }
 
-      if (endline_counter == 10)
+      if (endline_counter_ == 10)
       {
         ROS_INFO("ENDLINE GONE");
-        detection_status = false;
-        endline_counter = 0;
+        detection_status_ = false;
+        endline_counter_ = 0;
 
         //make service call
         if (client_.call(srv))
