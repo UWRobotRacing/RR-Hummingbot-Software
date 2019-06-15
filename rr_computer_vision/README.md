@@ -8,11 +8,11 @@ All the races indicate the ending of a lap with a distinct magenta line, which i
 
 1. Apply colour thresholding with the bounds set to extract magenta in the HSV colour space. Read more about it [here](https://docs.opencv.org/3.4/da/d97/tutorial_threshold_inRange.html). The thresholding values were realized through testing the thresholding on a drag race setup in the E5 bay at night. Note that lighting conditions could very likely give different results that don't look as good. Below are some images showing the result of this step:
 
-<img style="float: left;" src="images/endline1.jpg">
-<img style="float: right;" src="images/endline1_thres.jpg">
+<img src="images/endline1.jpg" width="640" height ="360">
+<img src="images/endline1_thres.jpg" width="640" height ="360">
 
-<img style="float: left;" src="images/endline2.jpg">
-<img style="float: right;" src="images/endline2_thres.jpg">
+<img src="images/endline2.jpg" width="640" height ="360">
+<img src="images/endline2_thres.jpg" width="640" height ="360">
 
 2. Extract contours from the thresholded image. Read more about it [here](https://docs.opencv.org/3.4/d4/d73/tutorial_py_contours_begin.html).
 
@@ -20,4 +20,4 @@ All the races indicate the ending of a lap with a distinct magenta line, which i
 
 4. For endline to be considered "detected", we must see 10 frames in a row with a max contour area above 1500. This number was picked by printing the contour areas to the terminal, and around the time the endline first comes into view, the area is around 1500. The 10 frame counter is to ensure no noisy frames trigger false positives.
 
-5. Once endline is deteced, we now wait to see 10 frames in a row with a max contour area below 1500. Once this happens, a service call is made that is provided by the supervisor node, whose responsibility it is to then figure out what to do once the endline is gone. 
+5. Once endline is deteced, we now wait to see 10 frames in a row with a max contour area below 1500. Once this happens, a service call is made that is provided by the supervisor node, whose responsibility it is to then figure out what to do once the endline is gone.
