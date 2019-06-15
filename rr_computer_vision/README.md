@@ -8,7 +8,7 @@ All the races indicate the ending of a lap with a distinct magenta line, which i
 
 1. Apply colour thresholding with the bounds set to extract magenta in the HSV colour space. Read more about it [here](https://docs.opencv.org/3.4/da/d97/tutorial_threshold_inRange.html). The thresholding values were realized through testing the thresholding on a drag race setup in the E5 bay at night. Note that lighting conditions could very likely give different results that don't look as good. Below are some images showing the result of this step:
 
-Original Image            |  Magenta colour threshold
+Original Image            |  Magenta Colour Threshold
 :------------------------:|:-------------------------:
 ![](images/endline1.jpg)  |  ![](images/endline1_thres.jpg)
 ![](images/endline2.jpg)  |  ![](images/endline2_thres.jpg)
