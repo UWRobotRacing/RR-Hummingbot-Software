@@ -1,7 +1,7 @@
 Computer Vision Node
 =========
 
-This node handles all the computer vision tasks required for the [IAARC 2019](https://iarrc.org/) compe tition, which involves traffic light, traffic sign, lane, and endline detection.
+This node handles all the computer vision tasks required for the [IAARC 2019](https://iarrc.org/) competition, which involves traffic light, traffic sign, lane, and endline detection.
 
 ### Endline Detection
 All the races indicate the ending of a lap with a distinct magenta line, which is what we refer to as the "endline". Our algorithm for detecting the endline is as follows: 
