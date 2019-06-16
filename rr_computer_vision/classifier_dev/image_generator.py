@@ -8,7 +8,7 @@ import json
 import shutil
 
 # constants
-MIN_SIGN_SIZE = 20
+MIN_SIGN_SIZE = 40
 ASPECT_RATIO_TOLERANCE = 0.1 # aspect ratio must be 1 +/- tolerance
 MAX_ROTATION = (0.8, 0.8, 0.1) # max rotation angles in rads (x,y,z)
 BLUR_KERNEL = (1, 1)
