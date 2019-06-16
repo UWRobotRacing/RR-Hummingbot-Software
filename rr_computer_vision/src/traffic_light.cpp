@@ -11,6 +11,8 @@ TrafficLightProcessor::TrafficLightProcessor(ros::NodeHandle nh) : it_(nh_)  {
     
     test_subscriber = it_.subscribe("/zed/rgb/image_rect_color", 1, &TrafficLightProcessor::TrafficLightImageCallback, this);
     test_publisher = it_.advertise("/test_traffic_light", 1);
+
+    client_ = nh_.serviceClient<std_srvs::Empty>("/Supervisor/start_race");
 }
 
 void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageConstPtr& msg) {
@@ -18,7 +20,7 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
   cv::Mat traffic_light_image, hsv_img, mag_img, blur_img;
   cv_bridge::CvImagePtr cv_ptr;
   std_srvs::Trigger srv;
-  std::vector<std::vector<cv::Point>> contours;
+  std::vector<std::vector<cv::Point> > contours;
   std::vector<cv::Vec4i> hierarchy;
   std::vector<cv::Point> approx;
 
@@ -31,7 +33,8 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
       //NEED CHANGE
     cv::inRange(hsv_img, cv::Scalar(0, 70, 50), cv::Scalar(10, 255, 255), mag_img);
     cv::inRange(hsv_img, cv::Scalar(170, 70, 50), cv::Scalar(180, 255, 255), mag_img);
-    cv::Mat red_light_img = red_mask1 | red_mask2;
+    
+    cv::Mat red_light_img;
     cv::GaussianBlur(red_light_img, red_light_img, cv::Size(7,7), 0, 0);
 
     // PUBLISH and visualize in rviz   
@@ -39,7 +42,7 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
     std_msgs::Header header;
     header.stamp=ros::Time::now();
     img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, red_light_img);
-    test_publisher.publish(red_light_img.toImageMsg());
+    test_publisher.publish(img_bridge_output.toImageMsg());
 
     // find contour and detect circle
     cv::findContours(mag_img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
@@ -64,14 +67,12 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
   }
 
   if(is_red_light){
-    //service call
-    //shutdown
     is_red_light=false;
   } else if (is_red_light==false){
-    //restart or continue 
+    ros::shutdown();
   }
   
-  catch(cv_bridge::Exception& e)
+  }catch(cv_bridge::Exception& e)
   {
      ROS_ERROR("cv_bridge exception: %s", e.what());
      return;
