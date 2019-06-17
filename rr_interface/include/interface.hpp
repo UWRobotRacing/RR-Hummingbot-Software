@@ -11,6 +11,21 @@
 
 #include <rr_interface/Transmitter.h>
 
+/* 
+  This is a flag that is sent by the transmitter (Jetson -> Coretex M4)
+  It is designed to send specific commands to ensure that the robot does
+  not deviate during certain cases
+  All the values defined above are binary values and should always be the case
+*/ 
+enum class jetsonFlag : uint8_t {
+  ESTOP = 1
+  // Stuff
+};
+
+enum class coretexFlag : uint8_t {
+  // Stuff
+};
+
 class Interface
 {
   public:
@@ -18,23 +33,17 @@ class Interface
     ~Interface();
 
     struct Transmitter {
-      float butt;
-      float butter;
+      int8_t steer_angle; // Degrees
+      uint16_t speed; // cm/s
+      jetsonFlag flag; // Flag enum
     };
 
     struct Receiver {
-      float butt;
-      float butter;
+      coretexFlag flag; // Flag enum
     };
 
     std::vector<uint16_t> Serialize(std::vector<uint16_t> transmitter);
     Receiver Deserialize(char* buffer);
-
-    // struct Transmitter {
-    //   uint8_t speed;
-    //   uint8_t steer;
-    //   uint8_t position;
-    // };
 
     Transmitter transmitter_;
     Receiver receiver_;
