@@ -38,8 +38,9 @@ class TrafficLightProcessor
     image_transport::Publisher test_publisher;
         
     bool is_red_light;
-    int red_light_counter;
-
+    int red_Pixel_Counter;
+    std::vector<cv::Rect> boundRect;
+    cv::Mat rectSection;
     public:
     TrafficLightProcessor(ros::NodeHandle nh);
     void TrafficLightImageCallback(const sensor_msgs::ImageConstPtr& msg);
