@@ -1,14 +1,13 @@
+# The message currently only receives a value from the coretex m4
+# This is mainly designed to help us figure out the current status of M4
 
-uint16 butt
-uint16 butter
-uint16 booter
+# Steering Angle (Degrees)
+int8 steer_angle
 
+# Speed (cm/s)
+uint16 speed
 
-#Current speed of the robot
-#uint8 speed
+# Enum Flag Types
+uint8 alive=0
 
-#Current Steer of the robot
-#uint8 steer
-
-#Position of the robot
-#uint8 position
+uint8 flag

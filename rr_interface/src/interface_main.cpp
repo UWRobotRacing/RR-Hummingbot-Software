@@ -123,10 +123,7 @@ int main(int argc, char **argv)
     if (counter == 0)
     {
       // Writing 
-      //Interface::Transmitter packet = interface.transmitter_;
-      Interface::Transmitter packet;
-      packet.butt = 1.1;
-      packet.butter = 2.2;
+      Interface::Transmitter packet = interface.transmitter_;
 
       unsigned char *payload = new unsigned char [sizeof(packet)];
       unsigned char *convert = (unsigned char *)&packet;
@@ -148,11 +145,10 @@ int main(int argc, char **argv)
       // settings above, specifically VMIN and VTIME
       int read_bytes = read(serial_port_filestream, &read_buf, sizeof(read_buf));
 
+      // Ensures that there is always data flowing through
       if (read_bytes != -1)
       { 
         interface.receiver_ = interface.Deserialize(read_buf);
-        ROS_INFO("Data 1: %f", interface.receiver_.butt);
-        ROS_INFO("Data 2: %f", interface.receiver_.butter);
       }
       
       if (counter == 2)

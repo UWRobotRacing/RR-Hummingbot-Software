@@ -23,29 +23,24 @@ Interface::Interface(ros::NodeHandle nh) {
 Interface::~Interface() {
 }
 
-
-// void Interface::TransmitterCallback(const rr_interface::Transmitter &msg) {
-//     transmitter_.speed = msg.speed;
-//     transmitter_.steer = msg.steer;
-//     transmitter_.position = msg.position;
-// }
-
 Interface::Receiver Interface::Deserialize(char* buffer)
 {
-    Interface::Receiver rReceiver;
+    if (buffer)
+    {
+        Interface::Receiver rReceiver;
 
-    // Converts the data to the correct struct
-    Receiver *fromChar = (Receiver*)buffer;
-    rReceiver.butt = fromChar->butt;
-    rReceiver.butter = fromChar->butter;
-
-    // ensures no dangling
-    fromChar = nullptr;
-
-    return rReceiver;
+        // Converts the data to the correct struct
+        Receiver *fromChar = (Receiver*)buffer;
+        return rReceiver;
+    }
 }
 
 void Interface::TransmitterCallback(const rr_interface::Transmitter &msg) {
-    transmitter_.butt = msg.butt;
-    transmitter_.butter = msg.butter;
+    switch(msg.flag) {
+        case 0:
+            transmitter_.flag = jetsonFlag::ESTOP;
+        break;
+    }
+    transmitter_.speed = msg.speed;
+    transmitter_.steer_angle = msg.steer_angle;
 }
