@@ -23,7 +23,9 @@ enum class jetsonFlag : uint8_t {
 };
 
 enum class coretexFlag : uint8_t {
-  // Stuff
+  ALIVE = 0,
+  STABLE = 1,
+  CONNECTED = 2
 };
 
 class Interface
