@@ -84,7 +84,15 @@ void LaserMapper::InitializeSubscribersandPublishers() {
 
     // SUBSCRIBERS
     lidar_sub_ = nh_.subscribe("/scan", 1, &LaserMapper::LidarCallback, this);
+    
+    /*
     lane_detection_sub_ = nh_.subscribe("/point_vec_out", 1, &LaserMapper::LaneDetectionCallback, this);
+    */
+    
+    left_lane_detection_sub_.subscribe(nh_, "/point_vec_out/left", 1);
+    right_lane_detection_sub_.subscribe(nh_, "/point_vec_out/right", 1);
+    lane_sync_ptr_.reset(new lane_sync_(syncPolicy_(2), left_lane_detection_sub_, right_lane_detection_sub_));
+    lane_sync_ptr_->registerCallback(boost::bind(&LaserMapper::LaneDetectionCallback, this, _1, _2));
 }
 
 /**
@@ -105,13 +113,14 @@ void LaserMapper::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     lidar_msg_ = *msg;
 }
 
-void LaserMapper::LaneDetectionCallback(const nav_msgs::OccupancyGrid::ConstPtr& msg) {
-    lane_detection_msg_ = *msg;
+void LaserMapper::LaneDetectionCallback(const nav_msgs::OccupancyGrid::ConstPtr& leftMsg, const nav_msgs::OccupancyGrid::ConstPtr& rightMsg) {
+  ROS_INFO("Called!");
+  //  lane_detection_msg_ = *msg;
 }
 
 void LaserMapper::GetParam() {
     // Map
-    nh_.param<double>("LaserMapper/map_res", map_res_, 001);
+    nh_.param<double>("LaserMapper/map_res", map_res_, 0.01);
     nh_.param<int>("LaserMapper/map_W", map_width_, 1280);
     nh_.param<int>("LaserMapper/map_H", map_height_, 720);
     
