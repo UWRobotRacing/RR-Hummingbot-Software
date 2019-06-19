@@ -21,10 +21,10 @@ using namespace std;
  * @param nh: ROS node handler
 */
 LaneDetection::LaneDetection(ros::NodeHandle nh) {
-    nh_ = nh;
-    // Initialize publishers and subscribers
-    InitializeSubscribers();
-    InitializePublishers();
+  nh_ = nh;
+  // Initialize publishers and subscribers
+  InitializeSubscribers();
+  InitializePublishers();
 }
 
 /*
@@ -36,36 +36,61 @@ LaneDetection::~LaneDetection() {
 }
 
 void LaneDetection::InitializeSubscribers() {
-    zed_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 1, &LaneDetection::RGBCameraCallback, this);
+  left_subscriber = nh_.subscribe("/zed/left/image_rect_color", 1, &LaneDetection::LeftCameraCallback, this);
+  right_subscriber = nh_.subscribe("/zed/right/image_rect_color", 1, &LaneDetection::RightCameraCallback, this);
 }
 
 void LaneDetection::InitializePublishers() {
-    test_publisher = nh_.advertise<sensor_msgs::Image>("/test_publisher", 1);
-    pointList_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>("/point_vec_out_", 1);
+  test_publisher = nh_.advertise<sensor_msgs::Image>("/test_publisher", 1);
+  left_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>("/output_point_list_left_cam", 1);
+  right_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>("/output_point_list_right_cam", 1);
 }
 
-void LaneDetection::RGBCameraCallback(const sensor_msgs::Image& msg){
+void LaneDetection::LeftCameraCallback(const sensor_msgs::Image& msg){
 
-    // Convert sensor_msgs::Image to a BGR8 cv::Mat
-    cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    img_bgr8_ = cv_bridge_bgr->image;
+  // Convert sensor_msgs::Image to a BGR8 cv::Mat
+  cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+  left_img_bgr8_ = cv_bridge_bgr->image;
 
-    // Process input image
-    process_image(img_bgr8_, out_);
-    
-    // Convert to ros message
-    cv_bridge::CvImage img_bridge_output;
-    std_msgs::Header header; // empty header
-    header.stamp = ros::Time::now(); // time
-    img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, out_);
-    
-    // Publish image
-    test_publisher.publish(img_bridge_output.toImageMsg());
+  // Process input image
+  process_image(left_img_bgr8_, left_out_, 0);
+  
+  // Convert to ros message
+  cv_bridge::CvImage img_bridge_output;
+  std_msgs::Header header; // empty header
+  header.stamp = ros::Time::now(); // time
+  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, left_out_);
+  
+  // Publish image
+  test_publisher.publish(img_bridge_output.toImageMsg());
 
-    // Calculate occupancy grid
-    get_occupancy_grid(grid_msg_, out_);
-    // publish occupancy grid
-    pointList_pub_.publish(grid_msg_);
+  // Calculate occupancy grid
+  get_occupancy_grid(left_grid_msg_, left_out_);
+  // publish occupancy grid
+  left_pub_.publish(left_grid_msg_);
+}
+
+void LaneDetection::RightCameraCallback(const sensor_msgs::Image& msg){
+  // Convert sensor_msgs::Image to a BGR8 cv::Mat
+  cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+  right_img_bgr8_ = cv_bridge_bgr->image;
+
+  // Process input image
+  process_image(right_img_bgr8_, right_out_, 1);
+  
+  // Convert to ros message
+  cv_bridge::CvImage img_bridge_output;
+  std_msgs::Header header; // empty header
+  header.stamp = ros::Time::now(); // time
+  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, right_out_);
+  
+  // Publish image
+  test_publisher.publish(img_bridge_output.toImageMsg());
+
+  // Calculate occupancy grid
+  get_occupancy_grid(right_grid_msg_, right_out_);
+  // publish occupancy grid
+  left_pub_.publish(right_grid_msg_);
 }
 
 void LaneDetection::get_occupancy_grid(nav_msgs::OccupancyGrid &grid_msg_, const cv::Mat &out_){
@@ -100,10 +125,9 @@ void LaneDetection::get_occupancy_grid(nav_msgs::OccupancyGrid &grid_msg_, const
   grid_msg_.info = meta_data_;
 }
 
-void LaneDetection::get_BEV_image(const cv::Mat &img_bgr8_, cv::Mat &BEV_image_){
+void LaneDetection::get_BEV_image(const cv::Mat &img_bgr8_, cv::Mat &BEV_image_, const cv::Mat src){
   cv::Mat Im1_HSV_;
   cv::cvtColor(img_bgr8_, Im1_HSV_, CV_BGR2HSV, 3);
-  cv::Mat src = (cv::Mat_<float>(4,2) << 200.0, 400.0, 1150.0, 400.0, 1280.0, 500.0, 20, 580.0);
   cv::Mat dst = (cv::Mat_<float>(4,2) << 300.0, 0, 900.0, 0, 900.0, 730.0, 300.0, 730.0);
   cv::Mat M_ = cv::getPerspectiveTransform(src, dst);
   cv::warpPerspective(Im1_HSV_,BEV_image_,M_,img_bgr8_.size());
@@ -181,11 +205,15 @@ cv::Mat LaneDetection::GetContours(const cv::Mat &image) {
   return filtered;
 }
 
-void LaneDetection::process_image(const cv::Mat &img_bgr8_, cv::Mat &out_){
+void LaneDetection::process_image(const cv::Mat &img_bgr8_, cv::Mat &out_, int left_or_right_){
   cv::Mat mask_warped_1_;
   cv::Mat mask_warped_2_;
   cv::Mat BEV_image_;
-  get_BEV_image(img_bgr8_, BEV_image_);
+  if(left_or_right_ == 0)
+    src = (cv::Mat_<float>(4,2) << 200.0, 400.0, 1150.0, 400.0, 1280.0, 500.0, 20, 580.0);
+  else
+    src = (cv::Mat_<float>(4,2) << 200.0, 400.0, 1150.0, 400.0, 1280.0, 500.0, 20, 580.0);
+  get_BEV_image(img_bgr8_, BEV_image_, src);
   Multithreshold(BEV_image_, mask_warped_1_);
   FindWhite(BEV_image_, mask_warped_2_);
   cv::bitwise_or(mask_warped_1_, mask_warped_2_, mask_warped_1_);

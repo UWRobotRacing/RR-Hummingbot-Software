@@ -28,30 +28,29 @@ class LaneDetection
   private:
     void InitializeSubscribers();
     void InitializePublishers();
-    void RGBCameraCallback(const sensor_msgs::Image& msg);
+    void LeftCameraCallback(const sensor_msgs::Image& msg);
+    void RightCameraCallback(const sensor_msgs::Image& msg);
     void Multithreshold(const cv::Mat &input_image, cv::Mat &output_image);
     void FindWhite(const cv::Mat &input_image, cv::Mat &output_image);
-    void get_BEV_image(const cv::Mat &img_bgr8_, cv::Mat &BEV_image_);
+    void get_BEV_image(const cv::Mat &img_bgr8_, cv::Mat &BEV_image_, const cv::Mat src);
     void get_occupancy_grid(nav_msgs::OccupancyGrid &grid_msg_, const cv::Mat &out_);
-    void process_image(const cv::Mat &img_bgr8_, cv::Mat &out_);
+    void process_image(const cv::Mat &img_bgr8_, cv::Mat &out_, int left_or_right);
 
-    ros::Subscriber zed_subscriber;
+    ros::Subscriber left_subscriber;
+    ros::Subscriber right_subscriber;
     ros::Publisher test_publisher;
-    ros::Publisher pointList_pub_;
+    ros::Publisher left_pub_;
+    ros::Publisher right_pub_;
     ros::NodeHandle nh_;
 
-    cv::Mat img_bgr8_;
-    cv::Mat out_;
+    cv::Mat src;
+    cv::Mat left_img_bgr8_;
+    cv::Mat left_out_;
+    cv::Mat right_img_bgr8_;
+    cv::Mat right_out_;
     
-
-    cv_bridge::CvImagePtr cv_input_bridge_;
-    cv_bridge::CvImage cv_output_bridge_;
-    
-    nav_msgs::OccupancyGrid grid_msg_;
-
-    std::string point_vec_out_;
-
-    
+    nav_msgs::OccupancyGrid left_grid_msg_;
+    nav_msgs::OccupancyGrid right_grid_msg_;
 
 };
 
