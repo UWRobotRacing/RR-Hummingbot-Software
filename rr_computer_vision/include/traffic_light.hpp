@@ -37,9 +37,11 @@ class TrafficLightProcessor
     image_transport::Subscriber test_subscriber;
     image_transport::Publisher test_publisher;
         
-    bool is_red_light;
+    bool red_light_detected;
     int red_Pixel_Counter;
-    std::vector<cv::Rect> boundRect;
+    double default_ratio;
+
+    cv::Rect boundRect;
     cv::Mat rectSection;
     public:
     TrafficLightProcessor(ros::NodeHandle nh);
