@@ -31,13 +31,25 @@ class EndlineDetection
     bool detection_status_;
     int endline_counter_;
 
+    // 1500 was used as the max contour threshold as that is what the area of the contour
+    // is when the endline first comes into view (approximately)
+    const double contour_area_cutoff_ = 1500.00;
+
     // Colour thresholding parameters
-    const int high_hue_ = 180;
     const int low_hue_ = 130;
+    const int high_hue_ = 180;
+
+    // Outdoor sunny facing away from sun or cloudy: [62, 255]
+    // Outdoor sunny facing sun: [0, 255]
+    // Indoor night time: [82, 255]
+    const int low_sat_ = 62;
     const int high_sat_ = 255;
-    const int low_sat_ = 82;
+
+    // Outdoor sunny facing away from sun or cloudy: [55, 255]
+    // Outdoor sunny facing sun: [41, 177]
+    // Indoor night time: [158, 255]
+    const int low_val_ = 55;
     const int high_val_ = 255;
-    const int low_val_ = 158;
 };
 
 #endif /*ENDLINE_DETECTION_HPP*/

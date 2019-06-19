@@ -89,13 +89,13 @@ void EndlineDetection::EndlineImgCallback(const sensor_msgs::ImageConstPtr& msg)
     // ROS_INFO("Max contour area: %f", maxArea);
 
     // For the endline to be considered 'detected', we wait for atleast 10 frames
-    // in a row with a high enough max contour size. 1500 was used as the max counter
+    // in a row with a high enough max contour size. 1500 was used as the max contour
     // threshold as that is what the area of the contour is when the endline first comes into
     // view. For the endline to be gone, we need 10 frames in a row below that 1500 threshold.
     // This counter approach ensures no false positives arise from noisy frames
     if (!detection_status_)
     {
-      if (maxArea > 1500.00 && endline_counter_ < 10)
+      if (maxArea > contour_area_cutoff_ && endline_counter_ < 10)
       {
         endline_counter_++;
       }
@@ -113,7 +113,7 @@ void EndlineDetection::EndlineImgCallback(const sensor_msgs::ImageConstPtr& msg)
     }
     else 
     {
-      if (maxArea < 1500.00 && endline_counter_ < 10)
+      if (maxArea < contour_area_cutoff_ && endline_counter_ < 10)
       {
         endline_counter_++;
       }
