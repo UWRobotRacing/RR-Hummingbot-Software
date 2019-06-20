@@ -14,7 +14,7 @@ TrafficLightProcessor::TrafficLightProcessor(ros::NodeHandle nh) : it_(nh_)  {
     red_Pixel_Counter=0;
     default_ratio=0.0;
     
-    test_subscriber = it_.subscribe("/zed/rgb/image_rect_color", 1, &TrafficLightProcessor::TrafficLightImageCallback, this);
+    test_subscriber = it_.subscribe("/zed/left/image_rect_color", 1, &TrafficLightProcessor::TrafficLightImageCallback, this);
     test_publisher = it_.advertise("/test_traffic_light", 1);
 
     client_ = nh_.serviceClient<std_srvs::Empty>("/Supervisor/start_race");
@@ -22,7 +22,7 @@ TrafficLightProcessor::TrafficLightProcessor(ros::NodeHandle nh) : it_(nh_)  {
 
 void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageConstPtr& msg) {
 
-  cv::Mat traffic_light_image, hsv_img, mag_img, blur_img;
+  cv::Mat traffic_light_image, hsv_img, threshold_img, blur_img;
   cv_bridge::CvImagePtr cv_ptr;
   std_srvs::Trigger srv;
   std::vector<std::vector<cv::Point> > contours;
@@ -36,29 +36,35 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
    
     // Filter red
       //NEED CHANGE
-    cv::inRange(hsv_img, cv::Scalar(170, 70, 50), cv::Scalar(180, 255, 255), mag_img);
-    cv::Mat red_light_img;
-    cv::GaussianBlur(red_light_img, red_light_img, cv::Size(7,7), 0, 0);
+    cv::inRange(hsv_img, cv::Scalar(170, 70, 50), cv::Scalar(180, 255, 255), threshold_img);
+
+    // cv::Mat red_light_img;
+    // cv::GaussianBlur(red_light_img, red_light_img, cv::Size(7,7), 0, 0);
 
     // PUBLISH and visualize in rviz   
     cv_bridge::CvImage img_bridge_output;
     std_msgs::Header header;
     header.stamp=ros::Time::now();
-    img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, red_light_img);
+    img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, threshold_img);
     test_publisher.publish(img_bridge_output.toImageMsg());
 
     // // find contour and detect circle
     if(red_light_detected==false){
-        cv::findContours(mag_img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+        cv::findContours(threshold_img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
         int conSize = contours.size();
         ROS_INFO("Number of contours: %d", conSize);
 
-        int maxAreaIndex=0;
-        for (int i=0; i<conSize; i++){
-          if(cv::contourArea(contours[maxAreaIndex]) < cv::contourArea(contours[i+1])){
-            maxAreaIndex=i+1;
+        int maxAreaIndex = 0;
+        for (int i = 0; i < conSize; i++)
+        {
+          if ( cv::contourArea(contours[maxAreaIndex]) < cv::contourArea(contours[i]) )
+          {
+            maxAreaIndex = i;
           }
         }
+   
+        ROS_INFO("Max contour area: %f", cv::contourArea(cv::Mat(contours[maxAreaIndex])));
+
 
         cv::approxPolyDP(cv::Mat(contours[maxAreaIndex]), approx, 0.1*arcLength(cv::Mat(contours[maxAreaIndex]), true), true);
         int polyLength = approx.size();
@@ -66,8 +72,7 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
         
         if (approx.size()>=10){
             boundRect = cv::boundingRect(contours[maxAreaIndex]);    // cv::Mat(contours[maxAreaIndex])
-            cv::Mat crop_img=mag_img(boundRect);
-            cv::cvtColor(crop_img, crop_img, CV_BGR2GRAY);
+            cv::Mat crop_img=threshold_img(boundRect);
             int red_Pixel_Counter=cv::countNonZero(crop_img);
           
             int total_pixel=crop_img.total();
@@ -76,7 +81,7 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
             red_light_detected=true;
         } 
     }else if(red_light_detected=true){
-        cv::Mat crop_img=mag_img(boundRect);
+        cv::Mat crop_img=threshold_img(boundRect);
         cv::cvtColor(crop_img, crop_img, CV_BGR2GRAY);
         int red_Pixel_Counter=cv::countNonZero(crop_img);
         int total_pixel=crop_img.total();
