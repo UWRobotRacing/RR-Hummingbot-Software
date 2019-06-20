@@ -90,7 +90,7 @@ void LaneDetection::RightCameraCallback(const sensor_msgs::Image& msg){
   // Calculate occupancy grid
   get_occupancy_grid(right_grid_msg_, right_out_);
   // publish occupancy grid
-  left_pub_.publish(right_grid_msg_);
+  right_pub_.publish(right_grid_msg_);
 }
 
 void LaneDetection::get_occupancy_grid(nav_msgs::OccupancyGrid &grid_msg_, const cv::Mat &out_){
