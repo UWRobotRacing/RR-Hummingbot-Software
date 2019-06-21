@@ -128,7 +128,7 @@ void LaneDetection::get_occupancy_grid(nav_msgs::OccupancyGrid &grid_msg_, const
 void LaneDetection::get_BEV_image(const cv::Mat &img_bgr8_, cv::Mat &BEV_image_, const cv::Mat src){
   cv::Mat Im1_HSV_;
   cv::cvtColor(img_bgr8_, Im1_HSV_, CV_BGR2HSV, 3);
-  cv::Mat dst = (cv::Mat_<float>(4,2) << 300.0, 0, 900.0, 0, 900.0, 730.0, 300.0, 730.0);
+  cv::Mat dst = (cv::Mat_<float>(4,2) << 300.0, 0, 900.0, 0, 900.0, 710.0, 300.0, 710.0);
   cv::Mat M_ = cv::getPerspectiveTransform(src, dst);
   cv::warpPerspective(Im1_HSV_,BEV_image_,M_,img_bgr8_.size());
 }
@@ -210,9 +210,9 @@ void LaneDetection::process_image(const cv::Mat &img_bgr8_, cv::Mat &out_, int l
   cv::Mat mask_warped_2_;
   cv::Mat BEV_image_;
   if(left_or_right_ == 0)
-    src = (cv::Mat_<float>(4,2) << 200.0, 400.0, 1150.0, 400.0, 1280.0, 500.0, 20, 580.0);
+    src = (cv::Mat_<float>(4,2) << 980.0, 520.0, 990.0, 480.0, 1280.0, 580.0, 1280.0, 660.0);
   else
-    src = (cv::Mat_<float>(4,2) << 200.0, 400.0, 1150.0, 400.0, 1280.0, 500.0, 20, 580.0);
+    src = (cv::Mat_<float>(4,2) << 330.0, 0.0, 900.0, 0.0, 900.0, 710.0, 300.0, 710.0);
   get_BEV_image(img_bgr8_, BEV_image_, src);
   Multithreshold(BEV_image_, mask_warped_1_);
   FindWhite(BEV_image_, mask_warped_2_);
