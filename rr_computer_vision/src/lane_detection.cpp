@@ -131,14 +131,14 @@ void LaneDetection::get_occupancy_grid(nav_msgs::OccupancyGrid &grid_msg_, const
 }
 
 void LaneDetection::get_BEV_image(const cv::Mat &img_bgr8_, cv::Mat &BEV_image_, const cv::Mat src){
-  cv::Mat Im1_HSV_;
-  cv::cvtColor(img_bgr8_, Im1_HSV_, CV_BGR2HSV, 3);
   cv::Mat dst = (cv::Mat_<float>(4,2) << 300.0, 0, 900.0, 0, 900.0, 710.0, 300.0, 710.0);
   cv::Mat M_ = cv::getPerspectiveTransform(src, dst);
-  cv::warpPerspective(Im1_HSV_,BEV_image_,M_,img_bgr8_.size());
+  cv::warpPerspective(img_bgr8_,BEV_image_,M_,img_bgr8_.size());
 }
 
 void LaneDetection::Multithreshold(const cv::Mat &input_image, cv::Mat &output_image) {
+  cv::cvtColor(input_image, input_image, CV_BGR2HSV, 3);
+
   cv::Mat bounds_ = (cv::Mat_<double>(3,6) << 0, 100, 140, 120, 255, 255, 0, 0, 250, 255, 25, 255, 25, 5, 186, 130, 50, 255);
   //Confirm Dims and define binary mask_
   cv::Mat mask_(input_image.rows, input_image.cols, CV_8U, cv::Scalar::all(0));
