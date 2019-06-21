@@ -36,12 +36,17 @@ LaneDetection::~LaneDetection() {
 }
 
 void LaneDetection::InitializeSubscribers() {
-  left_subscriber = nh_.subscribe("/zed/left/image_rect_color", 1, &LaneDetection::LeftCameraCallback, this);
-  right_subscriber = nh_.subscribe("/zed/right/image_rect_color", 1, &LaneDetection::RightCameraCallback, this);
+  left_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 1, &LaneDetection::LeftCameraCallback, this);
+  right_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 1, &LaneDetection::RightCameraCallback, this);
 }
 
-void LaneDetection::InitializePublishers() {
-  test_publisher = nh_.advertise<sensor_msgs::Image>("/test_publisher", 1);
+void LaneDetection::InitializePublishers() {  
+  // Setup debug rostopics
+  test_left_warp_img = nh_.advertise<sensor_msgs::Image>("/test_left_warp_img", 1);
+  test_right_warp_img = nh_.advertise<sensor_msgs::Image>("/test_right_warp_img", 1);
+  test_left_warp_threshold_img = nh_.advertise<sensor_msgs::Image>("/test_left_warp_threshold_img", 1);
+  test_right_warp_threshold_img = nh_.advertise<sensor_msgs::Image>("/test_right_warp_threshold_img", 1);
+
   left_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>("/output_point_list_left_cam", 1);
   right_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>("/output_point_list_right_cam", 1);
 }
@@ -62,7 +67,7 @@ void LaneDetection::LeftCameraCallback(const sensor_msgs::Image& msg){
   img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, left_out_);
   
   // Publish image
-  test_publisher.publish(img_bridge_output.toImageMsg());
+  test_left_warp_threshold_img.publish(img_bridge_output.toImageMsg());
 
   // Calculate occupancy grid
   get_occupancy_grid(left_grid_msg_, left_out_);
@@ -85,7 +90,7 @@ void LaneDetection::RightCameraCallback(const sensor_msgs::Image& msg){
   img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, right_out_);
   
   // Publish image
-  test_publisher.publish(img_bridge_output.toImageMsg());
+  test_right_warp_threshold_img.publish(img_bridge_output.toImageMsg());
 
   // Calculate occupancy grid
   get_occupancy_grid(right_grid_msg_, right_out_);
@@ -214,6 +219,22 @@ void LaneDetection::process_image(const cv::Mat &img_bgr8_, cv::Mat &out_, int l
   else
     src = (cv::Mat_<float>(4,2) << 330.0, 0.0, 900.0, 0.0, 900.0, 710.0, 300.0, 710.0);
   get_BEV_image(img_bgr8_, BEV_image_, src);
+
+  // Publish to a topic for debugging
+  cv_bridge::CvImage img_bridge_output;
+  std_msgs::Header header;
+  header.stamp=ros::Time::now();
+  img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, BEV_image_);
+  
+  if (left_or_right_ == 0)
+  {
+    test_left_warp_img.publish(img_bridge_output.toImageMsg());
+  }
+  else 
+  {
+    test_right_warp_img.publish(img_bridge_output.toImageMsg());
+  }
+  
   Multithreshold(BEV_image_, mask_warped_1_);
   FindWhite(BEV_image_, mask_warped_2_);
   cv::bitwise_or(mask_warped_1_, mask_warped_2_, mask_warped_1_);

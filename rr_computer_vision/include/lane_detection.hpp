@@ -38,7 +38,13 @@ class LaneDetection
 
     ros::Subscriber left_subscriber;
     ros::Subscriber right_subscriber;
-    ros::Publisher test_publisher;
+
+    // Publishers for debugging
+    ros::Publisher test_left_warp_img;
+    ros::Publisher test_right_warp_img;
+    ros::Publisher test_left_warp_threshold_img;
+    ros::Publisher test_right_warp_threshold_img;
+
     ros::Publisher left_pub_;
     ros::Publisher right_pub_;
     ros::NodeHandle nh_;
