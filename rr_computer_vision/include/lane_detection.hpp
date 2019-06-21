@@ -49,11 +49,11 @@ class LaneDetection
     ros::Publisher right_pub_;
     ros::NodeHandle nh_;
 
-    cv::Mat src;
-    cv::Mat left_img_bgr8_;
-    cv::Mat left_out_;
-    cv::Mat right_img_bgr8_;
-    cv::Mat right_out_;
+    // cv::Mat src;
+    // cv::Mat left_img_bgr8_;
+    // cv::Mat left_out_;
+    // cv::Mat right_img_bgr8_;
+    // cv::Mat right_out_;
     
     nav_msgs::OccupancyGrid left_grid_msg_;
     nav_msgs::OccupancyGrid right_grid_msg_;

@@ -37,7 +37,7 @@ LaneDetection::~LaneDetection() {
 
 void LaneDetection::InitializeSubscribers() {
   left_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 1, &LaneDetection::LeftCameraCallback, this);
-  right_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 1, &LaneDetection::RightCameraCallback, this);
+  //right_subscriber = nh_.subscribe("/zed/rgb/image_rect_color", 1, &LaneDetection::RightCameraCallback, this);
 }
 
 void LaneDetection::InitializePublishers() {  
@@ -52,6 +52,8 @@ void LaneDetection::InitializePublishers() {
 }
 
 void LaneDetection::LeftCameraCallback(const sensor_msgs::Image& msg){
+  ROS_INFO("LEFT CAMERA CALLBACK");
+  cv::Mat left_img_bgr8_, left_out_;
 
   // Convert sensor_msgs::Image to a BGR8 cv::Mat
   cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
@@ -76,6 +78,9 @@ void LaneDetection::LeftCameraCallback(const sensor_msgs::Image& msg){
 }
 
 void LaneDetection::RightCameraCallback(const sensor_msgs::Image& msg){
+  ROS_INFO("RIGHT CAMERA CALLBACK");
+  cv::Mat right_img_bgr8_, right_out_;
+
   // Convert sensor_msgs::Image to a BGR8 cv::Mat
   cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
   right_img_bgr8_ = cv_bridge_bgr->image;
@@ -214,10 +219,19 @@ void LaneDetection::process_image(const cv::Mat &img_bgr8_, cv::Mat &out_, int l
   cv::Mat mask_warped_1_;
   cv::Mat mask_warped_2_;
   cv::Mat BEV_image_;
+
+  cv::Mat src;
+
   if(left_or_right_ == 0)
+  {
+    ROS_INFO("LEFT CAMERA CO-ORDINATES");
     src = (cv::Mat_<float>(4,2) << 980.0, 520.0, 990.0, 480.0, 1280.0, 580.0, 1280.0, 660.0);
+  }
   else
+  {
+    ROS_INFO("RIGHT CAMERA CO-ORDINATES");
     src = (cv::Mat_<float>(4,2) << 330.0, 0.0, 900.0, 0.0, 900.0, 710.0, 300.0, 710.0);
+  }
   get_BEV_image(img_bgr8_, BEV_image_, src);
 
   // Publish to a topic for debugging
