@@ -10,3 +10,6 @@
 [submodule "rr_third_party_packages/twist_mux"]
 	path = rr_third_party_packages/twist_mux
 	url = https://github.com/ros-teleop/twist_mux
+[submodule "rr_third_party_packages/zed-ros-wrapper"]
+	path = rr_third_party_packages/zed-ros-wrapper
+	url = https://github.com/uwrobotics/zed-ros-wrapper.git
