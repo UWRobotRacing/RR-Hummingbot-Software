@@ -18,6 +18,13 @@
 // LOCAL
 #include "interface.hpp"
 
+// Change this for different serial values
+const std::string serial_port = "/dev/ttyUSB0";
+int serial_port_filestream;
+
+// Forward declaration
+void setupCommunication();
+
 /** @brief starts the interface node
  *
  *  nothing happens until enable is true
@@ -33,6 +40,67 @@ int main(int argc, char **argv)
   ROS_INFO("Interface: Interface Node Initialized");
   ros::Rate r(40);
 
+  // Declared later to remove some preset communication stuff that doesnt need to be tweaked
+  setupCommunication();
+
+  int counter = 0;
+  while (ros::ok())
+  {
+    if (counter == 0)
+    {
+      // Writing 
+      Interface::Transmitter packet = interface.transmitter_;
+
+      unsigned char *payload = new unsigned char [sizeof(packet)];
+      unsigned char *convert = (unsigned char *)&packet;
+      for (int i = 0; i < sizeof(packet); i++)
+      {
+        payload[i] = convert[sizeof(payload)-i-1];
+      }
+      int written_bytes = write(serial_port_filestream, payload, sizeof(packet));
+      delete payload;
+      payload = nullptr;
+    }
+    else
+    {
+      // Reading 
+      // Allocate memory for read buffer, set size according to your needs
+      char read_buf [sizeof(Interface::Receiver)];
+      memset(&read_buf, '\0', sizeof(read_buf));
+      
+      // Read bytes. The behaviour of read() (e.g. does it block?,
+      // how long does it block for?) depends on the configuration
+      // settings above, specifically VMIN and VTIME
+      int read_bytes = read(serial_port_filestream, &read_buf, sizeof(read_buf));
+
+      // Ensures that there is always data flowing through
+      if (read_bytes != -1)
+      { 
+        interface.receiver_ = interface.Deserialize(read_buf);
+      }
+      
+      if (counter == 2)
+      {
+        counter = 0;
+      }
+      else 
+      {
+        counter++;
+      }
+    }
+
+    ros::spinOnce();
+    r.sleep();
+  }
+
+  //----- CLOSE THE UART -----
+  close(serial_port_filestream);
+  ROS_INFO("Closed Serial Port");
+  return 0;
+}
+
+void setupCommunication()
+{
   // The following tutorial was followed to set up this serial UART communcation: 
   // https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/
 
@@ -48,9 +116,9 @@ int main(int argc, char **argv)
 
     O_NOCTTY - When set and path identifies a terminal device, open() shall not cause the terminal device to become the controlling terminal for the process.
   */
-  std::string serial_port_name = "/dev/ttyUSB0";
+  std::string serial_port_name = serial_port;
   // Everything in linux is considered a file, hence why this varaible is referred to as a file stream
-  int serial_port_filestream = open(serial_port_name.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
+  serial_port_filestream = open(serial_port_name.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
 
   // Check for errors
   if (serial_port_filestream < 0) {
@@ -117,56 +185,4 @@ int main(int argc, char **argv)
   }
   ROS_INFO("Successfully configured serial port settings for UART communication");
 
-  int counter = 0;
-  while (ros::ok())
-  {
-    if (counter == 0)
-    {
-      // Writing 
-      Interface::Transmitter packet = interface.transmitter_;
-
-      unsigned char *payload = new unsigned char [sizeof(packet)];
-      unsigned char *convert = (unsigned char *)&packet;
-      for (int i = 0; i < sizeof(packet); i++)
-      {
-        payload[i] = convert[sizeof(payload)-i-1];
-      }
-      int written_bytes = write(serial_port_filestream, payload, sizeof(packet));
-    }
-    else
-    {
-      // Reading 
-      // Allocate memory for read buffer, set size according to your needs
-      char read_buf [sizeof(Interface::Receiver)];
-      memset(&read_buf, '\0', sizeof(read_buf));
-      
-      // Read bytes. The behaviour of read() (e.g. does it block?,
-      // how long does it block for?) depends on the configuration
-      // settings above, specifically VMIN and VTIME
-      int read_bytes = read(serial_port_filestream, &read_buf, sizeof(read_buf));
-
-      // Ensures that there is always data flowing through
-      if (read_bytes != -1)
-      { 
-        interface.receiver_ = interface.Deserialize(read_buf);
-      }
-      
-      if (counter == 2)
-      {
-        counter = 0;
-      }
-      else 
-      {
-        counter++;
-      }
-    }
-
-    ros::spinOnce();
-    r.sleep();
-  }
-
-  //----- CLOSE THE UART -----
-  close(serial_port_filestream);
-  ROS_INFO("Closed Serial Port");
-  return 0;
 }

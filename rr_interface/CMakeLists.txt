@@ -32,4 +32,5 @@ roslint_cpp()
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 add_executable(rr_interface src/interface_main.cpp src/interface.cpp include/interface.hpp)
+add_dependencies(rr_interface rr_interface_generate_messages_cpp)
 target_link_libraries(rr_interface ${catkin_LIBRARIES}) 
