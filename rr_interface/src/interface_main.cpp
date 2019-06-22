@@ -50,9 +50,9 @@ int main(int argc, char **argv)
     {
       // Writing 
       Interface::Transmitter packet = interface.transmitter_;
-
+      /*
       unsigned char *payload = new unsigned char [sizeof(packet)];
-      unsigned char *convert = (unsigned char *)&packet;
+      unsigned char *convert = (unsigned char*)&packet;
       for (int i = 0; i < sizeof(packet); i++)
       {
         payload[i] = convert[sizeof(payload)-i-1];
@@ -60,6 +60,9 @@ int main(int argc, char **argv)
       int written_bytes = write(serial_port_filestream, payload, sizeof(packet));
       delete payload;
       payload = nullptr;
+       */
+      unsigned char *convert = (unsigned char*)&packet;
+      int writeen_bytes = write(serial_port_filestream, convert, sizeof(convert));
     }
     else
     {

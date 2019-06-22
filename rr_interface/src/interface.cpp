@@ -36,11 +36,15 @@ Interface::Receiver Interface::Deserialize(char* buffer)
 }
 
 void Interface::TransmitterCallback(const rr_interface::Transmitter &msg) {
+    /*
     switch(msg.flag) {
         case 0:
             transmitter_.flag = jetsonFlag::ESTOP;
         break;
     }
-    transmitter_.speed = msg.speed;
+     */
     transmitter_.steer_angle = msg.steer_angle;
+    transmitter_.speed = msg.speed;
+    transmitter_.flag = msg.flag;
+    transmitter_.neg_flag = msg.neg_flag;
 }
