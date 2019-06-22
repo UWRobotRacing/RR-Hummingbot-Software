@@ -46,5 +46,4 @@ void Interface::TransmitterCallback(const rr_interface::Transmitter &msg) {
     transmitter_.steer_angle = msg.steer_angle;
     transmitter_.speed = msg.speed;
     transmitter_.flag = msg.flag;
-    transmitter_.neg_flag = msg.neg_flag;
 }
