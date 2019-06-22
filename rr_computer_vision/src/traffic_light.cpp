@@ -36,10 +36,10 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
    
     // Filter red
       //NEED CHANGE
-    cv::inRange(hsv_img, cv::Scalar(170, 70, 50), cv::Scalar(180, 255, 255), threshold_img);
+    cv::inRange(hsv_img,cv::Scalar(0, 62, 161), cv::Scalar(96, 255, 215), threshold_img);    //outdoor :cv::Scalar(0, 62, 161), cv::Scalar(96, 255, 215)    cv::Scalar(0, 44, 40), cv::Scalar(96, 189, 160)
 
     // cv::Mat red_light_img;
-    // cv::GaussianBlur(red_light_img, red_light_img, cv::Size(7,7), 0, 0);
+    cv::GaussianBlur(threshold_img, threshold_img, cv::Size(7,7), 0, 0);
 
     // PUBLISH and visualize in rviz   
     cv_bridge::CvImage img_bridge_output;
@@ -65,29 +65,28 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
    
         ROS_INFO("Max contour area: %f", cv::contourArea(cv::Mat(contours[maxAreaIndex])));
 
-
-        cv::approxPolyDP(cv::Mat(contours[maxAreaIndex]), approx, 0.1*arcLength(cv::Mat(contours[maxAreaIndex]), true), true);
+        cv::approxPolyDP(cv::Mat(contours[maxAreaIndex]), approx, 0.02*arcLength(cv::Mat(contours[maxAreaIndex]), true), true);
         int polyLength = approx.size();
         ROS_INFO("Polygon length: %d", polyLength);
         
-        if (approx.size()>=10){
+        if (polyLength>=8){                                          //(cv::contourArea(contours[maxAreaIndex])>=180)
             boundRect = cv::boundingRect(contours[maxAreaIndex]);    // cv::Mat(contours[maxAreaIndex])
             cv::Mat crop_img=threshold_img(boundRect);
             int red_Pixel_Counter=cv::countNonZero(crop_img);
-          
             int total_pixel=crop_img.total();
             default_ratio=(double)red_Pixel_Counter/total_pixel;
             ROS_INFO("Red light detected!");
+            ROS_INFO("Default ratio: %f", default_ratio);
             red_light_detected=true;
         } 
-    }else if(red_light_detected=true){
+    }else if(red_light_detected==true){
         cv::Mat crop_img=threshold_img(boundRect);
-        cv::cvtColor(crop_img, crop_img, CV_BGR2GRAY);
         int red_Pixel_Counter=cv::countNonZero(crop_img);
         int total_pixel=crop_img.total();
         new_ratio= (double)red_Pixel_Counter/total_pixel;
-        if(new_ratio>default_ratio){
-            ROS_INFO("Red light is there!");
+        ROS_INFO("RATIO: %f", new_ratio);
+        if((new_ratio+0.3)>= default_ratio){
+            ROS_INFO("Red light is still there!");
         }else{
             ROS_INFO("Green light detected!");
             ros::shutdown();
