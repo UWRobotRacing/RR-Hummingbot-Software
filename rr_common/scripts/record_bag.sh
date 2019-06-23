@@ -1,2 +1,0 @@
-rosbag record 
-rosparam set
