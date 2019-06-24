@@ -11,7 +11,15 @@ def perspective_transform(img):
     img_size = (img.shape[1], img.shape[0])
 
     # Perspective transform source and destiantion co-ordinates
-    src = np.float32([[400,350], [760,350], [1280,500], [0,500]])
+    # Drag race: (1.5 m wide lanes)
+    # src = np.float32([[400,350], [760,350], [1280,500], [0,500]])
+
+    # Urban road: (1m wide lanes)
+    # src = np.float32([[420,380], [930,380], [1280,720], [50,720]])
+
+    # Circuit race: (2m wide lanes)
+    src = np.float32([[500,350], [750,350], [1280,550], [0,450]])
+
     dst = np.float32([[300, 0], [900,0], [900,720], [300,720]])
 
     # Apply transform
