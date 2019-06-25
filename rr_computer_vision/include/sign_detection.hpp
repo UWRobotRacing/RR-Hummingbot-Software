@@ -31,6 +31,8 @@ class SignDetection
     void InitializePublishers();
 
     void RGBDepthSyncCameraCallback(const sensor_msgs::ImageConstPtr& left_msg, const sensor_msgs::ImageConstPtr& depth_msg);
+    cv::Rect FilterSigns(std::vector<cv::Rect> signs, cv::Mat img);
+
 
     // Stuff for synchronized policy
     message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_;
