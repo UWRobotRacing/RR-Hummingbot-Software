@@ -45,7 +45,7 @@ SignDetection::~SignDetection() {
 }
 
 void SignDetection::InitializePublishers() {
-  test_publisher = nh_.advertise<sensor_msgs::Image>("/test_stitching", 1);
+  test_publisher = nh_.advertise<sensor_msgs::Image>("/test_cascade", 1);
 }
 
 void SignDetection::InitializeSubscribers() {
@@ -84,8 +84,7 @@ void ComputerVision::RGBDepthSyncCameraCallback(const sensor_msgs::ImageConstPtr
   final_sign = FilterSigns(classifications, left_img, depth_img);
 
   // Find arrow direction from sign
-  int direction;
-  direction = CheckArrowDir(cv::Mat(left_img, final_sign).clone());
+  int direction = CheckArrowDir(cv::Mat(left_img, final_sign).clone());
 
   // Publish so we can visualize in rviz
   cv_bridge::CvImage img_bridge_output;
@@ -116,18 +115,16 @@ cv::Rect SignDetection::FilterSigns(std::vector<cv::Rect> signs, cv::Mat img) {
 
 }
 
-struct SortX {
-    bool operator() (cv::Point pt1, cv::Point pt2) { return (pt1.x < pt2.x);}
-} x_sorter;
-
-struct SortY {
-    bool operator() (cv::Point pt1, cv::Point pt2) { return (pt1.y < pt2.y);}
-} y_sorter;
-
 void sortPoints(std::vector<cv::Point> &points) {
   // Sorts 4 points in order: bot-left, top-left, bot-right, top-right
   // Needed to map correct corners in perspective transform
+  struct SortX {
+    bool operator() (cv::Point pt1, cv::Point pt2) { return (pt1.x < pt2.x);}
+  } x_sorter;
 
+  struct SortY {
+      bool operator() (cv::Point pt1, cv::Point pt2) { return (pt1.y < pt2.y);}
+  } y_sorter;
 
   // Sort by x-coordinate
   std::sort(points.begin(), points.end(), x_sorter);
@@ -157,7 +154,7 @@ int SignDetection::CheckArrowDir(cv::Mat sign) {
   int largest_area = 0;
   int largest_cnt_index = 0;
   for (int i = 0; i < contours.size(); i++) {
-    double area = cv::contourArea(contours[i])
+    double area = cv::contourArea(contours[i]);
     if (area > largest_area) {
       largest_area = area;
       largest_cnt_index = i;
@@ -202,7 +199,7 @@ int SignDetection::CheckArrowDir(cv::Mat sign) {
   int largest_area = 0;
   int largest_cnt_index = 0;
   for (int i = 0; i < arrow_contours.size(); i++) {
-    double area = cv::contourArea(arrow_contours[i])
+    double area = cv::contourArea(arrow_contours[i]);
     if (area > largest_area) {
       largest_area = area;
       largest_cnt_index = i;
