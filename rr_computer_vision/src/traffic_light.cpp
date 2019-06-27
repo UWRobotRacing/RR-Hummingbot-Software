@@ -8,11 +8,13 @@
 TrafficLightProcessor::TrafficLightProcessor(ros::NodeHandle nh) : it_(nh_)  {
 
     red_light_detected = false;
-    
-    //cv::Rect boundRect;
-    // cv::Mat rectSection;
+    cv::Rect boundRect;
     red_Pixel_Counter=0;
     default_ratio=0.0;
+    int x;
+    int y;
+    int s;
+    int r;
     
     test_subscriber = it_.subscribe("/zed/left/image_rect_color", 1, &TrafficLightProcessor::TrafficLightImageCallback, this);
     test_publisher = it_.advertise("/test_traffic_light", 1);
@@ -25,60 +27,98 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
   cv::Mat traffic_light_image, hsv_img, threshold_img, blur_img;
   cv_bridge::CvImagePtr cv_ptr;
   std_srvs::Trigger srv;
-  std::vector<std::vector<cv::Point> > contours;
-  std::vector<cv::Vec4i> hierarchy;
-  std::vector<cv::Point> approx;
-  double new_ratio=0.0;
+  double new_ratio;
+//  std::vector<cv::Point> approx;
+
   try{
     cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     traffic_light_image = cv_ptr->image;
     cv::cvtColor(traffic_light_image, hsv_img, CV_BGR2HSV);
-   
-    // Filter red
-      //NEED CHANGE
-    cv::inRange(hsv_img,cv::Scalar(0, 62, 161), cv::Scalar(96, 255, 215), threshold_img);    //outdoor :cv::Scalar(0, 62, 161), cv::Scalar(96, 255, 215)    cv::Scalar(0, 44, 40), cv::Scalar(96, 189, 160)
+    int maxAreaIndex = 0;
+    int counter=0;
 
-    // cv::Mat red_light_img;
+    // Filter red
+    cv::inRange(hsv_img,cv::Scalar(0, 62, 161), cv::Scalar(96, 255, 215), threshold_img);    //outdoor :cv::Scalar(0, 62, 161), cv::Scalar(96, 255, 215)    cv::Scalar(0, 44, 40), cv::Scalar(96, 189, 160)
     cv::GaussianBlur(threshold_img, threshold_img, cv::Size(7,7), 0, 0);
 
-    // PUBLISH and visualize in rviz   
-    cv_bridge::CvImage img_bridge_output;
-    std_msgs::Header header;
-    header.stamp=ros::Time::now();
-    img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, threshold_img);
-    test_publisher.publish(img_bridge_output.toImageMsg());
-
-    // // find contour and detect circle
     if(red_light_detected==false){
-        cv::findContours(threshold_img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
-        int conSize = contours.size();
-        ROS_INFO("Number of contours: %d", conSize);
-
-        int maxAreaIndex = 0;
-        for (int i = 0; i < conSize; i++)
-        {
-          if ( cv::contourArea(contours[maxAreaIndex]) < cv::contourArea(contours[i]) )
-          {
-            maxAreaIndex = i;
-          }
-        }
-   
-        ROS_INFO("Max contour area: %f", cv::contourArea(cv::Mat(contours[maxAreaIndex])));
-
-        cv::approxPolyDP(cv::Mat(contours[maxAreaIndex]), approx, 0.02*arcLength(cv::Mat(contours[maxAreaIndex]), true), true);
-        int polyLength = approx.size();
-        ROS_INFO("Polygon length: %d", polyLength);
+        cv::SimpleBlobDetector::Params params;
+        params.filterByArea = true;
+        params.minArea = 50;
         
-        if (polyLength>=8){                                          //(cv::contourArea(contours[maxAreaIndex])>=180)
-            boundRect = cv::boundingRect(contours[maxAreaIndex]);    // cv::Mat(contours[maxAreaIndex])
+        // Filter by Circularity
+        params.filterByCircularity = true;
+        params.minCircularity = 0.3;
+        
+        // Filter by Convexity
+        params.filterByConvexity = true;
+        params.minConvexity = 0.4;
+        
+        // Filter by Inertia
+        params.filterByInertia = false;
+        //params.minInertiaRatio = 0.01;
+
+        params.blobColor=255;
+        
+        // Set up detector with params
+        // OR 
+        // Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
+        cv::SimpleBlobDetector detector(params);    
+        
+        // Detect blobs.
+        std::vector<KeyPoint> keypoints;
+        detector.detect( threshold_img, keypoints);
+
+        int numBlob=keypoints.size();
+        ROS_INFO("Number of blobs: %i", numBlob);
+
+        if(numBlob !=0 ){
+            for (int i = 0; i < numBlob; i++)
+            {
+              if ( keypoints[maxAreaIndex].size) < keypoints[i].size)
+              {
+                maxAreaIndex = i;
+              }
+            }
+
+            x=(int)keypoints[0].pt[0];
+            y=(int)keypoints[0].pt[1];
+            s=(int)keypoints[maxAreaIndex].size;
+            r=(int) s/2;
+
+            cv::Mat im_with_keypoints;
+            cv::drawKeypoints( threshold_img, keypoints, im_with_keypoints, Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+
+            // PUBLISH and visualize in rviz   
+            cv_bridge::CvImage img_bridge_output;
+            std_msgs::Header header;
+            header.stamp=ros::Time::now();
+            img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, im_with_keypoints);
+            test_publisher.publish(img_bridge_output.toImageMsg());
+     
+            cv::Rect boundRect (x-r, y-r, x+s, y+s);   
             cv::Mat crop_img=threshold_img(boundRect);
             int red_Pixel_Counter=cv::countNonZero(crop_img);
             int total_pixel=crop_img.total();
-            default_ratio=(double)red_Pixel_Counter/total_pixel;
-            ROS_INFO("Red light detected!");
-            ROS_INFO("Default ratio: %f", default_ratio);
-            red_light_detected=true;
-        } 
+            
+            if(counter==0){
+                default_ratio=(double)red_Pixel_Counter/total_pixel;
+                counter++;
+            } else {
+              new_ratio=(double)red_Pixel_Counter/total_pixel;              
+              if((new_ratio+0.2)>= default_ratio){
+                  counter++;
+                  ROS_INFO("Counter: %i", counter);
+              }
+            }
+            
+            if(counter==5){
+                ROS_INFO("Red light detected!");
+                ROS_INFO("Default ratio: %f", default_ratio);
+                red_light_detected=true;
+            }
+        }
+        
     }else if(red_light_detected==true){
         cv::Mat crop_img=threshold_img(boundRect);
         int red_Pixel_Counter=cv::countNonZero(crop_img);
@@ -99,21 +139,3 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
     return;
   }
 }
-
-
-
-// NO SORTING
-// for (int i=0; i<conSize; i++){
-//     cv::approxPolyDP(cv::Mat(contours[i]), approx, 0.1*arcLength(cv::Mat(contours[i]), true), true);
-//     int polyLength = approx.size();
-//     ROS_INFO("Polygon length: %d", polyLength);
-
-//     // determine if it is circle
-//       //buffer (it also helps eliminate noise )
-//     if (approx.size()>=15){
-//       red_light_counter++;
-//     } else if(red_light_counter >= 5){
-//       is_red_light=true;
-//       red_light_counter=0;
-//     }
-//   }
