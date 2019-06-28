@@ -11,10 +11,10 @@ def perspective_transform(img):
 
     # Perspective transform source and destiantion co-ordinates
     # Drag race: (1.5 m wide lanes)
-    # src = np.float32([[400,350], [760,350], [1280,500], [0,500]])
+    src = np.float32([[400,350], [760,350], [1280,500], [0,500]])
 
     # Urban road: (1m wide lanes)
-    src = np.float32([[420,380], [930,380], [1280,720], [50,720]])
+    # src = np.float32([[420,380], [930,380], [1280,720], [50,720]])
 
     # Circuit race: (2m wide lanes)
     # src = np.float32([[500,350], [750,350], [1280,550], [0,450]])
@@ -26,7 +26,7 @@ def perspective_transform(img):
     warped = cv2.warpPerspective(img, M, img_size)
 
     # Contour filter to take out noise and blobs that aren't the lanes
-    blob_size = 100
+    blob_size = 1000
     filtered = np.zeros(warped.shape, np.uint8)
     contours, _ = cv2.findContours(warped, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
     for cnt in contours:
@@ -36,24 +36,10 @@ def perspective_transform(img):
 
 def threshold(img):
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-
-    # Ultra white threshold (For sun reflections)
-    lower_hsv_bounds = np.array([0, 0, 250], np.uint8)
-    upper_hsv_bounds = np.array([255, 25, 255], np.uint8)
-    img_white_thres = cv2.inRange(img_hsv, lower_hsv_bounds, upper_hsv_bounds)
-
-    # Multi threshold - Hue + Value + Adaptive threshold
-    (channel_h, channel_s, channel_v) = cv2.split(img_hsv)
-    thres1 = cv2.inRange(channel_h, 70, 180, cv2.THRESH_BINARY_INV)
-    thres2 = cv2.inRange(channel_v, 125, 255, cv2.THRESH_BINARY_INV)
-    thres3 = cv2.adaptiveThreshold(channel_v, 255, 
+    adaptive_thres = cv2.adaptiveThreshold(channel_v, 255, 
                                cv2.ADAPTIVE_THRESH_MEAN_C, 
                                cv2.THRESH_BINARY, 25, -20)
-    thres_and = cv2.bitwise_and(thres1, thres2, thres3)
-
-    # Bitwise or the ultra white and multi-threshold together
-    final_thres = cv2.bitwise_or(img_white_thres, thres_and)
-    return final_thres
+    return adaptive_thres
 
 def main(image_dir):
     # Find all images in the directory
