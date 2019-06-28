@@ -40,6 +40,12 @@ class TrafficLightProcessor
     bool red_light_detected;
     int red_Pixel_Counter;
     double default_ratio;
+    int x;
+    int y;
+    int s;
+    int r;
+    int redLightCounter;
+    int greenLightCounter;
 
     cv::Rect boundRect;
     cv::Mat rectSection;
