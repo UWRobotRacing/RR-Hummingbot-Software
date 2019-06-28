@@ -7,7 +7,8 @@
 <launch>
   <arg name="camera" default=""/>
   <arg name="config_file" default=""/>
-    
+
   <!-- Computer Vision Node -->
   <node pkg="rr_computer_vision" type="rr_computer_vision" name="rr_computer_vision" output="screen"/>
 </launch>
+
