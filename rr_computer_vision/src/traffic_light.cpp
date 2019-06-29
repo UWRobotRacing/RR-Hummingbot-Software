@@ -2,7 +2,6 @@
   //  @author Yuchi(Allan) Zhao
   //  @competition IARRC 2019
 
-
 #include "traffic_light.hpp"
 
 TrafficLightProcessor::TrafficLightProcessor(ros::NodeHandle nh) : it_(nh_)  {
@@ -34,7 +33,7 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
     int maxAreaIndex = 0;
 
     // Filter red
-    cv::inRange(hsv_img,cv::Scalar(0, 62, 161), cv::Scalar(96, 255, 215), threshold_img);    //outdoor :cv::Scalar(0, 62, 161), cv::Scalar(96, 255, 215)    cv::Scalar(0, 44, 40), cv::Scalar(96, 189, 160)
+    cv::inRange(hsv_img,cv::Scalar(0, 90, 155), cv::Scalar(15, 255, 255), threshold_img);    //outdoor: cv::Scalar(0, 62, 161), cv::Scalar(96, 255, 215)    cv::Scalar(0, 44, 40), cv::Scalar(96, 189, 160)
     cv::GaussianBlur(threshold_img, threshold_img, cv::Size(7,7), 0, 0);
 
     // PUBLISH and visualize in rviz   
