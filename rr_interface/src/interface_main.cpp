@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   Interface interface(nh);
 
   ROS_INFO("Interface: Interface Node Initialized");
-  ros::Rate r(40);
+  ros::Rate r(10);
 
   // Declared later to remove some preset communication stuff that doesnt need to be tweaked
   setupCommunication();
@@ -50,6 +50,8 @@ int main(int argc, char **argv)
     {
       // Writing 
       Interface::Transmitter packet = interface.transmitter_;
+      // Add Padding
+      packet.padding = 65535;
       /*
       unsigned char *payload = new unsigned char [sizeof(packet)];
       unsigned char *convert = (unsigned char*)&packet;

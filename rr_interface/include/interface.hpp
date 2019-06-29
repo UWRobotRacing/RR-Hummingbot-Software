@@ -35,9 +35,10 @@ class Interface
     ~Interface();
 
     struct Transmitter {
-      int8_t steer_angle; // Degrees
+      int16_t steer_angle; // Degrees
       uint16_t speed; // cm/s
-      uint8_t flag; // Flag enum
+      uint16_t flag; // Flag enum
+      uint16_t padding;
     };
 
     struct Receiver {
