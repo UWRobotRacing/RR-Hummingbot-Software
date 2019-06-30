@@ -21,3 +21,9 @@ LaserMapper/max_angle:                      1.35
 LaserMapper/min_angle:                      -1.35
 LaserMapper/minrange:                       0.20
 LaserMapper/maxrange:                       8
+
+
+#Physical Offets
+#Offset values are in meters
+LaserMapper/offset_height:                 0
+LaserMapper/offset_width:                  0

@@ -37,7 +37,7 @@ class LaserMapper
 
     // Subscribers
     void LidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
-    void LaneDetectionCallback(const nav_msgs::OccupancyGrid::ConstPtr& leftMsg, const nav_msgs::OccupancyGrid::ConstPtr& rightMsg);
+    void LaneDetectionCallback(const nav_msgs::OccupancyGrid::ConstPtr& msg);
 
     // Methods
     void InitMap();
@@ -58,13 +58,7 @@ class LaserMapper
     ros::Publisher map_pub_;
     ros::Subscriber lidar_sub_;
     tf::TransformListener position_listener_;
-
-    //ros::Subscriber lane_detection_sub_;
-    message_filters::Subscriber<nav_msgs::OccupancyGrid> left_lane_detection_sub_;
-    message_filters::Subscriber<nav_msgs::OccupancyGrid> right_lane_detection_sub_;
-    typedef message_filters::sync_policies::ApproximateTime<nav_msgs::OccupancyGrid, nav_msgs::OccupancyGrid> syncPolicy_;
-    typedef message_filters::Synchronizer<syncPolicy_> lane_sync_;
-    boost::shared_ptr<lane_sync_> lane_sync_ptr_;
+    ros::Subscriber lane_detection_sub_;
 
     // Map Variables
     std::vector<int> belief_map_;
