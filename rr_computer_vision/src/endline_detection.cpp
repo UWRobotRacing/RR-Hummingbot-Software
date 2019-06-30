@@ -11,7 +11,7 @@
  * @author Yuchi(Allan) Zhao
 */
 
-// Helper incldues
+// Helper includes
 #include "endline_detection.hpp"
 #include <vector>
 

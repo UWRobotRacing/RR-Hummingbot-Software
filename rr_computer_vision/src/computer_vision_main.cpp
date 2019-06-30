@@ -8,11 +8,9 @@
 
 //LOCAL
 #include "computer_vision.hpp"
-<<<<<<< HEAD
 #include "lane_detection.hpp"
-=======
 #include "endline_detection.hpp"
->>>>>>> develop
+
 
 /** @brief main file that starts the subscribers and calls spin
  */
