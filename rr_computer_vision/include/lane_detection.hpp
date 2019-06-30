@@ -33,16 +33,19 @@ class LaneDetection
     ros::Publisher test_warp_img_;
     ros::Publisher grid_pub_;
 
+    // Parameters
+    cv::Mat warp_src_coords_;
+    int min_contour_size_;
+
+    void ImgCallback(const sensor_msgs::Image& msg);
     void InitializeSubscribers();
     void InitializePublishers();
-    void ImgCallback(const sensor_msgs::Image& msg);
 
     void Threshold(const cv::Mat &input_img, cv::Mat &output_img);
     void Warp(const cv::cuda::gpuMat &input_img, cv::cuda::gpuMat &output_img, const cv::Mat src);
     cv::Mat ContourFilter(const cv::Mat &img);
     void ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::OccupancyGrid &grid_msg);
 
-    // nav_msgs::OccupancyGrid occupancy_grid_msg_;
 };
 
 #endif //__LANE_DETECTION_HPP

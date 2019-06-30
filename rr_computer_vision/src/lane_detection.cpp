@@ -23,6 +23,14 @@
 
 LaneDetection::LaneDetection(ros::NodeHandle nh) {
   nh_ = nh;
+
+  // Extract parameters from yaml file
+  std::string params_file;
+  nh.param<std::string>("LaneDetectionParamsFile", params_file, "test.yaml");
+  cv::FileStorage fs(params_file, cv::FileStorage::READ);
+  fs["warp_src_coords"] >> warp_src_coords_;
+  fs["min_contour_size"] >> min_contour_size_;
+
   // Initialize publishers and subscribers
   InitializeSubscribers();
   InitializePublishers();
@@ -56,14 +64,11 @@ void LaneDetection::ImgCallback(const sensor_msgs::Image& msg) {
   cv::cuda::gpuMat img_warp_input(img_thres);
   cv::cuda::gpuMat img_warp_output;
 
-  // TODO: Get src co-ordintes from race yaml file
-  cv::Mat src;
-  src = (cv::Mat_<float>(4,2) << 330.0, 0.0, 900.0, 0.0, 900.0, 710.0, 300.0, 710.0);
-  Warp(img_warp_input, img_warp_output, src);
+  Warp(img_warp_input, img_warp_output, warp_src_coords_);
 
   cv::Mat img_contour_output;
   cv::Mat img_contour_input = img_warp_output;
-  img_contour_output = ContourFilter(img_contour_input);
+  img_contour_output = ContourFilter(img_contour_input, min_contour_size_);
 
   nav_msgs::OccupancyGrid grid_msg;
   ConvertToOccupancyGrid(img_contour_output, grid_msg);
@@ -159,9 +164,9 @@ void LaneDetection::ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::Occupan
 
   // TODO: Put this in ros param yaml file
   // 0.050: right zed camera
-  // -0.050: left zed camera
-  meta_data_.origin.position.x = 0.050;
-  meta_data_.origin.position.y = 0.055;
+  // -0.050: left zed camera0
+  meta_data_.origin.position.x = 0;
+  meta_data_.origin.position.y = 0;
 
   grid_msg_.info = meta_data_;
 }
