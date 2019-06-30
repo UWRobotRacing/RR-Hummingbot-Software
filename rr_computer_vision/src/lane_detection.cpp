@@ -21,9 +21,7 @@
 #include "lane_detection.hpp"
 #include <vector>
 
-LaneDetection::LaneDetection(ros::NodeHandle nh) {
-  nh_ = nh;
-
+LaneDetection::LaneDetection(ros::NodeHandle nh) : it_(nh_) {
   // Extract parameters from yaml file
   std::string params_file;
   nh.param<std::string>("LaneDetectionParamsFile", params_file, "test.yaml");
@@ -41,34 +39,47 @@ LaneDetection::~LaneDetection() {
 }
 
 void LaneDetection::InitializeSubscribers() {
-  img_subscriber_ = nh_.subscribe(rr_sensor_topics::zed_left, 1, &LaneDetection::LeftCameraCallback, this);
+  img_subscriber_ = it_.subscribe(rr_sensor_topics::zed_right, 1, &LaneDetection::ImgCallback, this);
 }
 
 void LaneDetection::InitializePublishers() {
   // Setup debug rostopics
-  test_threshold_img_ = nh_.advertise<sensor_msgs::Image>("/test_threshold_img", 1);
-  test_warp_img_ = nh_.advertise<sensor_msgs::Image>("/test_warp_img", 1);
+  test_thres_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_thres_img", 1);
+  test_warp_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_warp_img", 1);
 
   grid_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>(rr_cv::lane_detection_occupancy_grid, 1);
 }
 
-void LaneDetection::ImgCallback(const sensor_msgs::Image& msg) {
+void LaneDetection::ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
   // Convert sensor_msgs::Image to a BGR8 cv::Mat
   cv::Mat img_input_bgr8;
   cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
   img_input_bgr8 = cv_bridge_bgr->image;
   
-  cv::Mat ing_thres;
+  cv::Mat img_thres;
   Threshold(img_input_bgr8, img_thres);
 
-  cv::cuda::gpuMat img_warp_input(img_thres);
-  cv::cuda::gpuMat img_warp_output;
+  // Publish thresholded image (For testing purposes)
+  cv_bridge::CvImage img_bridge_output;
+  std_msgs::Header header;
+  header.stamp=ros::Time::now();
+  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_thres);
+  test_thres_img_pub_.publish(img_bridge_output.toImageMsg());
 
-  Warp(img_warp_input, img_warp_output, warp_src_coords_);
+  // cv::cuda::GpuMat img_warp_input(img_thres);
+  // cv::cuda::GpuMat img_warp_output;
+
+  cv::Mat img_warp;
+  Warp(img_thres, img_warp, warp_src_coords_);
+
+  // Publish warped image (For testing purposes)
+  header.stamp=ros::Time::now();
+  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_warp);
+  test_warp_img_pub_.publish(img_bridge_output.toImageMsg());
 
   cv::Mat img_contour_output;
-  cv::Mat img_contour_input = img_warp_output;
-  img_contour_output = ContourFilter(img_contour_input, min_contour_size_);
+  // cv::Mat img_contour_input = img_warp_output;
+  img_contour_output = ContourFilter(img_thres, min_contour_size_);
 
   nav_msgs::OccupancyGrid grid_msg;
   ConvertToOccupancyGrid(img_contour_output, grid_msg);
@@ -96,10 +107,10 @@ void LaneDetection::Threshold(const cv::Mat &input_img, cv::Mat &output_img) {
  * @param src warp transform source image co-ordinates
  * @return void
  */
-void LaneDetection::Warp(const cv::cuda::gpuMat &input_img, cv::cuda::gpuMat &output_img, const cv::Mat src) {
+void LaneDetection::Warp(const cv::Mat &input_img, cv::Mat &output_img, const cv::Mat src) {
   cv::Mat dst = (cv::Mat_<float>(4,2) << 300.0, 0, 900.0, 0, 900.0, 710.0, 300.0, 710.0);
   cv::Mat transform_matrix = cv::getPerspectiveTransform(src, dst);
-  cv::cuda::warpPerspective(input_img, output_img, transform_matrix, input_img.size());
+  cv::warpPerspective(input_img, output_img, transform_matrix, input_img.size());
 }
 
 /**
@@ -113,7 +124,7 @@ cv::Mat LaneDetection::ContourFilter(const cv::Mat &img, const int min_contour_s
   
   // Make a blank image with the same dimensions as the input image
   cv::Mat filtered(img.size(), CV_8UC1, cv::Scalar(0));
-  cv::Mat copy(img.clone())
+  cv::Mat copy(img.clone());
   
   // Find contours in the image
   std::vector<std::vector<cv::Point> > contours;
@@ -157,7 +168,7 @@ void LaneDetection::ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::Occupan
       occupancy_.push_back(100);
     }
   }
-  grid_msg_.data = occupancy_;
+  grid_msg.data = occupancy_;
   meta_data_.height = 720;
   meta_data_.width = 1280;
   meta_data_.resolution = 0.01;
@@ -168,5 +179,5 @@ void LaneDetection::ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::Occupan
   meta_data_.origin.position.x = 0;
   meta_data_.origin.position.y = 0;
 
-  grid_msg_.info = meta_data_;
+  grid_msg.info = meta_data_;
 }

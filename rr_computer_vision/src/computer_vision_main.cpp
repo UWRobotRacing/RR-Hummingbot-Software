@@ -27,9 +27,6 @@ int main(int argc, char** argv)
   // EndlineDetection ec(nh);
   LaneDetection lane_detection(nh);
 
-  while(ros::ok()){
-    ros::spinOnce();
-    r.sleep();
-  }
+  ros::spin();
   return 0;
 }

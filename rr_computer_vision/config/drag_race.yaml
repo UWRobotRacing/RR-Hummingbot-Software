@@ -1,0 +1,12 @@
+%YAML:1.0
+
+# 4 point coordinates in image plane used as the source coordinates for the warp transform
+# Note: OpenCV Image coordinates are in [x,y], where X is a column index 
+# (0 left, positive rightwards), and Y is a row index (0 top, positive downwards)
+warp_src_coords: !!opencv-matrix
+   rows: 4
+   cols: 2
+   dt: f
+   data: [400, 350, 760, 350, 1280, 500, 0, 500]
+
+min_contour_size: 100
