@@ -1,4 +1,4 @@
-  //  @file trsffic light detection
+  //  @file traffic light detection
   //  @author Yuchi(Allan) Zhao
   //  @competition IARRC 2019
 
@@ -15,8 +15,8 @@ TrafficLightProcessor::TrafficLightProcessor(ros::NodeHandle nh) : it_(nh_)  {
     r=0;
     redLightCounter=0;
     greenLightCounter=0;
-    test_subscriber = it_.subscribe("/zed/left/image_rect_color", 1, &TrafficLightProcessor::TrafficLightImageCallback, this);
-    test_publisher = it_.advertise("/test_traffic_light", 1);
+    // test_subscriber = it_.subscribe("/zed/left/image_rect_color", 1, &TrafficLightProcessor::TrafficLightImageCallback, this);
+    // test_publisher = it_.advertise("/test_traffic_light", 1);
     client_ = nh_.serviceClient<std_srvs::Empty>("/Supervisor/start_race");
 }
 
@@ -33,20 +33,23 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
     int maxAreaIndex = 0;
 
     // Filter red
-    cv::inRange(hsv_img,cv::Scalar(0, 90, 155), cv::Scalar(15, 255, 255), threshold_img);    //outdoor: cv::Scalar(0, 62, 161), cv::Scalar(96, 255, 215)    cv::Scalar(0, 44, 40), cv::Scalar(96, 189, 160)
+    cv::inRange(hsv_img,cv::Scalar(0, 90, 155), cv::Scalar(15, 255, 255), threshold_img);
     cv::GaussianBlur(threshold_img, threshold_img, cv::Size(7,7), 0, 0);
 
     // PUBLISH and visualize in rviz   
-            cv_bridge::CvImage img_bridge_output;
-            std_msgs::Header header;
-            header.stamp=ros::Time::now();
-            img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, threshold_img);
-            test_publisher.publish(img_bridge_output.toImageMsg());
+    // cv_bridge::CvImage img_bridge_output;
+    // std_msgs::Header header;
+    // header.stamp=ros::Time::now();
+    // img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, threshold_img);
+    // test_publisher.publish(img_bridge_output.toImageMsg());
 
     if(red_light_detected==false){
+        // set parameter for blob detection
         cv::SimpleBlobDetector::Params params;
+        
+        // Filter by Area
         params.filterByArea = true;
-        params.minArea = 200;
+        params.minArea = 300;
         
         // Filter by Circularity
         params.filterByCircularity = true;
@@ -60,59 +63,60 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
         params.filterByInertia = false;
         //params.minInertiaRatio = 0.01;
 
+        // Filter white
         params.blobColor=255;
         
         // Set up detector with params
-        // OR 
-        cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
-        //cv::SimpleBlobDetector detector(params);    
+        cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);    
         
         // Detect blobs.
         std::vector<cv::KeyPoint> keypoints;
         detector->detect( threshold_img, keypoints);
-        //detector.detect( threshold_img, keypoints);
-
         int numBlob=keypoints.size();
-        ROS_INFO("Number of blobs: %i", numBlob);
+        // ROS_INFO("Number of blobs: %i", numBlob);
 
         if(numBlob > 0){
-          if(numBlob > 1){
-            for (int i = 0; i < numBlob; i++)
-            {
-              if ( keypoints[maxAreaIndex].size < keypoints[i+1].size)
+            // find the largest blob if there are more than 2 blobs
+            if(numBlob > 1){
+              for (int i = 0; i < numBlob; i++)
               {
-                maxAreaIndex = i;
+                if (keypoints[maxAreaIndex].size < keypoints[i+1].size)
+                {
+                  maxAreaIndex = i+1;
+                }
               }
             }
-          }
-         
+
+            // the center and diameter of the blob
             x=(int)keypoints[maxAreaIndex].pt.x;
             y=(int)keypoints[maxAreaIndex].pt.y;
             s=(int)keypoints[maxAreaIndex].size;
             r=(int) s/2;
-            ROS_INFO("X: %i", x);
-            ROS_INFO("Y: %i", y);
-            ROS_INFO("S: %i", s);
-            ROS_INFO("R: %i", r);
-           
-            //cv::drawKeypoints( threshold_img, keypoints, im_with_keypoints, cv::Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-
+            // ROS_INFO("X: %i", x);
+            // ROS_INFO("Y: %i", y);
+            // ROS_INFO("S: %i", s);
+            // ROS_INFO("R: %i", r);
+            // cv::rectangle(threshold_img, cv::Point(x-r, y-r), cv::Point(x+s, y+s), cv::Scalar(0, 0, 255), 2,8);
+            
+            // create a reatangle around the blob
             cv::Rect firstRect (x-r, y-r, s, s);   
             cv::Mat crop_img=threshold_img(firstRect);
             boundRect=firstRect;
+
+            // count pixel in the rectangle
             int red_Pixel_Counter=cv::countNonZero(crop_img);
             int total_pixel=crop_img.total();
             
             if(redLightCounter == 0){
                 default_ratio=(double)red_Pixel_Counter/total_pixel;
-                ROS_INFO("default ratio: %f", default_ratio);
+                // ROS_INFO("default ratio: %f", default_ratio);
                 redLightCounter++;
             } else {
               new_ratio=(double)red_Pixel_Counter/total_pixel; 
-              ROS_INFO("new ratio: %f", new_ratio);             
+
+              // red light buffer             
               if((new_ratio+0.1)>= default_ratio){
                   redLightCounter++;
-                  ROS_INFO("redLightCounter: %i", redLightCounter);
               }
             }
             
@@ -123,23 +127,23 @@ void TrafficLightProcessor::TrafficLightImageCallback(const sensor_msgs::ImageCo
             }
         }
     }else {
+        
+        //crop the existing rectangle on each new frame and count pixel
         cv::Mat crop_img=threshold_img(boundRect);
         int red_Pixel_Counter=cv::countNonZero(crop_img);
         int total_pixel=crop_img.total();
         new_ratio= (double)red_Pixel_Counter/total_pixel;
 
-        ROS_INFO("red_Pixel_Counter: %f", red_Pixel_Counter);
-        ROS_INFO("total_pixel: %f", total_pixel);
-        ROS_INFO("RATIO: %f", new_ratio);
-
         if((new_ratio+0.1)>= default_ratio){
             ROS_INFO("Red light is still there!");
         }else{
+            // green light buffer
             greenLightCounter++;
-            ROS_INFO("greenLightCounter: %i", greenLightCounter);
-            if(greenLightCounter>5){
+            if(greenLightCounter >= 5){
               ROS_INFO("Green light detected!");
-              ros::shutdown();
+              if (client_.call(srv)){
+                ros::shutdown();
+              }
             }
         }
     }

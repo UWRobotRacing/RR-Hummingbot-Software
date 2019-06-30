@@ -1,11 +1,8 @@
 /**
  * @file rr_traffic_light.hpp
  * @brief Traffic Light Header File
- * @author Jamie Kim
- * @author Jason Leung
- * @author Toni Ogunmade(oluwatoni)
- * @author Adrian Malaran
- * @competition IARRC 2018
+ * @author Yuchi(Allan) Zhao
+ * @competition IARRC 2019
  */
 
 #ifndef RR_TRAFFIC_LIGHT
@@ -34,8 +31,8 @@ class TrafficLightProcessor
     ros::NodeHandle nh_;
     ros::ServiceClient client_;
     image_transport::ImageTransport it_;
-    image_transport::Subscriber test_subscriber;
-    image_transport::Publisher test_publisher;
+    // image_transport::Subscriber test_subscriber;
+    // image_transport::Publisher test_publisher;
         
     bool red_light_detected;
     int red_Pixel_Counter;
@@ -44,11 +41,10 @@ class TrafficLightProcessor
     int y;
     int s;
     int r;
-    int redLightCounter;
-    int greenLightCounter;
-
     cv::Rect boundRect;
-    cv::Mat rectSection;
+    // int redLightCounter;
+    // int greenLightCounter;
+
     public:
     TrafficLightProcessor(ros::NodeHandle nh);
     void TrafficLightImageCallback(const sensor_msgs::ImageConstPtr& msg);
