@@ -9,4 +9,4 @@ warp_src_coords: !!opencv-matrix
    dt: f
    data: [400, 350, 760, 350, 1280, 500, 0, 500]
 
-min_contour_size: 100
+min_contour_size: 500

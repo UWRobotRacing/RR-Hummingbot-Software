@@ -31,6 +31,7 @@ class LaneDetection
     // Publishers for debugging
     ros::Publisher test_thres_img_pub_;
     ros::Publisher test_warp_img_pub_;
+    ros::Publisher test_contour_filter_img_pub_;
     ros::Publisher grid_pub_;
 
     // Parameters

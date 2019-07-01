@@ -46,6 +46,7 @@ void LaneDetection::InitializePublishers() {
   // Setup debug rostopics
   test_thres_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_thres_img", 1);
   test_warp_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_warp_img", 1);
+  test_contour_filter_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_contour_filter_img", 1);
 
   grid_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>(rr_cv::lane_detection_occupancy_grid, 1);
 }
@@ -79,7 +80,12 @@ void LaneDetection::ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
 
   cv::Mat img_contour_output;
   // cv::Mat img_contour_input = img_warp_output;
-  img_contour_output = ContourFilter(img_thres, min_contour_size_);
+  img_contour_output = ContourFilter(img_warp, min_contour_size_);
+
+  // Publish contour filtered image (For testing purposes)
+  header.stamp=ros::Time::now();
+  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_contour_output);
+  test_contour_filter_img_pub_.publish(img_bridge_output.toImageMsg());
 
   nav_msgs::OccupancyGrid grid_msg;
   ConvertToOccupancyGrid(img_contour_output, grid_msg);
@@ -176,7 +182,7 @@ void LaneDetection::ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::Occupan
   // TODO: Put this in ros param yaml file
   // 0.050: right zed camera
   // -0.050: left zed camera0
-  meta_data_.origin.position.x = 0;
+  meta_data_.origin.position.x = meta_data_.width/2 * meta_data_.resolution;
   meta_data_.origin.position.y = 0;
 
   grid_msg.info = meta_data_;
