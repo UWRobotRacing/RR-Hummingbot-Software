@@ -154,36 +154,39 @@ cv::Mat LaneDetection::ContourFilter(const cv::Mat &img, const int min_contour_s
  */
 void LaneDetection::ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::OccupancyGrid &grid_msg) {
   uchar* data_pointer_;
-  uchar value1_;
   std::vector<int8_t> occupancy_;
   nav_msgs::MapMetaData meta_data_;
   occupancy_.clear();
   occupancy_.reserve(img.cols * img.rows);
 
-  data_pointer_ = img.data;
-  for (int i = 0; i < (img.rows * img.cols); i++)
+  for (int row = 0; row < img.rows; row++)
   {
-    value1_ = *data_pointer_;
-    data_pointer_++;
-    if (value1_ == 0)
+    for (int col = img.cols; col > 0; col--)
     {
-      occupancy_.push_back(-1);
-    }
-    else
-    {
-      occupancy_.push_back(100);
+      if (img.at<uchar>(row, col) == 0)
+      {
+        // Unknown cell
+        occupancy_.push_back(-1);
+      }
+      else
+      {
+        // Occupied cell
+        occupancy_.push_back(100);
+      }
     }
   }
+
   grid_msg.data = occupancy_;
+
+  // TODO: Move everything to rosparam file
   meta_data_.height = 720;
   meta_data_.width = 1280;
-  meta_data_.resolution = 0.01;
+  meta_data_.resolution = 0.0039;
+  float camera_width_offset = 0.05;
+  float camera_height_offset = 0.048;
 
-  // TODO: Put this in ros param yaml file
-  // 0.050: right zed camera
-  // -0.050: left zed camera0
-  meta_data_.origin.position.x = meta_data_.width/2 * meta_data_.resolution;
-  meta_data_.origin.position.y = 0;
+  meta_data_.origin.position.x = -1*(meta_data_.width*meta_data_.resolution)/2 - camera_width_offset - 1.5;
+  meta_data_.origin.position.y = -1*(meta_data_.height*meta_data_.resolution) - camera_height_offset;
 
   grid_msg.info = meta_data_;
 }
