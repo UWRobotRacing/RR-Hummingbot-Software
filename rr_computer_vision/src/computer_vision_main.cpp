@@ -18,7 +18,7 @@ int main(int argc, char** argv)
   ROS_INFO("Starting Computer Vision Node");
   
   ComputerVision computer_vision(nh);
-  TrafficLightProcessor tlproc(nh);
+  // TrafficLightDetection tlproc(nh);
   // EndlineDetection ec(nh);
 
   ros::spin();
