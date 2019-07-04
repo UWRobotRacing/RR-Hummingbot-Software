@@ -40,11 +40,13 @@ With the trained Haar Cascade, our algorithm to acquire the arrow direction from
 7. Finally, we can mask the arrow using both masks and count the number of pixels in both sections of the arrow. It can be assumed that the section of the arrow containing the head contains more pixels than the other section. We now know the orientation of the arrow head and can conclude if we need to turn left or right.
 
 Example Haar Cascade output:
+
 Original image | Haar cascade bounding box
 :-------------:|:------------------------:
 ![](images/sign_detection/zed_image.jpg) | ![](images/sign_detection/bounding_box.jpg)
 
 Example images for arrow classification algorithm:
+
 Canny edge detection | Arrow contour | Fit ellipse and line | Masks used to split arrow
 :-------------------:|:-------------:|:--------------------:|:-------------------------:
 ![](images/sign_detection/canny_output.jpg) |  ![](images/sign_detection/arrow_binary.jpg) | ![](images/sign_detection/ellipse_fit.jpg) |  ![](images/sign_detection/split_masks.jpg)
