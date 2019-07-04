@@ -20,3 +20,8 @@ Original Image            |  Magenta Colour Threshold
 4. For endline to be considered "detected", we must see 10 frames in a row with a max contour area above 1500. This number was picked by printing the contour areas to the terminal, and around the time the endline first comes into view, the area is around 1500. The 10 frame counter is to ensure no noisy frames trigger false positives.
 
 5. Once endline is deteced, we now wait to see 10 frames in a row with a max contour area below 1500. Once this happens, a service call is made that is provided by the supervisor node, whose responsibility it is to then figure out what to do once the endline is gone. 
+
+Original Image            |  Red Colour Threshold
+:------------------------:|:-------------------------:
+![](images/trafficLight1.jpg)  |  ![](images/trafficLight1_thre.jpg)
+![](images/trafficLight2.jpg)  |  ![](images/trafficLight2_thre.jpg)
