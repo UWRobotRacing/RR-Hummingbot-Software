@@ -8,53 +8,37 @@
 
 // ROS
 #include <ros/ros.h>
-#include <sensor_msgs/Image.h>
+#include <image_transport/image_transport.h>
 
 // OpenCV
-#include "opencv2/objdetect/objdetect.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/opencv.hpp>
 
-// Synchronized Policy
-// #include <message_filters/subscriber.h>
-// #include <message_filters/synchronizer.h>
-// #include <message_filters/sync_policies/approximate_time.h>
+// Other includes
+#include <vector>
 
 class SignDetection
 {
   public:
-    SignDetection(ros::NodeHandle nh);
-    ~SignDetection();
+    SignDetection(ros::NodeHandle);
 
   private:
-
-    void InitializeSubscribers();
-    void InitializePublishers();
-
-    void RGBDepthSyncCameraCallback(const sensor_msgs::ImageConstPtr& left_msg, const sensor_msgs::ImageConstPtr& depth_msg);
-    cv::Rect FilterSigns(std::vector<cv::Rect> signs, cv::Mat img);
-
-
-    // Stuff for synchronized policy
-    // message_filters::Subscriber<sensor_msgs::Image> left_camera_subscriber_;
-    // message_filters::Subscriber<sensor_msgs::Image> depth_map_subscriber_;   
-    // typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> RGB_DEPTH_POLICY;
-    // typedef message_filters::Synchronizer<RGB_DEPTH_POLICY> RGB_DEPTH_SYNC;
-    // boost::shared_ptr<RGB_DEPTH_SYNC> rgb_depth_sync_;
-
-    ros::Subscriber left_header_subscriber_;
-    ros::Subscriber depth_header_subscriber_;
-
-    ros::Publisher test_publisher;
+    // Ros variables
     ros::NodeHandle nh_;
+    ros::ServiceClient client_;
+    image_transport::ImageTransport it_;
+    image_transport::Subscriber img_subscriber_;
+    image_transport::Publisher img_publisher_;
 
+    void RGBCameraCallback(const sensor_msgs::ImageConstPtr& left_msg);
+    cv::Rect ExpandRect(cv::Rect rect_in);
+    cv::Mat CheckArrowDir(cv::Mat sign);
 
+    // Variables for tracking the sign through frames
+    unsigned int consecutive_frames = 0;
+    cv::Rect last_frame_bbox;
 
-
-    std::string cascade_name = "../classifier_dev/cascade_stage13.xml";
+    // Haar cascade
     cv::CascadeClassifier sign_cascade;
-
-
 };
 
 #endif //SIGN_DETECTION_PROCESSOR_HPP

@@ -9,6 +9,7 @@
 //LOCAL
 #include "computer_vision.hpp"
 #include "endline_detection.hpp"
+#include "sign_detection.hpp"
 
 /** @brief main file that starts the subscribers and calls spin
  */
@@ -21,6 +22,7 @@ int main(int argc, char** argv)
   
   ComputerVision computer_vision(nh);
   // EndlineDetection ec(nh);
+  SignDetection sd(nh);
 
   ros::spin();
   return 0;
