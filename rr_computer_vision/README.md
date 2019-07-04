@@ -30,8 +30,8 @@ All the races start when a traffic light turns from red to green. Our algorithm 
 
 Original Image                 |  Red Colour Threshold
 :-----------------------------:|:----------------------------------:
-![](images/trafficLight1.jpg)  |  ![](images/trafficLight1_thre.jpg)
-![](images/trafficLight2.jpg)  |  ![](images/trafficLight2_thre.jpg)
+![](images/trafficLight1.jpg)  |  ![](images/trafficLight1_thre.png)
+![](images/trafficLight2.jpg)  |  ![](images/trafficLight2_thre.png)
 
 2.	Find blobs in each frame by running blob detection algorithm. Read more about it here. By adjusting the parameters that blob detection uses, we can find all the blobs that are similar to a circle.
 
