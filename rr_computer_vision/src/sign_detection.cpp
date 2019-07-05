@@ -46,9 +46,9 @@
 */
 SignDetection::SignDetection(ros::NodeHandle nh) : it_(nh_) {
   img_publisher_ = it_.advertise("/test_cascade", 1);
+  //sign_status_publisher_ = nh_.advertise<my_custom_msg_package::MyCustomMsg>("/sign_detection", 1);
 
   img_subscriber_ = it_.subscribe("zed/zed_node/right/image_rect_color", 1, &SignDetection::RGBCameraCallback, this);
-  //img_subscriber_ = it_.subscribe("zed/rgb/image_rect_color", 1, &SignDetection::RGBCameraCallback, this);
 
   std::string cascade_file;
   nh.param<std::string>("HaarCascadeFile", cascade_file, "");
@@ -106,9 +106,11 @@ void expand_rect(cv::Rect& rect, cv::Size img_size) {
 // }
 
 void SignDetection::RGBCameraCallback(const sensor_msgs::ImageConstPtr& right_msg) {
+  // Define output status
+  std::pair<cv::Mat, uint8_t> status;
+
   // Convert sensor_msgs::Image to a BGR8 cv::Mat 
   cv::Mat rgb_img = (cv_bridge::toCvCopy(right_msg, sensor_msgs::image_encodings::BGR8))->image;
-  //cv::Mat depth_img = (cv_bridge::toCvCopy(depth_msg, sensor_msgs::image_encodings::MONO8))->image;
   cv::Mat right_img;
   cv::cvtColor(rgb_img, right_img, cv::COLOR_BGR2GRAY);
   cv::equalizeHist(right_img, right_img);
@@ -123,7 +125,7 @@ void SignDetection::RGBCameraCallback(const sensor_msgs::ImageConstPtr& right_ms
   cv::Rect best_bbox;
   if (classifications.empty()) {
     consecutive_frames = 0;
-    // send "no sign" for message
+    ROS_INFO("Message: %i", NONE);
   } else {
     // Keep bouding box with the highest level weight
     std::vector<int>::size_type best_index = 0;
@@ -133,7 +135,7 @@ void SignDetection::RGBCameraCallback(const sensor_msgs::ImageConstPtr& right_ms
         best_weight = level_weights[i];
         best_index = i;
       }
-      ROS_INFO("bbox: (%4.2f y: %i, x: %i, w: %i, h: %i)", level_weights[i], classifications[i].y, classifications[i].x, classifications[i].width, classifications[i].height);
+      //ROS_INFO("bbox: (%4.2f y: %i, x: %i, w: %i, h: %i)", level_weights[i], classifications[i].y, classifications[i].x, classifications[i].width, classifications[i].height);
     }
     best_bbox = classifications[best_index];
 
@@ -153,58 +155,37 @@ void SignDetection::RGBCameraCallback(const sensor_msgs::ImageConstPtr& right_ms
 
   }
 
-  cv::Mat arrow_img;
   ROS_INFO("Consecutive frames: %i", consecutive_frames);
   // Find arrow direction from sign
-  if (consecutive_frames > 0) {
+  if (consecutive_frames > 10) {
     // Expand bounding box to make sure it contains the arrow
     expand_rect(best_bbox, right_img.size());
     // add rect to img
     cv::rectangle(rgb_img, best_bbox, cv::Scalar(0, 0, 255));
 
     // Get direction of arrow
-    arrow_img = CheckArrowDir(cv::Mat(right_img, best_bbox).clone());
+    status = CheckArrowDir(cv::Mat(right_img, best_bbox).clone());
   }
-
-  
-
 
   // Add classifications to image
   // for (cv::Rect bbox : classifications) {
   //   cv::rectangle(rgb_img, bbox, cv::Scalar(255, 0, 0));
   // }
 
+  ROS_INFO("Direction: %i", status.second);
+
   // Publish so we can visualize in rviz
   cv_bridge::CvImage img_bridge_output;
   std_msgs::Header header; // empty header
   header.stamp = ros::Time::now(); // time
-  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, arrow_img);
+  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, status.first);
   //img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, rgb_img);
 
   img_publisher_.publish(img_bridge_output.toImageMsg());
   ROS_INFO("IMAGE DATA PUBLISHED");
 }
 
-// void sortPoints(std::vector<cv::Point> &points) {
-//   // Sorts 4 points in order: bot-left, top-left, bot-right, top-right
-//   // Needed to map correct corners in perspective transform
-//   struct SortX {
-//     bool operator() (cv::Point pt1, cv::Point pt2) { return (pt1.x < pt2.x);}
-//   } x_sorter;
-
-//   struct SortY {
-//       bool operator() (cv::Point pt1, cv::Point pt2) { return (pt1.y < pt2.y);}
-//   } y_sorter;
-
-//   // Sort by x-coordinate
-//   std::sort(points.begin(), points.end(), x_sorter);
-
-//   // Sort 2 left most and 2 right most by y-coordinate separately
-//   std::sort(points.begin(), points.begin() + 1, y_sorter);
-//   std::sort(points.begin() + 2, points.begin() + 3, y_sorter);
-// }
-
-cv::Mat SignDetection::CheckArrowDir(cv::Mat sign) {
+std::pair<cv::Mat, uint8_t> SignDetection::CheckArrowDir(cv::Mat sign) {
   // Function returns the direction of the arrow within the givin sign
   // Summary: 
   // Apply canny to get outline of arrow and get it's contour
@@ -269,12 +250,16 @@ cv::Mat SignDetection::CheckArrowDir(cv::Mat sign) {
 
   ROS_INFO("Angle: %f; w, h: (%f, %f)", angle, rect_size.width, rect_size.height);
 
+  // Define output pair
+  std::pair<cv::Mat, uint8_t> pair_out;
+
   // If angle is vertical, conclude that arrow direction is straight
   // Angle ranges 0-180 deg from the vertival axis going CW
   if (angle < 45 || angle > 135) {
     // Sign is straight
-    ROS_INFO("Straight");
-
+    cv::Mat img;
+    pair_out = std::make_pair(img, STRAIGHT);
+    return pair_out;
   } else {
     // Sign is horizontal, need to apply secondary check, summary of check is:
     // Get a line perpendicular to the orientation of the arrow that passes through it's middle
@@ -286,68 +271,27 @@ cv::Mat SignDetection::CheckArrowDir(cv::Mat sign) {
     float slope = tan((angle) * M_PI / 180);
 
     // Define line lambda function that passes through rect_center
-    auto get_y = [&](int x) { return slope * (x - rect_center.x) + rect_center.y; };
+    //auto get_y = [&](int x) { return slope * (x - rect_center.x) + rect_center.y; };
     auto get_x = [&](int y) { return 1 / slope * (y - rect_center.y) + rect_center.x; };
 
     // Find corrdinates for points that go through all four edges
-    cv::Point left(0, get_y(0));
-    cv::Point right(arrow.cols, get_y(arrow.cols));
+    //cv::Point left(0, get_y(0));
+    //cv::Point right(arrow.cols, get_y(arrow.cols));
     cv::Point top(get_x(0), 0);
     cv::Point bottom(get_x(arrow.rows), arrow.rows);
 
-    ROS_INFO("L: (%i, %i), R: (%i, %i), T: (%i, %i), B: (%i, %i)", left.x, left.y, right.x, right.y, top.x, top.y, bottom.x, bottom.y);
+    //ROS_INFO("L: (%i, %i), R: (%i, %i), T: (%i, %i), B: (%i, %i)", left.x, left.y, right.x, right.y, top.x, top.y, bottom.x, bottom.y);
 
-    // Only keep the two points that make sense (other two will be outside the image)
-    std::vector<cv::Point> edge_points1;
-    std::vector<cv::Point> edge_points2;
-    if (left.y >= 0 && left.y < arrow.rows) {
-      edge_points1.push_back(left);
-      edge_points1.push_back(cv::Point(0, 0));
-      edge_points1.push_back(cv::Point(arrow.cols-1, 0));
+    // Create masks for left and right half of the arrow
+    std::vector<cv::Point> left_mask_points = {bottom, cv::Point(0, arrow.rows-1), cv::Point(0, 0), top};
+    std::vector<cv::Point> right_mask_points = {bottom, cv::Point(arrow.cols-1, arrow.rows-1), cv::Point(arrow.cols-1, 0), top};
 
-      edge_points2.push_back(left);
-      edge_points2.push_back(cv::Point(0, arrow.rows-1));
-      edge_points2.push_back(cv::Point(arrow.cols-1, arrow.rows-1));
-    }
-    if (right.y >= 0 && right.y < arrow.rows) {
-      edge_points1.push_back(right);
-      edge_points2.push_back(right);
-    }
-    if (top.x >= 0 && top.x < arrow.cols) {
-      
-      
-      
-
-      edge_points1.push_back(bottom);
-      edge_points1.push_back(cv::Point(0, arrow.rows-1));
-      edge_points1.push_back(cv::Point(0, 0));
-      edge_points1.push_back(top);
-
-
-      
-      
-      
-
-      edge_points2.push_back(bottom);
-      edge_points2.push_back(cv::Point(arrow.cols-1, arrow.rows-1));
-      edge_points2.push_back(cv::Point(arrow.cols-1, 0));
-      edge_points2.push_back(top);
-    }
-    // if (bottom.x >= 0 && bottom.x < arrow.cols) {
-    //   edge_points1.push_back(bottom);
-    //   edge_points2.push_back(bottom);
-    // }
-
-    // Remove potential duplicates (if point is located in a corner)
-    // if (edge_points.size() > 2) {
-      
-    // }
-
+    
     // Define the other corners needed to create a polygon mask
 
 
-    cv::Mat mask1 = cv::Mat::zeros(arrow.size(), CV_8U);
-    cv::fillConvexPoly(mask1, edge_points1, cv::Scalar(255));
+    cv::Mat left_mask = cv::Mat::zeros(arrow.size(), CV_8U);
+    cv::fillConvexPoly(left_mask, left_mask_points, cv::Scalar(255));
 
     // Draw masks on image with alpha blending
     double alpha = 0.5;
@@ -355,33 +299,32 @@ cv::Mat SignDetection::CheckArrowDir(cv::Mat sign) {
 
     arrow_bgr.copyTo(overlay);
 
-    cv::fillConvexPoly(overlay, edge_points1, cv::Scalar(255, 0, 0));
-    cv::fillConvexPoly(overlay, edge_points2, cv::Scalar(0, 255, 0));
+    cv::fillConvexPoly(overlay, left_mask_points, cv::Scalar(255, 0, 0));
+    cv::fillConvexPoly(overlay, right_mask_points, cv::Scalar(0, 255, 0));
 
     cv::addWeighted(overlay, alpha, arrow_bgr, 1 - alpha, 0, arrow_bgr);
 
     // Apply mask to arrow and count pixels
-    cv::Mat mask2 = cv::Mat::zeros(arrow.size(), CV_8U);
-    cv::Mat arrow1, arrow2;
-    arrow.copyTo(arrow1, mask1);
-    cv::bitwise_not(mask1, mask2);
-    arrow.copyTo(arrow2, mask2);
+    cv::Mat right_mask = cv::Mat::zeros(arrow.size(), CV_8U);
+    cv::Mat left_arrow, right_arrow;
+    arrow.copyTo(left_arrow, left_mask);
+    cv::bitwise_not(left_mask, right_mask);
+    arrow.copyTo(right_arrow, right_mask);
 
     // Count pixels in arrow1 and arrow2
-    int area1 = cv::countNonZero(arrow1);
-    int area2 = cv::countNonZero(arrow2);
+    int left_area = cv::countNonZero(left_arrow);
+    int right_area = cv::countNonZero(right_arrow);
 
     int total_area = cv::countNonZero(arrow);
 
-    ROS_INFO("Green: %i, Blue: %i, total: %i", area2, area1, total_area);
+    ROS_INFO("Green: %i, Blue: %i, total: %i", right_area, left_area, total_area);
 
-    // Add visuals
-    // cv::line(arrow_bgr, top, bottom, cv::Scalar(255, 0, 0));
-    // cv::circle(arrow_bgr, rect_center, 1, cv::Scalar(0, 0, 255));
-    // cv::ellipse(arrow_bgr, rect_fit, cv::Scalar(0, 255, 0));
+    if (left_area > right_area) {
+      pair_out = std::make_pair(arrow_bgr, LEFT);
+    } else {
+      pair_out = std::make_pair(arrow_bgr, RIGHT);
+    }
 
+    return pair_out;
   }
-
-
-  return arrow_bgr;
 }

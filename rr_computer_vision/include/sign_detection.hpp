@@ -25,13 +25,14 @@ class SignDetection
     // Ros variables
     ros::NodeHandle nh_;
     ros::ServiceClient client_;
+    //ros::Publisher sign_status_publisher_;
     image_transport::ImageTransport it_;
     image_transport::Subscriber img_subscriber_;
     image_transport::Publisher img_publisher_;
 
     void RGBCameraCallback(const sensor_msgs::ImageConstPtr& left_msg);
     cv::Rect ExpandRect(cv::Rect rect_in);
-    cv::Mat CheckArrowDir(cv::Mat sign);
+    std::pair<cv::Mat, uint8_t> CheckArrowDir(cv::Mat sign);
 
     // Variables for tracking the sign through frames
     unsigned int consecutive_frames = 0;
@@ -39,6 +40,15 @@ class SignDetection
 
     // Haar cascade
     cv::CascadeClassifier sign_cascade;
+
+    // Enum for publish message
+    enum sign_status: uint8_t
+    {
+      NONE,
+      LEFT,
+      RIGHT,
+      STRAIGHT
+    };
 };
 
 #endif //SIGN_DETECTION_PROCESSOR_HPP
