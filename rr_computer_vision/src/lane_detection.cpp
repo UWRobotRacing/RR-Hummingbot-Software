@@ -134,13 +134,13 @@ cv::Mat LaneDetection::ContourFilter(const cv::Mat &img, const int min_contour_s
   
   // Find contours in the image
   std::vector<std::vector<cv::Point> > contours;
-  cv::findContours(copy, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE, cv::Point());
+  cv::findContours(copy, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point());
 
   // Only draw contours on the blank image that are above the minimum contour size
   cv::Scalar color(255);
   for (size_t i = 0; i < contours.size(); i++) {
     if (cv::contourArea(contours[i]) >= min_contour_size) {
-      cv::drawContours(filtered, contours, i, color, -1, 8, cv::noArray(), 2, cv::Point());
+      cv::drawContours(filtered, contours, i, color, CV_FILLED , 8, cv::noArray(), 2, cv::Point());
     }
   }
   return filtered;
