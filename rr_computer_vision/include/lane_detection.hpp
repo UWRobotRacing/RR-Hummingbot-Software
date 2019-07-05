@@ -37,6 +37,10 @@ class LaneDetection
     // Parameters
     cv::Mat warp_src_coords_;
     int min_contour_size_;
+    double resolution_;
+    double camera_width_offset_;
+    double camera_height_offset_;
+
 
     void ImgCallback(const sensor_msgs::ImageConstPtr&);
     void InitializeSubscribers();
