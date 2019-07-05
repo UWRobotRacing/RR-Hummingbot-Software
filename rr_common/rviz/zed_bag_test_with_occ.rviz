@@ -96,7 +96,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /point_vec_out_
+      Topic: /rr_bot/rr_cv/lane_detection/occupancy_grid
       Unreliable: false
       Use Timestamp: false
       Value: true

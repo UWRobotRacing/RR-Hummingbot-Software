@@ -24,10 +24,13 @@
 LaneDetection::LaneDetection(ros::NodeHandle nh) : it_(nh_) {
   // Extract parameters from yaml file
   std::string params_file;
-  nh.param<std::string>("LaneDetectionParamsFile", params_file, "test.yaml");
+  nh.param<std::string>("LaneDetectionParamsFile", params_file, "drag_race.yaml");
   cv::FileStorage fs(params_file, cv::FileStorage::READ);
   fs["warp_src_coords"] >> warp_src_coords_;
   fs["min_contour_size"] >> min_contour_size_;
+  fs["resolution"] >> resolution_;
+  fs["camera_width_offset"] >> camera_width_offset_;
+  fs["camera_height_offset"] >> camera_height_offset_;
 
   // Initialize publishers and subscribers
   InitializeSubscribers();
@@ -181,12 +184,10 @@ void LaneDetection::ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::Occupan
   // TODO: Move everything to rosparam file
   meta_data_.height = 720;
   meta_data_.width = 1280;
-  meta_data_.resolution = 0.0039;
-  float camera_width_offset = 0.05;
-  float camera_height_offset = 0.048;
+  meta_data_.resolution = resolution_;
 
-  meta_data_.origin.position.x = -1*(meta_data_.width*meta_data_.resolution)/2 - camera_width_offset - 1.5;
-  meta_data_.origin.position.y = -1*(meta_data_.height*meta_data_.resolution) - camera_height_offset;
+  meta_data_.origin.position.x = -1*(meta_data_.width*meta_data_.resolution)/2 - camera_width_offset_;
+  meta_data_.origin.position.y = -1*(meta_data_.height*meta_data_.resolution) - camera_height_offset_;
 
   grid_msg.info = meta_data_;
 }

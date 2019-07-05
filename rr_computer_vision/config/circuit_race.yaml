@@ -10,3 +10,10 @@ warp_src_coords: !!opencv-matrix
    data: [500, 350, 750, 350, 1280, 550, 0, 450]
 
 min_contour_size: 250
+
+resolution: 0.0045
+
+camera_feed: 'right'
+
+camera_width_offset: 0.05
+camera_height_offset: 0.048
