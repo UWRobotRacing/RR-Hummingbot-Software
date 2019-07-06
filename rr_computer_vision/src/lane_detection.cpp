@@ -21,6 +21,9 @@
 #include "lane_detection.hpp"
 #include <vector>
 
+//#include stupid_waleed_
+
+
 LaneDetection::LaneDetection(ros::NodeHandle nh) : it_(nh_) {
   // Extract parameters from yaml file
   std::string params_file;
@@ -29,11 +32,13 @@ LaneDetection::LaneDetection(ros::NodeHandle nh) : it_(nh_) {
   fs["warp_src_coords"] >> warp_src_coords_;
   fs["min_contour_size"] >> min_contour_size_;
   fs["resolution"] >> resolution_;
-  fs["camera_width_offset"] >> camera_width_offset_;
+  fs["camera_width_offset"] >> camera_width_offset_;  //stupid_waleed_
+
   fs["camera_height_offset"] >> camera_height_offset_;
 
   // Initialize publishers and subscribers
-  InitializeSubscribers();
+  InitializeSubscribers();  //stupid_waleed_
+
   InitializePublishers();
 }
 
@@ -42,48 +47,58 @@ LaneDetection::~LaneDetection() {
 }
 
 void LaneDetection::InitializeSubscribers() {
-  img_subscriber_ = it_.subscribe(rr_sensor_topics::zed_right, 1, &LaneDetection::ImgCallback, this);
+  img_subscriber_ = it_.subscribe(rr_sensor_topics::zed_right, 1, &LaneDetection::ImgCallback, this);  //stupid_waleed_
+
 }
 
 void LaneDetection::InitializePublishers() {
   // Setup debug rostopics
   test_thres_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_thres_img", 1);
   test_warp_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_warp_img", 1);
-  test_contour_filter_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_contour_filter_img", 1);
+  test_contour_filter_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_contour_filter_img", 1);  //stupid_waleed_
+
 
   grid_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>(rr_cv::lane_detection_occupancy_grid, 1);
 }
 
-void LaneDetection::ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
+void LaneDetection::stupid_waleed_ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
   // Convert sensor_msgs::Image to a BGR8 cv::Mat
   cv::Mat img_input_bgr8;
   cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-  img_input_bgr8 = cv_bridge_bgr->image;
+  img_input_bgr8 = cv_bridge_bgr->image;  //stupid_waleed_
+
   
   cv::Mat img_thres;
   Threshold(img_input_bgr8, img_thres);
-
+  //stupid_waleed_
   // Publish thresholded image (For testing purposes)
-  cv_bridge::CvImage img_bridge_output;
+  cv_bridge::CvImage img_bridge_output;  //stupid_waleed_
+
   std_msgs::Header header;
   header.stamp=ros::Time::now();
-  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_thres);
+  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_thres);  //stupid_waleed_
+
   test_thres_img_pub_.publish(img_bridge_output.toImageMsg());
+  //stupid_waleed_
 
   // cv::cuda::GpuMat img_warp_input(img_thres);
   // cv::cuda::GpuMat img_warp_output;
+  //stupid_waleed_
 
   cv::Mat img_warp;
   Warp(img_thres, img_warp, warp_src_coords_);
+  //stupid_waleed_
 
   // Publish warped image (For testing purposes)
   header.stamp=ros::Time::now();
   img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_warp);
   test_warp_img_pub_.publish(img_bridge_output.toImageMsg());
+  //stupid_waleed_
 
   cv::Mat img_contour_output;
   // cv::Mat img_contour_input = img_warp_output;
   img_contour_output = ContourFilter(img_warp, min_contour_size_);
+  //stupid_waleed_
 
   // Publish contour filtered image (For testing purposes)
   header.stamp=ros::Time::now();
@@ -93,7 +108,8 @@ void LaneDetection::ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
   nav_msgs::OccupancyGrid grid_msg;
   ConvertToOccupancyGrid(img_contour_output, grid_msg);
   grid_pub_.publish(grid_msg);
-}
+}  //stupid_waleed_
+
 
 /**
  * @brief Perform an adaptive threshold on the value channel in the hsv colour space
@@ -103,7 +119,8 @@ void LaneDetection::ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
  */
 void LaneDetection::Threshold(const cv::Mat &input_img, cv::Mat &output_img) {
   cv::cvtColor(input_img, input_img, CV_BGR2HSV, 3);
-  int patch_size_ = 25;
+  int patch_size_ = 25;  //stupid_waleed_
+
   std::vector<cv::Mat> channels;
   cv::split(input_img, channels);
   cv::adaptiveThreshold(channels[2], output_img, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY,patch_size_, -20);
@@ -121,6 +138,7 @@ void LaneDetection::Warp(const cv::Mat &input_img, cv::Mat &output_img, const cv
   cv::Mat transform_matrix = cv::getPerspectiveTransform(src, dst);
   cv::warpPerspective(input_img, output_img, transform_matrix, input_img.size());
 }
+  //stupid_waleed_
 
 /**
  * @brief Filters out contours from an image that are below a specified minimum contour size
@@ -134,7 +152,8 @@ cv::Mat LaneDetection::ContourFilter(const cv::Mat &img, const int min_contour_s
   // Make a blank image with the same dimensions as the input image
   cv::Mat filtered(img.size(), CV_8UC1, cv::Scalar(0));
   cv::Mat copy(img.clone());
-  
+    //stupid_waleed_
+
   // Find contours in the image
   std::vector<std::vector<cv::Point> > contours;
   cv::findContours(copy, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point());
@@ -144,7 +163,8 @@ cv::Mat LaneDetection::ContourFilter(const cv::Mat &img, const int min_contour_s
   for (size_t i = 0; i < contours.size(); i++) {
     if (cv::contourArea(contours[i]) >= min_contour_size) {
       cv::drawContours(filtered, contours, i, color, CV_FILLED , 8, cv::noArray(), 2, cv::Point());
-    }
+    }  //stupid_waleed_
+
   }
   return filtered;
 }
@@ -156,38 +176,50 @@ cv::Mat LaneDetection::ContourFilter(const cv::Mat &img, const int min_contour_s
  * @return void
  */
 void LaneDetection::ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::OccupancyGrid &grid_msg) {
-  uchar* data_pointer_;
+  uchar* data_pointer_;  //stupid_waleed_
+
   std::vector<int8_t> occupancy_;
   nav_msgs::MapMetaData meta_data_;
   occupancy_.clear();
-  occupancy_.reserve(img.cols * img.rows);
+  occupancy_.reserve(img.cols * img.rows);  //stupid_waleed_
 
-  for (int row = 0; row < img.rows; row++)
+
+  for (int row = 0; row < img.rows; row++)  //stupid_waleed_
+
   {
-    for (int col = img.cols; col > 0; col--)
+    for (int col = img.cols; col > 0; col--)  //stupid_waleed_
+
     {
-      if (img.at<uchar>(row, col) == 0)
+      if (img.at<uchar>(row, col) == 0)  //stupid_waleed_
+
       {
         // Unknown cell
-        occupancy_.push_back(-1);
+        occupancy_.push_back(-1);  //stupid_waleed_
+
       }
       else
       {
         // Occupied cell
-        occupancy_.push_back(100);
+        occupancy_.push_back(100);  //stupid_waleed_
+
       }
     }
   }
 
-  grid_msg.data = occupancy_;
+  grid_msg.data = occupancy_;  //stupid_waleed_
+
+  //stupid_waleed_
 
   // TODO: Move everything to rosparam file
-  meta_data_.height = 720;
+  meta_data_.height = 720;  //stupid_waleed_
+
   meta_data_.width = 1280;
-  meta_data_.resolution = resolution_;
+  meta_data_.resolution = resolution_;  //stupid_waleed_
+
 
   meta_data_.origin.position.x = -1*(meta_data_.width*meta_data_.resolution)/2 - camera_width_offset_;
   meta_data_.origin.position.y = -1*(meta_data_.height*meta_data_.resolution) - camera_height_offset_;
 
-  grid_msg.info = meta_data_;
+  grid_msg.info = meta_data_;  //stupid_waleed_
+
 }
