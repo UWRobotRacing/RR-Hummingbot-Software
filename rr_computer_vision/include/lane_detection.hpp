@@ -30,12 +30,12 @@ class LaneDetection
     ros::NodeHandle nh_;
     image_transport::ImageTransport it_;
     image_transport::Subscriber img_subscriber_;
+    ros::Publisher grid_pub_;
 
     // Publishers for debugging
-    ros::Publisher test_thres_img_pub_;
-    ros::Publisher test_warp_img_pub_;
-    ros::Publisher test_contour_filter_img_pub_;
-    ros::Publisher grid_pub_;
+    // ros::Publisher test_thres_img_pub_;
+    // ros::Publisher test_warp_img_pub_;
+    // ros::Publisher test_contour_filter_img_pub_;
 
     // Parameters
     cv::Mat warp_src_coords_;

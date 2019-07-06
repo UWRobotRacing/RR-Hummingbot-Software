@@ -25,7 +25,7 @@ int main(int argc, char** argv)
   
   ComputerVision computer_vision(nh);
   // EndlineDetection ec(nh);
-  LaneDetection lane_detection(nh);
+  // LaneDetection lane_detection(nh);
 
   ros::spin();
   return 0;

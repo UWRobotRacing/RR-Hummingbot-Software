@@ -53,10 +53,9 @@ void LaneDetection::InitializeSubscribers() {
 
 void LaneDetection::InitializePublishers() {
   // Setup debug rostopics
-  test_thres_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_thres_img", 1);
-  test_warp_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_warp_img", 1);
-  test_contour_filter_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_contour_filter_img", 1);  
-
+  // test_thres_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_thres_img", 1);
+  // test_warp_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_warp_img", 1);
+  // test_contour_filter_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_contour_filter_img", 1);
 
   grid_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>(rr_cv::lane_detection_occupancy_grid, 1);
 }
@@ -66,17 +65,16 @@ void LaneDetection::ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
   cv::Mat img_input_bgr8;
   cv_bridge::CvImagePtr cv_bridge_bgr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
   img_input_bgr8 = cv_bridge_bgr->image;  
-
   
   cv::Mat img_thres;
   Threshold(img_input_bgr8, img_thres);
   // Publish thresholded image (For testing purposes)
-  cv_bridge::CvImage img_bridge_output;  
+  // cv_bridge::CvImage img_bridge_output;
 
-  std_msgs::Header header;
-  header.stamp=ros::Time::now();
-  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_thres);  
-  test_thres_img_pub_.publish(img_bridge_output.toImageMsg());
+  // std_msgs::Header header;
+  // header.stamp=ros::Time::now();
+  // img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_thres);
+  // test_thres_img_pub_.publish(img_bridge_output.toImageMsg());
 
   // cv::cuda::GpuMat img_warp_input(img_thres);
   // cv::cuda::GpuMat img_warp_output;
@@ -85,18 +83,18 @@ void LaneDetection::ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
   Warp(img_thres, img_warp, warp_src_coords_);
 
   // Publish warped image (For testing purposes)
-  header.stamp=ros::Time::now();
-  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_warp);
-  test_warp_img_pub_.publish(img_bridge_output.toImageMsg());
+  // header.stamp=ros::Time::now();
+  // img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_warp);
+  // test_warp_img_pub_.publish(img_bridge_output.toImageMsg());
 
   cv::Mat img_contour_output;
   // cv::Mat img_contour_input = img_warp_output;
   img_contour_output = ContourFilter(img_warp, min_contour_size_);
 
   // Publish contour filtered image (For testing purposes)
-  header.stamp=ros::Time::now();
-  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_contour_output);
-  test_contour_filter_img_pub_.publish(img_bridge_output.toImageMsg());
+  // header.stamp=ros::Time::now();
+  // img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, img_contour_output);
+  // test_contour_filter_img_pub_.publish(img_bridge_output.toImageMsg());
 
   nav_msgs::OccupancyGrid grid_msg;
   ConvertToOccupancyGrid(img_contour_output, grid_msg);
