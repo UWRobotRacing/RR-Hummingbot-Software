@@ -26,15 +26,15 @@ Here are the results of this algorithm on the 3 varying lane widths. From top to
 | ![](images/lane_detection/drag_race/original.jpg) | ![](images/lane_detection/drag_race/threshold.jpg) | ![](images/lane_detection/drag_race/warp.jpg) | ![](images/lane_detection/drag_race/filtered.jpg) | ![](images/lane_detection/drag_race/occupancy.png) |
 | ![](images/lane_detection/circuit_race/original.jpg) | ![](images/lane_detection/circuit_race/threshold.jpg) | ![](images/lane_detection/circuit_race/warp.jpg) | ![](images/lane_detection/circuit_race/filtered.jpg) | ![](images/lane_detection/circuit_race/occupancy.png) |
 
-### Traffic light detection
+### Traffic Light Detection
 The start of each race is indicated by a traffic light switching from red to green. Our algorithm for detecting the traffic light is as follows:
 
 1. Colour thresholding in the HSV colourspace to extract reds from the image. Read more about it [here](https://docs.opencv.org/3.4/da/d97/tutorial_threshold_inRange.html). The thresholding values were specifically chosen based on testing on different rosbags taken in the E7 parking lot during the day time. It is important to notice that the results could vary under different lighting conditions. Below are two sets of images showing the result when facing towards and away from the sun:
 
-Original Image                 |  Red Colour Threshold
-:-----------------------------:|:----------------------------------:
-![](images/trafficLight1.jpg)  |  ![](images/trafficLight1_thre.png)
-![](images/trafficLight2.jpg)  |  ![](images/trafficLight2_thre.png)
+| Original Image                                    |  Red Colour Threshold                          |
+| ------------------------------------------------- | ---------------------------------------------- |
+| ![](images/traffic_light_detection/original1.jpg) | ![](images/traffic_light_detection/thres1.png) |
+| ![](images/traffic_light_detection/original2.jpg) | ![](images/traffic_light_detection/thres2.png) |
 
 2. Find blobs in each frame by using OpenCV's blob detection algorithm. Read more about it [here](https://www.learnopencv.com/blob-detection-using-opencv-python-c/). The parameters in the algorithm are adjusted to catch blobs that look circular.
 
@@ -53,10 +53,10 @@ All the races indicate the ending of a lap with a distinct magenta line, which i
 
 1. Apply colour thresholding with the bounds set to extract magenta in the HSV colour space. Read more about it [here](https://docs.opencv.org/3.4/da/d97/tutorial_threshold_inRange.html). The thresholding values were realized through testing on endline tape setup in various lighting conditions. Note that lighting conditions could very likely give different results that don't look as good. Below are some images showing the result of this step:
 
-Original Image                              |  Magenta Colour Threshold
-:------------------------------------------:|:------------------------------------------------:
-![](images/endline_detection/endline1.jpg)  |  ![](images/endline_detection/endline1_thres.jpg)
-![](images/endline_detection/endline2.jpg)  |  ![](images/endline_detection/endline2_thres.jpg)
+| Original Image                              |  Magenta Colour Threshold                |
+| ------------------------------------------- | ---------------------------------------- |
+| ![](images/endline_detection/original1.jpg) | ![](images/endline_detection/thres1.jpg) |
+| ![](images/endline_detection/original2.jpg) | ![](images/endline_detection/thres2.jpg) |
 
 2. Extract contours from the thresholded image. Read more about it [here](https://docs.opencv.org/3.4/d4/d73/tutorial_py_contours_begin.html).
 
