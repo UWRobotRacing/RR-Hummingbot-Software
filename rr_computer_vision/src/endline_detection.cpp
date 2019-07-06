@@ -1,34 +1,31 @@
 /** @file endline_detection.cpp
  *  @brief Magenta endline detection
- *
- * Topics Subscribed:
- *   /zed/rgb/image_rect_color
- *
- * Service called:
- *   /Supervisor/count_lap
- *
- * @author Waleed Ahmed (w29ahmed)
- * @author Yuchi(Allan) Zhao
+ *  @author Waleed Ahmed (w29ahmed)
+ *  @author Yuchi(Allan) Zhao
+ *  @competition IARRC 2019
 */
 
-// Helper includes
-#include "endline_detection.hpp"
+// Standard includes
 #include <vector>
+
+// Local includes
+#include "rr_topic_names.hpp"
+#include "endline_detection.hpp"
+
+// ROS includes
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include <std_srvs/Trigger.h>
 
 // OpenCV includes
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-// Ros includes
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
-#include <std_srvs/Trigger.h>
-
 // Constructor
 EndlineDetection::EndlineDetection(ros::NodeHandle nh) : it_(nh_), detection_status_(false), endline_counter_(0)
 {
   client_ = nh_.serviceClient<std_srvs::Trigger>("/Supervisor/count_lap");
-  img_subscriber_ = it_.subscribe("/zed/rgb/image_rect_color", 1, &EndlineDetection::EndlineImgCallback, this);
+  img_subscriber_ = it_.subscribe(rr_sensor_topics::zed_left, 1, &EndlineDetection::EndlineImgCallback, this);
   // img_publisher_ = it_.advertise("/test_endline", 1);
 }
 

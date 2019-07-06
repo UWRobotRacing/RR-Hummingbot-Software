@@ -1,4 +1,9 @@
 %YAML:1.0
+# @file drag_race.yaml
+# @brief Parameters for drag race
+# @author Waleed Ahmed (w29ahmed)
+# @author Carson Chen
+# @competition IARRC 2019
 
 # 4 point coordinates in image plane used as the source coordinates for the warp transform
 # Note: OpenCV Image coordinates are in [x,y], where X is a column index 

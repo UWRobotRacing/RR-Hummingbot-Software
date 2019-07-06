@@ -8,6 +8,9 @@
 #ifndef __LANE_DETECTION_HPP
 #define __LANE_DETECTION_HPP
 
+// Standard includes
+#include <string>
+
 // ROS includes
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>

@@ -9,7 +9,8 @@
 #ifndef RR_TOPIC_NAMES
 #define RR_TOPIC_NAMES
 
-#include <string.h>
+// Standard includes
+#include <string>
 
 static std::string rr_str = "/rr_bot/";
 static std::string rr_cv_str = "rr_cv/";

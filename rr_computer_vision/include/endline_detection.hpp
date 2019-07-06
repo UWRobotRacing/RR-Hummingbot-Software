@@ -1,13 +1,17 @@
 /** @file endline_detection.hpp
- * @author Waleed Ahmed (w29ahmed)
- * @author Yuchi(Allan) Zhao
+ *  @author Waleed Ahmed (w29ahmed)
+ *  @author Yuchi(Allan) Zhao
+ *  @competition IARRC 2019
  */
 
 #ifndef ENDLINE_DETECTION_HPP
 #define ENDLINE_DETECTION_HPP
 
+// ROS includes
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
+
+// OpenCV includes
 #include <opencv2/opencv.hpp>
 
 class EndlineDetection

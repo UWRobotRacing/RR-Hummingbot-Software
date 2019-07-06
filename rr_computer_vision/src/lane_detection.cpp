@@ -6,6 +6,13 @@
  *  @competition IARRC 2019
  */
 
+// Standard includes
+#include <vector>
+
+// Local includes
+#include "rr_topic_names.hpp"
+#include "lane_detection.hpp"
+
 // ROS includes
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -15,13 +22,6 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
-
-// Local includes
-#include "rr_topic_names.hpp"
-#include "lane_detection.hpp"
-#include <vector>
-
-
 
 LaneDetection::LaneDetection(ros::NodeHandle nh) : it_(nh_) {
   // Extract parameters from yaml file
