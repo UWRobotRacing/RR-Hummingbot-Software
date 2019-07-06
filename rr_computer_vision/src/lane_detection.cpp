@@ -29,10 +29,11 @@ LaneDetection::LaneDetection(ros::NodeHandle nh) : it_(nh_) {
   nh.param<std::string>("LaneDetectionParamsFile", params_file, "drag_race.yaml");
   cv::FileStorage fs(params_file, cv::FileStorage::READ);
   fs["warp_src_coords"] >> warp_src_coords_;
+  fs["camera_feed"] >> camera_feed_;
   fs["min_contour_size"] >> min_contour_size_;
+
   fs["resolution"] >> resolution_;
   fs["camera_width_offset"] >> camera_width_offset_; 
-
   fs["camera_height_offset"] >> camera_height_offset_;
 
   // Initialize publishers and subscribers
@@ -46,8 +47,8 @@ LaneDetection::~LaneDetection() {
 }
 
 void LaneDetection::InitializeSubscribers() {
-  img_subscriber_ = it_.subscribe(rr_sensor_topics::zed_right, 1, &LaneDetection::ImgCallback, this);  
-
+  std::string camera_topic = (!camera_feed_.compare("right")) ? rr_sensor_topics::zed_right : rr_sensor_topics::zed_left;
+  img_subscriber_ = it_.subscribe(camera_topic, 1, &LaneDetection::ImgCallback, this);
 }
 
 void LaneDetection::InitializePublishers() {

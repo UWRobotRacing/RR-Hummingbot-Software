@@ -9,7 +9,7 @@ warp_src_coords: !!opencv-matrix
    dt: f
    data: [400, 350, 760, 350, 1280, 500, 0, 500]
 
-camera_feed: 'left'
+camera_feed: "left"
 min_contour_size: 100
 
 # Mapper meta data parameters
