@@ -7,6 +7,12 @@ warp_src_coords: !!opencv-matrix
    rows: 4
    cols: 2
    dt: f
-   data: [400, 350, 760, 350, 1280, 500, 0, 500]
+   data: [500, 350, 750, 350, 1280, 550, 0, 450]
 
-min_contour_size: 500
+camera_feed: 'right'
+min_contour_size: 250
+
+# Mapper meta data parameters
+resolution: 0.0047
+camera_width_offset: 0.05
+camera_height_offset: 0.048

@@ -31,11 +31,20 @@ All the races have lane lines present, and need to be reliably detected with var
 
 The lane detection algorithm is as follows:
 
-1. Adaptive threshold on the value (V) channel in the HSV colour space
-2. Warp transform to get a top-down view of the lanes
-3. Contour filtering and filling to get rid of noise (rocks reflecting light on the ground, shadow outlines, etc.) as well as fill in any gaps that appear in the lanes
+1. Adaptive threshold on the value (V) channel in the HSV colour space.
+2. Warp transform to get a top-down view of the lanes.
+3. Contour filtering and filling to get rid of noise (rocks reflecting light on the ground, shadow outlines, etc.) as well as fill in any gaps that appear in the lanes.
+4. Convert filtered image (binary) to an occupancy grid, which is the data type that the mapper uses. Each race has calibrated values fed into the meta data for the mapper to ensure the lane width on the occupancy grid matches real life. See the bottom left corner of the occupancy grid images to see the lane width on the occupancy grid.
 
-[comment]: <> (TODO: Show output on other races as well)
-Original Image           |  1. Adaptive Threshold  | 2. Warp Transform       | 3. Contour Filtering
-:-----------------------:|:-----------------------:|:-----------------------:|:-----------------------:
-![](images/lane_detection/lane_original.jpg)  |  ![](images/lane_detection/lane_threshold.jpg)  |  ![](images/lane_detection/lane_warp.jpg)  |  ![](images/lane_detection/lane_filtered.jpg)
+Original Image                                        |  1. Adaptive Threshold
+:----------------------------------------------------:|:--------------------------------------------------------:
+![](images/lane_detection/urban_road/original.jpg)    |  ![](images/lane_detection/urban_road/threshold.jpg)    |
+![](images/lane_detection/drag_race/original.jpg)     |  ![](images/lane_detection/drag_race/threshold.jpg)     |
+![](images/lane_detection/circuit_race/original.jpg)  |  ![](images/lane_detection/circuit_race/threshold.jpg)  |
+
+2. Warp Transform       | 3. Contour Filtering | 4. Occupancy Grid
+:-----------------------:|:-----------------------:|:-----------------------:
+ ![](images/lane_detection/urban_road/warp.jpg)  |  ![](images/lane_detection/urban_road/filtered.jpg)  | ![](images/lane_detection/urban_road/occupancy.png)
+  ![](images/lane_detection/drag_race/warp.jpg)  |  ![](images/lane_detection/drag_race/filtered.jpg)  | ![](images/lane_detection/drag_race/occupancy.png)
+   ![](images/lane_detection/circuit_race/warp.jpg)  |  ![](images/lane_detection/circuit_race/filtered.jpg)  | ![](images/lane_detection/circuit_race/occupancy.png)
+ 
