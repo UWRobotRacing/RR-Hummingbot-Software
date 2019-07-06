@@ -45,7 +45,7 @@ class LaneDetection
     double camera_height_offset_;
     std::string camera_feed_;
 
-    void ImgCallback(const sensor_msgs::ImageConstPtr&);
+    void ImgCallback(const sensor_msgs::ImageConstPtr& msg);
     void InitializeSubscribers();
     void InitializePublishers();
 

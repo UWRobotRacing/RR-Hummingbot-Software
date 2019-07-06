@@ -135,14 +135,12 @@ void LaneDetection::Warp(const cv::Mat &input_img, cv::Mat &output_img, const cv
  * @return image with only contours in it that are above the minimum contour size
  */
 cv::Mat LaneDetection::ContourFilter(const cv::Mat &img, const int min_contour_size) {
-  //int blob_size_ = 100;
-  
   // Make a blank image with the same dimensions as the input image
   cv::Mat filtered(img.size(), CV_8UC1, cv::Scalar(0));
   cv::Mat copy(img.clone());
 
   // Find contours in the image
-  std::vector<std::vector<cv::Point> > contours;
+  std::vector<std::vector<cv::Point>> contours;
   cv::findContours(copy, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point());
 
   // Only draw contours on the blank image that are above the minimum contour size
@@ -188,7 +186,6 @@ void LaneDetection::ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::Occupan
 
   grid_msg.data = occupancy_; 
 
-  // TODO: Move everything to rosparam file
   meta_data_.height = 720;  
   meta_data_.width = 1280;
   meta_data_.resolution = resolution_; 
