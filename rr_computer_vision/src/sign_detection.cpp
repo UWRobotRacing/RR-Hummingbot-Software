@@ -70,22 +70,20 @@ void expand_rect(cv::Rect& rect, cv::Size img_size) {
   cv::Point offset(delta_size.width / 2, delta_size.height / 2);
   rect += delta_size;
   rect -= offset;
+  //ROS_INFO("bbox: (y: %i, x: %i, w: %i, h: %i)", rect.y, rect.x, rect.width, rect.height);
 
   // Check if rect crosses image boundaries
   if (rect.x < 0) {
     rect.x = 0;
-  } else {
-    if (rect.x + rect.width > img_size.width) {
-      rect.width = img_size.width - rect.x;
-    }
-  }
+  } else if (rect.x + rect.width > img_size.width) {
+    rect.width = img_size.width - rect.x;
+  } 
 
   if (rect.y < 0) {
     rect.y = 0;
-  } else {
-    if (rect.y + rect.height > img_size.width) {
-      rect.height = img_size.height - rect.y;
-    }
+  } 
+  if (rect.y + rect.height > img_size.height) {
+    rect.height = img_size.height - rect.y;
   }
 }
 
@@ -111,6 +109,12 @@ void SignDetection::RGBCameraCallback(const sensor_msgs::ImageConstPtr& right_ms
 
   // Convert sensor_msgs::Image to a BGR8 cv::Mat 
   cv::Mat rgb_img = (cv_bridge::toCvCopy(right_msg, sensor_msgs::image_encodings::BGR8))->image;
+
+  // Cut out bottom half and left quarter of image to speed up node
+  cv::Rect crop(rgb_img.cols / 4, 0, rgb_img.cols * 3/4 - 1, rgb_img.rows / 2);
+  rgb_img = rgb_img(crop);
+  
+  // Convert to grayscale and equalize
   cv::Mat right_img;
   cv::cvtColor(rgb_img, right_img, cv::COLOR_BGR2GRAY);
   cv::equalizeHist(right_img, right_img);
@@ -119,8 +123,8 @@ void SignDetection::RGBCameraCallback(const sensor_msgs::ImageConstPtr& right_ms
   std::vector<cv::Rect> classifications;
   std::vector<int> reject_levels;
   std::vector<double> level_weights;
-  //sign_cascade.detectMultiScale(right_img, classifications, reject_levels, level_weights, 1.05, 5, 0 | cv::CASCADE_SCALE_IMAGE, cv::Size(20, 20), true);
-  sign_cascade.detectMultiScale(right_img, classifications, reject_levels, level_weights, 1.1, 4, 0 | cv::CASCADE_SCALE_IMAGE, cv::Size(20, 20), cv::Size(), true);
+  sign_cascade.detectMultiScale(right_img, classifications, reject_levels, level_weights, 1.05, 3, 0 | cv::CASCADE_SCALE_IMAGE, cv::Size(20, 20), cv::Size(), true);
+  //sign_cascade.detectMultiScale(right_img, classifications, reject_levels, level_weights, 1.1, 4, 0 | cv::CASCADE_SCALE_IMAGE, cv::Size(20, 20), cv::Size(), true);
   
   cv::Rect best_bbox;
   if (classifications.empty()) {
@@ -160,6 +164,8 @@ void SignDetection::RGBCameraCallback(const sensor_msgs::ImageConstPtr& right_ms
   if (consecutive_frames > 10) {
     // Expand bounding box to make sure it contains the arrow
     expand_rect(best_bbox, right_img.size());
+    //ROS_INFO("bbox: (y: %i, x: %i, w: %i, h: %i)", best_bbox.y, best_bbox.x, best_bbox.width, best_bbox.height);
+    //ROS_INFO("img w:%i, img h:%i", right_img.cols, right_img.rows);
     // add rect to img
     cv::rectangle(rgb_img, best_bbox, cv::Scalar(0, 0, 255));
 
@@ -168,21 +174,21 @@ void SignDetection::RGBCameraCallback(const sensor_msgs::ImageConstPtr& right_ms
   }
 
   // Add classifications to image
-  // for (cv::Rect bbox : classifications) {
-  //   cv::rectangle(rgb_img, bbox, cv::Scalar(255, 0, 0));
-  // }
+  for (cv::Rect bbox : classifications) {
+    cv::rectangle(rgb_img, bbox, cv::Scalar(255, 0, 0));
+  }
 
-  ROS_INFO("Direction: %i", status.second);
+  //ROS_INFO("Direction: %i", status.second);
 
   // Publish so we can visualize in rviz
   cv_bridge::CvImage img_bridge_output;
   std_msgs::Header header; // empty header
   header.stamp = ros::Time::now(); // time
-  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, status.first);
-  //img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, rgb_img);
+  //img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, status.first);
+  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, rgb_img);
 
   img_publisher_.publish(img_bridge_output.toImageMsg());
-  ROS_INFO("IMAGE DATA PUBLISHED");
+  //ROS_INFO("IMAGE DATA PUBLISHED");
 }
 
 std::pair<cv::Mat, uint8_t> SignDetection::CheckArrowDir(cv::Mat sign) {
@@ -248,7 +254,7 @@ std::pair<cv::Mat, uint8_t> SignDetection::CheckArrowDir(cv::Mat sign) {
   cv::Size2f rect_size = rect_fit.size;
   cv::Point2f rect_center = rect_fit.center;
 
-  ROS_INFO("Angle: %f; w, h: (%f, %f)", angle, rect_size.width, rect_size.height);
+  //ROS_INFO("Angle: %f; w, h: (%f, %f)", angle, rect_size.width, rect_size.height);
 
   // Define output pair
   std::pair<cv::Mat, uint8_t> pair_out;
@@ -317,7 +323,7 @@ std::pair<cv::Mat, uint8_t> SignDetection::CheckArrowDir(cv::Mat sign) {
 
     int total_area = cv::countNonZero(arrow);
 
-    ROS_INFO("Green: %i, Blue: %i, total: %i", right_area, left_area, total_area);
+    //ROS_INFO("Green: %i, Blue: %i, total: %i", right_area, left_area, total_area);
 
     if (left_area > right_area) {
       pair_out = std::make_pair(arrow_bgr, LEFT);
