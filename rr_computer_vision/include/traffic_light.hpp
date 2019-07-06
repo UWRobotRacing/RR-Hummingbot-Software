@@ -2,7 +2,7 @@
  * @file rr_traffic_light.hpp
  * @brief Traffic Light Header File
  * @author Yuchi(Allan) Zhao
- * @author Waleed Ahmed
+ * @author Waleed Ahmed (w29ahmed)
  * @competition IARRC 2019
  */
 
@@ -13,33 +13,40 @@
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 
-// OPENCV includes
+// OpenCV includes
 #include <opencv2/opencv.hpp>
 
 class TrafficLightDetection
 {
   public:
     TrafficLightDetection(ros::NodeHandle nh);
-    void TrafficLightImageCallback(const sensor_msgs::ImageConstPtr& msg);
-    void SetParams();
-    void RedLightDetection(const cv::Mat& threshold_img, int& maxAreaIndex, double& new_ratio);
-    void ColorFilter(const cv::Mat& hsv_img, cv::Mat& threshold_img);
-    void FindBoundRect(const int maxAreaIndex, cv::Mat& crop_img, const cv::Mat& threshold_img, std::vector<cv::KeyPoint>& keypoints);
+    void ImgCallback(const sensor_msgs::ImageConstPtr& msg);
+    void SetBlobDetectorParams();
+    void RedColorThreshold(const cv::Mat& input_img, cv::Mat& threshold_img);
+    void RedLightDetection(const cv::Mat& threshold_img);
+    void FindBoundRect(const cv::Mat& threshold_img, cv::Mat& crop_img, std::vector<cv::KeyPoint>& keypoints, const int max_area_index);
 
   private:
     ros::NodeHandle nh_;
     ros::ServiceClient client_;
     image_transport::ImageTransport it_;
-    // image_transport::Subscriber test_subscriber;
-    // image_transport::Publisher test_publisher;
-        
+    image_transport::Subscriber img_subscriber_;
+    // image_transport::Publisher test_publisher_;
+
+    // Blob detector
     cv::Rect boundRect_;
-    cv::SimpleBlobDetector::Params params;
+    cv::SimpleBlobDetector::Params params_;
     cv::Ptr<cv::SimpleBlobDetector> detector_;
+
+    // Internal states/counters
     bool red_light_detected_;
-    double default_ratio_;
-    int redLightCounter_;
-    int greenLightCounter_;
+    double default_pixel_ratio_;
+    int red_light_counter_;
+    int green_light_counter_;
+
+    // Constants
+    const double pixel_ratio_range_ = 0.40;
+    const int frame_counter_max_ = 10;
 };
 
 #endif

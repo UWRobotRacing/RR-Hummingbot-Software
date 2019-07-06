@@ -53,7 +53,6 @@ class LaneDetection
     void Warp(const cv::Mat &input_img, cv::Mat &output_img, const cv::Mat src);
     cv::Mat ContourFilter(const cv::Mat &img, const int min_contour_size);
     void ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::OccupancyGrid &grid_msg);
-
 };
 
 #endif //__LANE_DETECTION_HPP

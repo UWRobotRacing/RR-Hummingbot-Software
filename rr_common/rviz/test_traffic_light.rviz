@@ -52,7 +52,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /zed/left/image_rect_color
+      Image Topic: /zed/zed_node/right/image_rect_color
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -114,10 +114,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.785398006
+      Pitch: 1.56979632
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.785398006
+      Yaw: 1.66039801
     Saved: ~
 Window Geometry:
   Displays:
