@@ -28,7 +28,7 @@
 LaneDetection::LaneDetection(ros::NodeHandle nh) : it_(nh_) {
   // Extract parameters from yaml file
   std::string params_file;
-  nh.param<std::string>("LaneDetectionParamsFile", params_file, "drag_race.yaml");
+  nh_.param<std::string>("LaneDetectionParamsFile", params_file, "drag_race.yaml");
   cv::FileStorage fs(params_file, cv::FileStorage::READ);
   fs["warp_src_coords"] >> warp_src_coords_;
   fs["camera_feed"] >> camera_feed_;

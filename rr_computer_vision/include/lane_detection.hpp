@@ -56,7 +56,6 @@ class LaneDetection
     cv::Mat ContourFilter(const cv::Mat &img, const int min_contour_size);
     bool RemoveHorizontalLanes(const cv::Mat &input_img, cv::Mat &output_img);
     void ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::OccupancyGrid &grid_msg);
-
 };
 
 #endif //__LANE_DETECTION_HPP
