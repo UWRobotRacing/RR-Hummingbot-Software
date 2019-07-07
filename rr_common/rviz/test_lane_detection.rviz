@@ -54,7 +54,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /zed/zed_node/right/image_rect_color
+      Image Topic: /zed/zed_node/left/image_rect_color
       Max Value: 1
       Median window: 5
       Min Value: 0

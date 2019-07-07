@@ -1,6 +1,7 @@
 /** @file lane_detection_processor.hpp
  *  @author Waleed Ahmed (w29ahmed)
  *  @author Carson Chen
+ *  @author Martin Ethier
  *  @author Matthew Post
  *  @author Toni Ogunmade(oluwatoni)
  *  @competition IARRC 2019
@@ -35,7 +36,7 @@ class LaneDetection
     // Publishers for debugging
     // ros::Publisher test_thres_img_pub_;
     // ros::Publisher test_warp_img_pub_;
-    // ros::Publisher test_contour_filter_img_pub_;
+    ros::Publisher test_contour_filter_img_pub_;
 
     // Parameters
     cv::Mat warp_src_coords_;
@@ -44,6 +45,7 @@ class LaneDetection
     double camera_width_offset_;
     double camera_height_offset_;
     std::string camera_feed_;
+    bool monitor_horizontal_lanes_;
 
     void ImgCallback(const sensor_msgs::ImageConstPtr& msg);
     void InitializeSubscribers();
@@ -52,6 +54,7 @@ class LaneDetection
     void Threshold(const cv::Mat &input_img, cv::Mat &output_img);
     void Warp(const cv::Mat &input_img, cv::Mat &output_img, const cv::Mat src);
     cv::Mat ContourFilter(const cv::Mat &img, const int min_contour_size);
+    bool RemoveHorizontalLanes(const cv::Mat &input_img, cv::Mat &output_img);
     void ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::OccupancyGrid &grid_msg);
 
 };

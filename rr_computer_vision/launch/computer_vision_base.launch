@@ -5,7 +5,7 @@
  -  @competition IARRC 2018
  -->
 <launch>
-  <arg name="config_file" default="$(find rr_computer_vision)/config/drag_race.yaml"/>
+  <arg name="config_file" default="$(find rr_computer_vision)/config/urban_road_challenge.yaml"/>
 
   <param name="LaneDetectionParamsFile" type="string" value="$(arg config_file)"/>
 
