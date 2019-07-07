@@ -58,7 +58,6 @@ bool Supervisor::CountLap(std_srvs::Empty::Request &req, std_srvs::Empty::Respon
 }
 
 void Supervisor::IdleRobot() {
-  ROS_INFO("Robot Idle!");
   //Set null_lock as true. Will NOT allow path planner messages through
   bool_msg_.data = true;
   null_lock_.publish(bool_msg_);

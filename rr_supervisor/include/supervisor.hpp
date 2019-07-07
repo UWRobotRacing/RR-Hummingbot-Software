@@ -23,6 +23,7 @@ class Supervisor
     ~Supervisor();
 
     bool race_started;
+    void IdleRobot();
 
   private:
     // ROS variables
@@ -45,7 +46,6 @@ class Supervisor
     bool StartRace(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res);
     bool CountLap(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res);
 
-    void IdleRobot();
     void FinishRace();
 };
 
