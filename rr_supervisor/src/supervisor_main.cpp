@@ -11,10 +11,10 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "supervisor");
   ROS_INFO("Initializing Supervisor node");
-  ros::NodeHandle nh_;
+  ros::NodeHandle nh;
 
   // Instantiate Supervisor object
-  Supervisor supervisor;
+  Supervisor supervisor(nh);
 
   ROS_INFO("Robot Idle, waiting for traffic light...");
 

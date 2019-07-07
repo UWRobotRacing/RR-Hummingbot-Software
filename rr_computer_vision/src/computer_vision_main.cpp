@@ -18,9 +18,8 @@ int main(int argc, char** argv)
   ROS_INFO("Initializing Computer Vision Node");
   ros::NodeHandle nh;
   
-  ComputerVision computer_vision(nh);
-  TrafficLightDetection traffic_light_detection(nh);
-
+  // ComputerVision computer_vision(nh);
+  // TrafficLightDetection traffic_light_detection(nh);
   // EndlineDetection endline_detection(nh);
   // LaneDetection lane_detection(nh);
 

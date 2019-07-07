@@ -19,7 +19,7 @@
 class Supervisor
 {
   public:
-    Supervisor();
+    Supervisor(ros::NodeHandle nh);
     ~Supervisor();
 
     bool race_started;

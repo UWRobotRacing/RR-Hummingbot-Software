@@ -11,8 +11,8 @@
 /**
  * @brief Supervisor class constructor
  */
-Supervisor::Supervisor() {
-  race_started = false;
+Supervisor::Supervisor(ros::NodeHandle nh): nh_(nh), race_started(false), lap_counter_(0) {
+  nh_.param<int>("LapCount", lap_count_, 1);
 
   null_vector_.x = 0.0; null_vector_.y = 0.0; null_vector_.z = 0.0;
   twist_msg_.linear = null_vector_;
@@ -68,4 +68,6 @@ void Supervisor::FinishRace() {
   // from being published, which will stop the robot
   twist_pub_.publish(twist_msg_);
   IdleRobot();
+
+  ROS_INFO("Race finished!");
 }
