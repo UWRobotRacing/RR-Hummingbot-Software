@@ -1,10 +1,11 @@
-/** @file main.cpp
+/** @file supervisor_main.cpp
  *  @brief Supervisor main method, initialize supervisor node
- *  @author Waleed Ahmed(w29ahmed) && Yuchi(ALlan) Zhao
+ *  @author Waleed Ahmed(w29ahmed)
+ *  @author Yuchi(ALlan) Zhao
  *  @competition IARRC 2019
  */
 
-#include <supervisor.hpp>
+#include "supervisor.hpp"
 
 int main(int argc, char** argv)
 {
@@ -16,7 +17,7 @@ int main(int argc, char** argv)
   Supervisor supervisor;
 
   ros::Rate r(5);
-  while (ros::ok() && (not supervisor.raceStarted))
+  while (ros::ok() && (!supervisor.race_started))
   {
     supervisor.IdleRobot();
     ros::spinOnce();
