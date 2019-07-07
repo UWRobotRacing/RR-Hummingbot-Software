@@ -12,9 +12,6 @@
 // ROS
 #include <ros/ros.h>
 
-// LOCAL
-#include "msg_srv_names.hpp"
-
 class PathPlanner {
     public:
         PathPlanner();
