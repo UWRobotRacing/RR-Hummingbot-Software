@@ -22,7 +22,7 @@ int main(int argc, char** argv)
   ComputerVision computer_vision(nh);
   // TrafficLightDetection traffic_light_detection(nh);
   // EndlineDetection endline_detection(nh);
-  // LaneDetection lane_detection(nh);
+  LaneDetection lane_detection(nh);
 
   ros::spin();
   return 0;

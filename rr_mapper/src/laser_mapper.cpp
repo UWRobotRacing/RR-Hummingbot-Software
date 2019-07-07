@@ -40,25 +40,29 @@ void LaserMapper::PublishMap() {
     nav_msgs::OccupancyGrid full_map;
 
     //Checks for lidar msg
-    int n = floor(abs(min_angle_-lidar_msg_.angle_min)/lidar_msg_.angle_increment);
-    double increment = lidar_msg_.angle_increment;
+    if (lidar_msg_.header.frame_id != "")
+    {
+      int n = floor(abs(min_angle_-lidar_msg_.angle_min)/lidar_msg_.angle_increment);
+      double increment = lidar_msg_.angle_increment;
 
-    if (prev_header_.seq != lidar_msg_.header.seq)
-    {
-    for (double i = min_angle_; i < max_angle_; i+= increment)
-    {
-        // Check for NaN ranges
-        if (std::isnan (lidar_msg_.ranges[n]) == false)
-        {
-          DrawLine(i, lidar_msg_.ranges[n], inflate_obstacle_);
-        }
-        n++;
+      if (prev_header_.seq != lidar_msg_.header.seq)
+      {
+      for (double i = min_angle_; i < max_angle_; i+= increment)
+      {
+          // Check for NaN ranges
+          if (std::isnan (lidar_msg_.ranges[n]) == false)
+          {
+            DrawLine(i, lidar_msg_.ranges[n], inflate_obstacle_);
+          }
+          n++;
+      }
+      prev_header_ = lidar_msg_.header;
+      }
     }
-    prev_header_ = lidar_msg_.header;
-    } 
 
     // Initialize the new map to be published
-    full_map.header.frame_id = "/base_link";
+    //full_map.header.frame_id = "/base_link";
+    full_map.header.frame_id = "/map";
     full_map.info.resolution = map_res_;
     full_map.info.width = map_width_;
     full_map.info.height = map_height_;
@@ -68,13 +72,22 @@ void LaserMapper::PublishMap() {
                 tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
     full_map.data.resize(map_height_*map_width_);
 
-    for (int i = 0; i < map_height_*map_width_; i++)
+    for (int i = 0; i < belief_map_.size(); i++)
     {
         full_map.data[i] = belief_map_[i];
     }
 
+    /*
+    meta_data_.origin.position.x = -1*(meta_data_.width*meta_data_.resolution)/2 - camera_width_offset_;
+    meta_data_.origin.position.y = -camera_height_offset_;
+    TODO: Get camera offsets here to place into combiner
+    */
+
+
+    // TODO: Fix the offset
     //Joins the occupancy grid of the lane and the lidar
-    CombineOccupancyGrid(full_map, lane_detection_msg_, offset_height_, offset_width_);
+    // CombineOccupancyGrid(full_map, lane_detection_msg_, camera_offset_height_, camera_offset_width_);
+    CombineOccupancyGrid(full_map, lane_detection_msg_, -0.105, 0.05);
 
     map_pub_.publish(full_map);
     belief_map_.clear();

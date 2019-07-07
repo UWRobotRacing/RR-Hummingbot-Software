@@ -11,7 +11,7 @@ LaserMapper/LASER_ORIENTATION:              -1
 
 #Map Parameters#
 #map_res in meter
-LaserMapper/map_res:                        0.01
+LaserMapper/map_res:                        0.0039
 LaserMapper/map_W:                          1280
 LaserMapper/map_H:                          720
 
