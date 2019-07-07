@@ -14,6 +14,7 @@
 
 static std::string rr_str = "/rr_bot/";
 static std::string rr_cv_str = "rr_cv/";
+static std::string rr_mapper_str = "rr_mapper/";
 
 namespace rr_sensor_topics {
     static std::string zed_left = "/zed/zed_node/left/image_rect_color";
@@ -30,7 +31,7 @@ namespace rr_controller {
 }
 
 namespace rr_mapper {
-
+    static std::string mapper_occupnacy_grid = rr_str + rr_mapper_str + "occupancy_grid";
 }
 
 namespace rr_path_planner {

@@ -5,7 +5,10 @@
  *  @competition IARRC 2018
  */
 
-// Local
+// Helper Includes
+#include "rr_topic_names.hpp"
+
+// Local Includes
 #include "laser_mapper.hpp"
 
 /**
@@ -86,15 +89,13 @@ void LaserMapper::InitializeSubscribersandPublishers() {
     lidar_sub_ = nh_.subscribe("/scan", 1, &LaserMapper::LidarCallback, this);
     
     
-    lane_detection_sub_ = nh_.subscribe("/point_vec_out", 1, &LaserMapper::LaneDetectionCallback, this);
+    lane_detection_sub_ = nh_.subscribe(rr_cv::lane_detection_occupancy_grid, 1, &LaserMapper::LaneDetectionCallback, this);
     
 }
 
 /**
  * @name LidarCallback
- * @brief Obtains message sent by Lidar
- *        & Processes it to belief_map_
- * @param[in] msg: Lidar Message
+ * @brief Updates lidar_msg_
  * @return NONE
  */
 void LaserMapper::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)

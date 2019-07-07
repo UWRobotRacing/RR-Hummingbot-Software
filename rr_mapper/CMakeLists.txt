@@ -14,6 +14,7 @@ find_package(
   nav_msgs
   tf
   roslint
+  rr_common
 )
 
 catkin_package()

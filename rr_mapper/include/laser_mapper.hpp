@@ -15,10 +15,6 @@
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
 
-#include <message_filters/subscriber.h>
-#include <message_filters/subscriber.h>
-#include <message_filters/sync_policies/approximate_time.h>
-
 /*
  * Callback Class for laser to Occumpancy Grid Format/OpenCV Format
  */
