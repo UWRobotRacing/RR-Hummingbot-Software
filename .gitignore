@@ -64,6 +64,9 @@ Temporary Items
 *.srec
 *.atsuo
 
+#VS code
+*.vscode
+
 #Rosbags because they are too big
 *.bag
 
@@ -72,7 +75,7 @@ Temporary Items
 
 .vscode/settings.json
 .vscode/c_cpp_properties.json
-<<<<<<< HEAD
-=======
 .weights
->>>>>>> origin/simulation
+
+# Notebook checkpoints
+.ipynb_checkpoints

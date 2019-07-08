@@ -35,7 +35,14 @@ int main(int argc, char **argv)
   LaserMapper laserProcessor(nh);
 
   ROS_INFO("Mapper: Laser Node Initialized");
-  ros::spin();
+  ros::Rate r(30);
+  while(ros::ok())
+  {
+    //This will ensure that at least one message will be flushed in before publishing
+    ros::spinOnce();
+    laserProcessor.PublishMap();
+    r.sleep();
+  }
 
   return 0;
 }

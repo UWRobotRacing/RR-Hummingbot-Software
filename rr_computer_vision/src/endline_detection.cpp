@@ -1,34 +1,31 @@
 /** @file endline_detection.cpp
  *  @brief Magenta endline detection
- *
- * Topics Subscribed:
- *   /zed/rgb/image_rect_color
- *
- * Service called:
- *   /Supervisor/count_lap
- *
- * @author Waleed Ahmed (w29ahmed)
- * @author Yuchi(Allan) Zhao
+ *  @author Waleed Ahmed (w29ahmed)
+ *  @author Yuchi(Allan) Zhao
+ *  @competition IARRC 2019
 */
 
-// Helper incldues
-#include "endline_detection.hpp"
+// Standard includes
 #include <vector>
+
+// Local includes
+#include "rr_topic_names.hpp"
+#include "endline_detection.hpp"
+
+// ROS includes
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include <std_srvs/Empty.h>
 
 // OpenCV includes
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-// Ros includes
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
-#include <std_srvs/Trigger.h>
-
 // Constructor
 EndlineDetection::EndlineDetection(ros::NodeHandle nh) : it_(nh_), detection_status_(false), endline_counter_(0)
 {
-  client_ = nh_.serviceClient<std_srvs::Trigger>("/Supervisor/count_lap");
-  img_subscriber_ = it_.subscribe("/zed/rgb/image_rect_color", 1, &EndlineDetection::EndlineImgCallback, this);
+  client_ = nh_.serviceClient<std_srvs::Empty>(rr_supervisor::count_lap_service);
+  img_subscriber_ = it_.subscribe(rr_sensor_topics::zed_left, 1, &EndlineDetection::EndlineImgCallback, this);
   // img_publisher_ = it_.advertise("/test_endline", 1);
 }
 
@@ -44,10 +41,10 @@ void EndlineDetection::EndlineImgCallback(const sensor_msgs::ImageConstPtr& msg)
 {
   cv::Mat init_img, hsv_img, mag_img, blur_img;
   cv_bridge::CvImagePtr cv_ptr;
-  std_srvs::Trigger srv;
   std::vector<std::vector<cv::Point>> contours;
   std::vector<cv::Vec4i> hierarchy;
   std::vector<cv::Point> approx;
+  std_srvs::Empty srv;
 
   try
   {
@@ -106,7 +103,7 @@ void EndlineDetection::EndlineImgCallback(const sensor_msgs::ImageConstPtr& msg)
 
       if (endline_counter_ == 10)
       {
-        ROS_INFO("ENDLINE DETECTED");
+        ROS_INFO("Endline detected!");
         detection_status_ = true;
         endline_counter_ = 0;
       }
@@ -124,18 +121,16 @@ void EndlineDetection::EndlineImgCallback(const sensor_msgs::ImageConstPtr& msg)
 
       if (endline_counter_ == 10)
       {
-        ROS_INFO("ENDLINE GONE");
         detection_status_ = false;
         endline_counter_ = 0;
 
-        //make service call
+        // Make service call
         if (client_.call(srv))
         {
-          if (srv.response.success)
-          {
-            ROS_INFO("SUCCESS");
-            ros::shutdown();
-          }
+          // Shutdown all ROS clients, subscribers, and publishers
+          client_.shutdown();
+          img_subscriber_.shutdown();
+          // img_publisher_.shutdown();
         }
       }
     }

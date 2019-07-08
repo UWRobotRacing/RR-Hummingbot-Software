@@ -1,6 +1,5 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import cv2
+import numpy as np
 
 import glob, os
 import argparse
@@ -12,13 +11,13 @@ def perspective_transform(img):
 
     # Perspective transform source and destiantion co-ordinates
     # Drag race: (1.5 m wide lanes)
-    # src = np.float32([[400,350], [760,350], [1280,500], [0,500]])
+    src = np.float32([[400,350], [760,350], [1280,500], [0,500]])
 
     # Urban road: (1m wide lanes)
     # src = np.float32([[420,380], [930,380], [1280,720], [50,720]])
 
     # Circuit race: (2m wide lanes)
-    src = np.float32([[500,350], [750,350], [1280,550], [0,450]])
+    # src = np.float32([[500,350], [750,350], [1280,550], [0,450]])
 
     dst = np.float32([[300, 0], [900,0], [900,720], [300,720]])
 
@@ -26,16 +25,21 @@ def perspective_transform(img):
     M = cv2.getPerspectiveTransform(src, dst)
     warped = cv2.warpPerspective(img, M, img_size)
 
-    return warped
+    # Contour filter to take out noise and blobs that aren't the lanes
+    blob_size = 1000
+    filtered = np.zeros(warped.shape, np.uint8)
+    contours, _ = cv2.findContours(warped, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    for cnt in contours:
+        if cv2.contourArea(cnt) >= blob_size: 
+            cv2.drawContours(filtered, [cnt], -1, 255, -1)
+    return filtered
 
 def threshold(img):
-    # Convert to grayscale 
-    img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-
-    # Apply adaptive thresholding
-    img_threshold = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 25, -20);
-
-    return img_threshold
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    adaptive_thres = cv2.adaptiveThreshold(channel_v, 255, 
+                               cv2.ADAPTIVE_THRESH_MEAN_C, 
+                               cv2.THRESH_BINARY, 25, -20)
+    return adaptive_thres
 
 def main(image_dir):
     # Find all images in the directory
@@ -57,15 +61,15 @@ def main(image_dir):
     for file in files_found:
         img = cv2.imread(file)
 
+        # Threshold thege ima and save it 
+        thres_save_path = thres_save_dir + os.path.splitext(file)[0] + '_thres.jpg'
+        img_thres = threshold(img)
+        cv2.imwrite(thres_save_path, img_thres)
+
         # Warp image and save it 
         warp_save_path = warp_save_dir + os.path.splitext(file)[0] + '_warped.jpg'
-        img_warped = perspective_transform(img)
+        img_warped = perspective_transform(img_thres)
         cv2.imwrite(warp_save_path, img_warped)
-
-        # Threshold the warped image and save it 
-        thres_save_path = thres_save_dir + os.path.splitext(file)[0] + '_thres.jpg'
-        img_thres = threshold(img_warped)
-        cv2.imwrite(thres_save_path, img_thres)
 
 if __name__ == "__main__":
     # Get command line arguments

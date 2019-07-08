@@ -3,11 +3,10 @@
  *  @competition IARRC 2019
  */
 
-
-//OPENCV
-
 //LOCAL
 #include "computer_vision.hpp"
+#include "traffic_light.hpp"
+#include "lane_detection.hpp"
 #include "endline_detection.hpp"
 #include "sign_detection.hpp"
 
@@ -17,12 +16,14 @@ int main(int argc, char** argv)
 {
   //Node and image transport initialization
   ros::init(argc, argv, "rr_computer_vision");
+  ROS_INFO("Initializing Computer Vision Node");
   ros::NodeHandle nh;
-  ROS_INFO("Starting Computer Vision Node");
   
-  ComputerVision computer_vision(nh);
-  // EndlineDetection ec(nh);
-  SignDetection sd(nh);
+  // ComputerVision computer_vision(nh);
+  // TrafficLightDetection traffic_light_detection(nh);
+  // EndlineDetection endline_detection(nh);
+  // LaneDetection lane_detection(nh);
+  // SignDetection sign_detection(nh);
 
   ros::spin();
   return 0;

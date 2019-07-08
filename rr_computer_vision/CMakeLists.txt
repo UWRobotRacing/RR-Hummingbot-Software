@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   cv_bridge
   roslint
+  rr_common
 )
 
 find_package(OpenCV REQUIRED)
