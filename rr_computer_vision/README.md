@@ -3,7 +3,7 @@ Computer Vision Node
 
 This node handles all the computer vision tasks required for the [IAARC 2019](https://iarrc.org/) competition, which involves traffic light, traffic sign, lane, and endline detection.
 
-### Lane Detection
+## Lane Detection
 All the races have lane lines present, and need to be reliably detected with varying lane widths and lighting conditions. For the 2019 competition, the races have the following lane widths:
 
 * Drag Race: 1.5m
@@ -26,7 +26,20 @@ Here are the results of this algorithm on the 3 varying lane widths. From top to
 | ![](images/lane_detection/drag_race/original.jpg) | ![](images/lane_detection/drag_race/threshold.jpg) | ![](images/lane_detection/drag_race/warp.jpg) | ![](images/lane_detection/drag_race/filtered.jpg) | ![](images/lane_detection/drag_race/occupancy.png) |
 | ![](images/lane_detection/circuit_race/original.jpg) | ![](images/lane_detection/circuit_race/threshold.jpg) | ![](images/lane_detection/circuit_race/warp.jpg) | ![](images/lane_detection/circuit_race/filtered.jpg) | ![](images/lane_detection/circuit_race/occupancy.png) |
 
-### Traffic Light Detection
+#### Horizontal Lane Detection
+For the urban road challenge, we need to monitor the horizontal lanes located at the intersection in order to know when we can start performing our turns. We are also required to remove these lanes from the occupancy grid output as to not box in the path planner at the intersections. In order to accomplish this, the following algorithm was developed:
+1. Dilate the warped and contour filtered binary image from step 3 above.
+2. Apply the probabilistic Hough lines algorithm to this binary image. This algorithm returns a set of line segments defined each by a set of endpoints.
+3. For each line, calculate it's angle. If the angle is within 30 degrees, this is deemed as a horizontal line. 
+4. For each horizontal line, check if any of it's endpoints is within 30 pixels from the bottom of the image. If true, this means we are crossing the line soon and we will publish a "horizontal_lane_crossed" msg as true.
+5. Each horizontal lane will have multiple horizontal line segments returned from the Hough lines so by setting each horizontal line segment thickness to 15 and adding it to a mask, we can cover the whole area used by the horizontal lanes in the mask.
+6. Invert the mask and apply it to the input image to remove horizontal lanes. Convert this image to an occupancy grid and publish it.
+
+| Original Image | Warped and Contour Filtered | Horizontal Hough Lines | Mask | Horizontal Lanes Removed |
+| -------------- | --------------------- | ----------------- | -------------------- | ----------------- |
+| ![](images/horizontal_lane_detection/original.png) | ![](images/horizontal_lane_detection/contour_filtered.png) | ![](images/horizontal_lane_detection/horizontal_hough_lines.png) | ![](images/horizontal_lane_detection/mask.png) | ![](images/horizontal_lane_detection/horizontal_lane_removed.png) |
+
+## Traffic Light Detection
 The start of each race is indicated by a traffic light switching from red to green. Our algorithm for detecting the traffic light is as follows:
 
 1. Colour thresholding in the HSV colourspace to extract reds from the image. Read more about it [here](https://docs.opencv.org/3.4/da/d97/tutorial_threshold_inRange.html). The thresholding values were specifically chosen based on testing on different rosbags taken in the E7 parking lot during the day time. It is important to notice that the results could vary under different lighting conditions. Below are two sets of images showing the result when facing towards and away from the sun:
@@ -48,7 +61,7 @@ The start of each race is indicated by a traffic light switching from red to gre
 
 7.	Once the green light is detected, a service call is made that is provided by the Supervisor node, which will figure out what to do next. The traffic light node shuts down after this service call is made.
 
-### Endline Detection
+## Endline Detection
 All the races indicate the ending of a lap with a distinct magenta line, which is what we refer to as the "endline". Our algorithm for detecting the endline is as follows:
 
 1. Apply colour thresholding with the bounds set to extract magenta in the HSV colour space. Read more about it [here](https://docs.opencv.org/3.4/da/d97/tutorial_threshold_inRange.html). The thresholding values were realized through testing on endline tape setup in various lighting conditions. Note that lighting conditions could very likely give different results that don't look as good. Below are some images showing the result of this step:
