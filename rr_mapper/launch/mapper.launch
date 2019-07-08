@@ -5,11 +5,9 @@
  -  @author Toni Ogunmade(oluwatoni)
  -  @competition IARRC 2018
  -->
-<launch>    
-  <include file="$(find rr_computer_vision)/launch/computer_vision_base.launch"></include>
-  
+<launch>      
   <rosparam file="$(find rr_mapper)/config/rr_mapper.yaml"/>
-  
+
   <!--
   <node pkg="urg_node" name="urg_node" type="urg_node">
     <param name="serial_port" type ="string" value="/dev/hokuyo" />

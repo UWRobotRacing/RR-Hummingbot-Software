@@ -77,17 +77,8 @@ void LaserMapper::PublishMap() {
         full_map.data[i] = belief_map_[i];
     }
 
-    /*
-    meta_data_.origin.position.x = -1*(meta_data_.width*meta_data_.resolution)/2 - camera_width_offset_;
-    meta_data_.origin.position.y = -camera_height_offset_;
-    TODO: Get camera offsets here to place into combiner
-    */
-
-
-    // TODO: Fix the offset
     //Joins the occupancy grid of the lane and the lidar
-    // CombineOccupancyGrid(full_map, lane_detection_msg_, camera_offset_height_, camera_offset_width_);
-    CombineOccupancyGrid(full_map, lane_detection_msg_, -0.105, 0.05);
+    CombineOccupancyGrid(full_map, lane_detection_msg_, offset_height_, offset_width_);
 
     map_pub_.publish(full_map);
     belief_map_.clear();
@@ -96,14 +87,11 @@ void LaserMapper::PublishMap() {
 
 void LaserMapper::InitializeSubscribersandPublishers() {
     // PUBLISHERS
-    map_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>("/occupancy_grid_output", 1);
+    map_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>(rr_mapper::mapper_occupnacy_grid, 1);
 
     // SUBSCRIBERS
     lidar_sub_ = nh_.subscribe("/scan", 1, &LaserMapper::LidarCallback, this);
-    
-    
     lane_detection_sub_ = nh_.subscribe(rr_cv::lane_detection_occupancy_grid, 1, &LaserMapper::LaneDetectionCallback, this);
-    
 }
 
 /**
@@ -128,7 +116,7 @@ void LaserMapper::LaneDetectionCallback(const nav_msgs::OccupancyGrid::ConstPtr&
 
 void LaserMapper::GetParam() {
     // Map
-    nh_.param<double>("LaserMapper/map_res", map_res_, 0.01);
+    nh_.param<double>("Resolution", map_res_, 0.01);
     nh_.param<int>("LaserMapper/map_W", map_width_, 1280);
     nh_.param<int>("LaserMapper/map_H", map_height_, 720);
     
@@ -143,8 +131,8 @@ void LaserMapper::GetParam() {
     nh_.param<double>("LaserMapper/maxrange", max_range_, 8);
 
     // Offset
-    nh_.param<int>("LaserMapper/offset_height", offset_height_, 0);
-    nh_.param<int>("LaserMapper/offset_width", offset_width_, 0);
+    nh_.param<double>("CameraHeightOffset", offset_height_, 0);
+    nh_.param<double>("CameraWidthOffset", offset_width_, 0);
 }
 
 void LaserMapper::InitMap() {

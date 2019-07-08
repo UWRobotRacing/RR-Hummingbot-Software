@@ -84,8 +84,8 @@ class LaserMapper
     const double OBS_SCALE_ = 1;
 
     // lane_detection Map Values
-    int offset_height_;
-    int offset_width_;
+    double offset_height_;
+    double offset_width_;
 
     enum CellState {
     NO_OBS_ = 0,

@@ -38,7 +38,6 @@ namespace rr_supervisor {
 
 namespace rr_controller {
   static std::string twist_cmd = rr_str + rr_controller_str + "twist_cmd";
-
 }
 
 namespace rr_mapper {
