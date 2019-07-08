@@ -26,7 +26,7 @@ EndlineDetection::EndlineDetection(ros::NodeHandle nh) : it_(nh_), detection_sta
 {
   client_ = nh_.serviceClient<std_srvs::Empty>(rr_supervisor::count_lap_service);
   img_subscriber_ = it_.subscribe(rr_sensor_topics::zed_left, 1, &EndlineDetection::EndlineImgCallback, this);
-  // img_publisher_ = it_.advertise("/test_endline", 1);
+  // test_publisher_ = it_.advertise("/test_endline", 1);
 }
 
 // Function used to sort by contour area
@@ -62,7 +62,7 @@ void EndlineDetection::EndlineImgCallback(const sensor_msgs::ImageConstPtr& msg)
     // std_msgs::Header header;
     // header.stamp=ros::Time::now();
     // img_bridge_output=cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, mag_img);
-    // img_publisher_.publish(img_bridge_output.toImageMsg());
+    // test_publisher_.publish(img_bridge_output.toImageMsg());
 
     // Find Contours in thersholded image
     cv::findContours(mag_img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
@@ -130,7 +130,7 @@ void EndlineDetection::EndlineImgCallback(const sensor_msgs::ImageConstPtr& msg)
           // Shutdown all ROS clients, subscribers, and publishers
           client_.shutdown();
           img_subscriber_.shutdown();
-          // img_publisher_.shutdown();
+          // test_publisher_.shutdown();
         }
       }
     }

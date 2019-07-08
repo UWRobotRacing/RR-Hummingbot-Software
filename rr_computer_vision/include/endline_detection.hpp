@@ -25,7 +25,7 @@ class EndlineDetection
     ros::ServiceClient client_;
     image_transport::ImageTransport it_;
     image_transport::Subscriber img_subscriber_;
-    // image_transport::Publisher img_publisher_;
+    // image_transport::Publisher test_publisher_;
 
     // Callback and lambda function for detecting the endline
     void EndlineImgCallback(const sensor_msgs::ImageConstPtr&);
@@ -37,7 +37,7 @@ class EndlineDetection
 
     // 1500 was used as the max contour threshold as that is what the area of the contour
     // is when the endline first comes into view (approximately)
-    const double contour_area_cutoff_ = 1500.00;
+    const double contour_area_cutoff_ = 3000.00;
 
     // Colour thresholding parameters
     const int low_hue_ = 130;
