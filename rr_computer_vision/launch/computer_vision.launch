@@ -10,7 +10,7 @@
   <param name="LaneDetectionParamsFile" type="string" value="$(arg config_file)"/>
 
   <!-- Launch ZED camera wrapper -->
-  <include file="$(find zed_wrapper)/launch/zed.launch"> </include>
+  <!-- <include file="$(find zed_wrapper)/launch/zed.launch"> </include> -->
   
   <!-- Computer Vision Node -->
   <node pkg="rr_computer_vision" type="rr_computer_vision" name="rr_computer_vision" output="screen"/>

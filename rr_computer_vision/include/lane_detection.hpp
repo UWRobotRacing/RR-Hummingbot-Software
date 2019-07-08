@@ -16,6 +16,7 @@
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <std_msgs/Bool.h>
 
 // OpenCV includes
 #include <opencv2/opencv.hpp>
@@ -32,11 +33,13 @@ class LaneDetection
     image_transport::ImageTransport it_;
     image_transport::Subscriber img_subscriber_;
     ros::Publisher grid_pub_;
+    ros::Publisher horiz_lane_monitor_pub_;
 
     // Publishers for debugging
     // ros::Publisher test_thres_img_pub_;
     // ros::Publisher test_warp_img_pub_;
-    ros::Publisher test_contour_filter_img_pub_;
+    // ros::Publisher test_contour_filter_img_pub_;
+    // ros::Publisher test_horiz_lane_removal_img_pub_;
 
     // Parameters
     cv::Mat warp_src_coords_;

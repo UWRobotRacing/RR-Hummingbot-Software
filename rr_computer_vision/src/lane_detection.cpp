@@ -59,8 +59,10 @@ void LaneDetection::InitializePublishers() {
   // Setup debug rostopics
   // test_thres_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_thres_img", 1);
   // test_warp_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_warp_img", 1);
-  test_contour_filter_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_contour_filter_img", 1);
+  // test_contour_filter_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_contour_filter_img", 1);
+  // test_horiz_lane_removal_img_pub_ = nh_.advertise<sensor_msgs::Image>("/test_horizontal_lane_removal_img", 1);
 
+  horiz_lane_monitor_pub_ = nh_.advertise<std_msgs::Bool>(rr_cv::horizontal_lane_monitor, 1);
   grid_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>(rr_cv::lane_detection_occupancy_grid, 1);
 }
 
@@ -103,15 +105,21 @@ void LaneDetection::ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
   cv::Mat horizontal_removal_output;
   if (monitor_horizontal_lanes_) {
     bool cross_flag = RemoveHorizontalLanes(img_contour_output, horizontal_removal_output);
-    ROS_INFO("Cross: %s", cross_flag ? "true" : "false");
+
+    // Publish lane crossing status
+    std_msgs::Bool horiz_lane_msg;
+    horiz_lane_msg.data = cross_flag;
+    horiz_lane_monitor_pub_.publish(horiz_lane_msg);
+
+    // Publish horizontal lane removal image (For testing purposes)
+    // header.stamp=ros::Time::now();
+    // img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, horizontal_removal_output);
+    // test_horiz_lane_removal_img_pub_.publish(img_bridge_output.toImageMsg());
   } else {
     horizontal_removal_output = img_contour_output;
   }
 
-  header.stamp=ros::Time::now();
-  img_bridge_output = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, horizontal_removal_output);
-  test_contour_filter_img_pub_.publish(img_bridge_output.toImageMsg());
-
+  // Convert to an occupancy grid and publish
   nav_msgs::OccupancyGrid grid_msg;
   ConvertToOccupancyGrid(horizontal_removal_output, grid_msg);
   grid_pub_.publish(grid_msg);
@@ -184,9 +192,6 @@ bool LaneDetection::RemoveHorizontalLanes(const cv::Mat &input_img, cv::Mat &out
   // Apply probabilistic Hough lines to dilated image
   std::vector<cv::Vec4i> lines;
   cv::HoughLinesP(dilated, lines, 1, CV_PI/180, 100, 100, 20);
-  //visualize lines
-  // output_img = input_img.clone();
-  // cv::cvtColor(output_img, output_img, CV_GRAY2BGR);
 
   // Create a mask of all horizontal lines
   cv::Mat mask(input_img.size(), CV_8U, cv::Scalar(0));
@@ -202,10 +207,10 @@ bool LaneDetection::RemoveHorizontalLanes(const cv::Mat &input_img, cv::Mat &out
 
     // A theta value between -30 and 30 defines a horizontal line
     if (-30 < theta && theta < 30) {
-      // Add line to mask with a thickness of 10
-      cv::line(mask, point1, point2, cv::Scalar(255), 10);
-      //cv::line(output_img, point1, point2, cv::Scalar(0, 0, 255), 2);
-      //ROS_INFO("Height: %i, y1: %i, y2: %i", input_img.rows, point1.y, point2.y);
+      // Add line to mask with a thickness of 15
+      cv::line(mask, point1, point2, cv::Scalar(255), 15);
+
+      // If line is within 30 pixels of bottom of image, flag that we are crossing it
       if (point2.y > input_img.rows - 30 || point1.y > input_img.rows - 30) {
         cross_line = true;
       }
