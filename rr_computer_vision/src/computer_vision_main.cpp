@@ -18,10 +18,19 @@ int main(int argc, char** argv)
   ROS_INFO("Initializing Computer Vision Node");
   ros::NodeHandle nh;
   
-  // ComputerVision computer_vision(nh);
+  // Poll until traffic light is detected
   // TrafficLightDetection traffic_light_detection(nh);
+  // ros::Rate r(5);
+  // while (ros::ok() && (!traffic_light_detection.race_started))
+  // {
+  //   ros::spinOnce();
+  //   r.sleep();
+  // }
+
+  // Once race has started, can instantiate the other objects
+  // LaneDetection lane_detection(nh);
   // EndlineDetection endline_detection(nh);
-  LaneDetection lane_detection(nh);
+  // ComputerVision computer_vision(nh);
 
   ros::spin();
   return 0;

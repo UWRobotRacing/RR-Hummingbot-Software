@@ -17,7 +17,7 @@
 #include <sensor_msgs/image_encodings.h>
 
 TrafficLightDetection::TrafficLightDetection(ros::NodeHandle nh) : it_(nh_), red_light_detected_(false), default_pixel_ratio_(0),
-red_light_counter_(0), green_light_counter_(0) {
+red_light_counter_(0), green_light_counter_(0), race_started(false) {
   img_subscriber_ = it_.subscribe(rr_sensor_topics::zed_right, 1, &TrafficLightDetection::ImgCallback, this);
   client_ = nh_.serviceClient<std_srvs::Empty>(rr_supervisor::start_race_service);
   // test_publisher_ = it_.advertise("/test_traffic_light", 1);
@@ -98,6 +98,9 @@ void TrafficLightDetection::ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
             img_subscriber_.shutdown();
             client_.shutdown();
             // test_publisher_.shutdown();
+
+            // Set flag that cv node main can use
+            race_started = true;
           }
         }
       }
