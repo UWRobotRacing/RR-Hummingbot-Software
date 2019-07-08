@@ -54,7 +54,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /zed/zed_node/right/image_rect_color
+      Image Topic: /zed/zed_node/left/image_rect_color
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -105,6 +105,18 @@ Visualization Manager:
       Median window: 5
       Min Value: 0
       Name: Contour Filtered
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /test_horizontal_lane_removal_img
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Horizontal Lane Removed
       Normalize Range: true
       Queue Size: 2
       Transport Hint: raw

@@ -21,3 +21,6 @@ min_contour_size: 250
 resolution: 0.0047
 camera_width_offset: 0.05
 camera_height_offset: -0.105
+
+# Horizontal lane montioring
+monitor_horizontal_lanes: false

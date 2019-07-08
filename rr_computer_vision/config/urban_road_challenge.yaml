@@ -3,6 +3,7 @@
 # @brief Parameters for the urban road challenge
 # @author Waleed Ahmed (w29ahmed)
 # @author Carson Chen
+# @author Martin Ethier
 # @competition IARRC 2019
 
 # 4 point coordinates in image plane used as the source coordinates for the warp transform
@@ -21,3 +22,6 @@ min_contour_size: 200
 resolution: 0.0027
 camera_width_offset: -0.05
 camera_height_offset: -0.105
+
+# Horizontal lane montioring
+monitor_horizontal_lanes: true

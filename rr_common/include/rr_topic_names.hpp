@@ -27,6 +27,7 @@ namespace rr_sensor_topics {
 
 namespace rr_cv {
   static std::string lane_detection_occupancy_grid = rr_str + rr_cv_str + "lane_detection/occupancy_grid";
+  static std::string horizontal_lane_monitor = rr_str + rr_cv_str + "lane_detection/horizontal_lane_crossed";
 }
 
 namespace rr_supervisor {
