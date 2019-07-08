@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   std_srvs
   geometry_msgs
+  rr_common
 )
 
 catkin_package()

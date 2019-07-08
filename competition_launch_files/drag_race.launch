@@ -1,0 +1,12 @@
+<launch>
+  <param name="LapCount" type="int" value="1"/>
+
+  <!-- Supervisor Node -->
+  <include file="$(find rr_supervisor)/launch/supervisor.launch" />
+
+  <!-- Computer Vision Node -->
+  <include file="$(find rr_computer_vision)/launch/computer_vision.launch">
+    <arg name="config_file" value="$(find rr_computer_vision)/config/drag_race.yaml" />
+  </include>
+
+</launch>

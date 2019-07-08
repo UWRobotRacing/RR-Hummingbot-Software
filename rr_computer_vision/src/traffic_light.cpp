@@ -13,19 +13,22 @@
 // ROS includes
 // #include <ros/console.h>
 #include <std_srvs/Empty.h>
-#include <std_srvs/Trigger.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
 TrafficLightDetection::TrafficLightDetection(ros::NodeHandle nh) : it_(nh_), red_light_detected_(false), default_pixel_ratio_(0),
 red_light_counter_(0), green_light_counter_(0) {
   img_subscriber_ = it_.subscribe(rr_sensor_topics::zed_right, 1, &TrafficLightDetection::ImgCallback, this);
-  client_ = nh_.serviceClient<std_srvs::Empty>("/Supervisor/start_race");
+  client_ = nh_.serviceClient<std_srvs::Empty>(rr_supervisor::start_race_service);
   // test_publisher_ = it_.advertise("/test_traffic_light", 1);
 
   // Set up blob detector
   SetBlobDetectorParams();
   detector_ = cv::SimpleBlobDetector::create(params_);
+}
+
+TrafficLightDetection::~TrafficLightDetection() {
+
 }
 
 /**
@@ -56,7 +59,7 @@ void TrafficLightDetection::SetBlobDetectorParams() {
 void TrafficLightDetection::ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
   cv::Mat traffic_light_image, hsv_img, threshold_img, blur_img, im_with_keypoints;
   cv_bridge::CvImagePtr cv_ptr;
-  std_srvs::Trigger srv;
+  std_srvs::Empty srv;
   double new_ratio = 0;
 
   try {
@@ -84,7 +87,6 @@ void TrafficLightDetection::ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
 
       if ((pixel_ratio + pixel_ratio_range_) >= default_pixel_ratio_) {
         green_light_counter_ = 0;
-        ROS_INFO("Red light is still there.");
       }
       else {
         // green light buffer
@@ -92,7 +94,10 @@ void TrafficLightDetection::ImgCallback(const sensor_msgs::ImageConstPtr& msg) {
         if (green_light_counter_ >= frame_counter_max_) {
           ROS_INFO("Green light detected!");
           if (client_.call(srv)) {
-            ros::shutdown();
+            // Shutdown all ROS subscribers, publishers, and service clients
+            img_subscriber_.shutdown();
+            client_.shutdown();
+            // test_publisher_.shutdown();
           }
         }
       }

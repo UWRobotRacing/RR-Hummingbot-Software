@@ -20,11 +20,7 @@ class TrafficLightDetection
 {
   public:
     TrafficLightDetection(ros::NodeHandle nh);
-    void ImgCallback(const sensor_msgs::ImageConstPtr& msg);
-    void SetBlobDetectorParams();
-    void RedColorThreshold(const cv::Mat& input_img, cv::Mat& threshold_img);
-    void RedLightDetection(const cv::Mat& threshold_img);
-    void FindBoundRect(const cv::Mat& threshold_img, cv::Mat& crop_img, std::vector<cv::KeyPoint>& keypoints, const int max_area_index);
+    ~TrafficLightDetection();
 
   private:
     ros::NodeHandle nh_;
@@ -32,6 +28,12 @@ class TrafficLightDetection
     image_transport::ImageTransport it_;
     image_transport::Subscriber img_subscriber_;
     // image_transport::Publisher test_publisher_;
+
+    void SetBlobDetectorParams();
+    void ImgCallback(const sensor_msgs::ImageConstPtr& msg);
+    void RedColorThreshold(const cv::Mat& input_img, cv::Mat& threshold_img);
+    void RedLightDetection(const cv::Mat& threshold_img);
+    void FindBoundRect(const cv::Mat& threshold_img, cv::Mat& crop_img, std::vector<cv::KeyPoint>& keypoints, const int max_area_index);
 
     // Blob detector
     cv::Rect boundRect_;
