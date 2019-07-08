@@ -36,6 +36,13 @@ LaneDetection::LaneDetection(ros::NodeHandle nh) : it_(nh_) {
   fs["camera_width_offset"] >> camera_width_offset_; 
   fs["camera_height_offset"] >> camera_height_offset_;
 
+  // Occupancy grid meta data
+  meta_data_.height = 720;  
+  meta_data_.width = 1280;
+  meta_data_.resolution = resolution_; 
+  meta_data_.origin.position.x = 0;
+  meta_data_.origin.position.y = 0;
+
   // Initialize publishers and subscribers
   InitializeSubscribers();  
 
@@ -163,13 +170,12 @@ cv::Mat LaneDetection::ContourFilter(const cv::Mat &img, const int min_contour_s
 void LaneDetection::ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::OccupancyGrid &grid_msg) {
   uchar* data_pointer_; 
   std::vector<int8_t> occupancy_;
-  nav_msgs::MapMetaData meta_data_;
   occupancy_.clear();
   occupancy_.reserve(img.cols * img.rows); 
 
-  for (int row = 0; row < img.rows; row++) 
+  for (int row = img.rows; row > 0; row--) 
   {
-    for (int col = img.cols; col > 0; col--) 
+    for (int col = 0; col < img.cols; col++) 
     {
       if (img.at<uchar>(row, col) == 0) 
       {
@@ -186,12 +192,10 @@ void LaneDetection::ConvertToOccupancyGrid(const cv::Mat &img, nav_msgs::Occupan
 
   grid_msg.data = occupancy_; 
 
-  meta_data_.height = 720;  
-  meta_data_.width = 1280;
-  meta_data_.resolution = resolution_; 
-
+  /*
   meta_data_.origin.position.x = -1*(meta_data_.width*meta_data_.resolution)/2 - camera_width_offset_;
-  meta_data_.origin.position.y = -1*(meta_data_.height*meta_data_.resolution) - camera_height_offset_;
+  meta_data_.origin.position.y = -camera_height_offset_;
+   */
 
   grid_msg.info = meta_data_; 
 }
