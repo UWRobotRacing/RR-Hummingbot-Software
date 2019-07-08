@@ -21,7 +21,7 @@ min_contour_size: 200
 # Mapper meta data parameters
 resolution: 0.0027
 camera_width_offset: -0.05
-camera_height_offset: 0.048
+camera_height_offset: -0.105
 
 # Horizontal lane montioring
 monitor_horizontal_lanes: true
