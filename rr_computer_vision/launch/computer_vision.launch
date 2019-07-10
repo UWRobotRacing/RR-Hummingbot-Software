@@ -9,6 +9,8 @@
 
   <param name="LaneDetectionParamsFile" type="string" value="$(arg config_file)"/>
 
+  <param name="HaarCascadeFile" type="string" value="$(find rr_computer_vision)/classifier_dev/haar_cascade.xml"/>
+
   <!-- Launch ZED camera wrapper -->
   <include file="$(find zed_wrapper)/launch/zed.launch"> </include>
   

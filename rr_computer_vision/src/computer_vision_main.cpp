@@ -8,6 +8,7 @@
 #include "traffic_light.hpp"
 #include "lane_detection.hpp"
 #include "endline_detection.hpp"
+#include "sign_detection.hpp"
 
 /** @brief main file that starts the subscribers and calls spin
  */
@@ -30,6 +31,7 @@ int main(int argc, char** argv)
   // Once race has started, can instantiate the other objects
   // LaneDetection lane_detection(nh);
   // EndlineDetection endline_detection(nh);
+  // SignDetection sign_detection(nh);
   // ComputerVision computer_vision(nh);
 
   ros::spin();
