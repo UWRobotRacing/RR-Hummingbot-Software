@@ -46,53 +46,60 @@ int main(int argc, char **argv)
   int counter = 0;
   while (ros::ok())
   {
-    if (counter == 0)
-    {
-      // Writing 
-      Interface::Transmitter packet = interface.transmitter_;
-      // Add Padding
-      packet.padding = 65535;
-      /*
-      unsigned char *payload = new unsigned char [sizeof(packet)];
-      unsigned char *convert = (unsigned char*)&packet;
-      for (int i = 0; i < sizeof(packet); i++)
-      {
-        payload[i] = convert[sizeof(payload)-i-1];
-      }
-      int written_bytes = write(serial_port_filestream, payload, sizeof(packet));
-      delete payload;
-      payload = nullptr;
-       */
-      unsigned char *convert = (unsigned char*)&packet;
-      int writeen_bytes = write(serial_port_filestream, convert, sizeof(convert));
-    }
-    else
-    {
-      // Reading 
-      // Allocate memory for read buffer, set size according to your needs
-      char read_buf [sizeof(Interface::Receiver)];
-      memset(&read_buf, '\0', sizeof(read_buf));
-      
-      // Read bytes. The behaviour of read() (e.g. does it block?,
-      // how long does it block for?) depends on the configuration
-      // settings above, specifically VMIN and VTIME
-      int read_bytes = read(serial_port_filestream, &read_buf, sizeof(read_buf));
+    // Writing 
+    Interface::Transmitter packet = interface.transmitter_;
+    // Add Padding
+    packet.padding = 65535;
+    unsigned char *convert = (unsigned char*)&packet;
+    int writeen_bytes = write(serial_port_filestream, convert, sizeof(convert));
 
-      // Ensures that there is always data flowing through
-      if (read_bytes != -1)
-      { 
-        interface.receiver_ = interface.Deserialize(read_buf);
-      }
+    // if (counter == 0)
+    // {
+    //   // Writing 
+    //   Interface::Transmitter packet = interface.transmitter_;
+    //   // Add Padding
+    //   packet.padding = 65535;
+    //   /*
+    //   unsigned char *payload = new unsigned char [sizeof(packet)];
+    //   unsigned char *convert = (unsigned char*)&packet;
+    //   for (int i = 0; i < sizeof(packet); i++)
+    //   {
+    //     payload[i] = convert[sizeof(payload)-i-1];
+    //   }
+    //   int written_bytes = write(serial_port_filestream, payload, sizeof(packet));
+    //   delete payload;
+    //   payload = nullptr;
+    //    */
+    //   unsigned char *convert = (unsigned char*)&packet;
+    //   int writeen_bytes = write(serial_port_filestream, convert, sizeof(convert));
+    // }
+    // else
+    // {
+    //   // Reading 
+    //   // Allocate memory for read buffer, set size according to your needs
+    //   char read_buf [sizeof(Interface::Receiver)];
+    //   memset(&read_buf, '\0', sizeof(read_buf));
       
-      if (counter == 2)
-      {
-        counter = 0;
-      }
-      else 
-      {
-        counter++;
-      }
-    }
+    //   // Read bytes. The behaviour of read() (e.g. does it block?,
+    //   // how long does it block for?) depends on the configuration
+    //   // settings above, specifically VMIN and VTIME
+    //   int read_bytes = read(serial_port_filestream, &read_buf, sizeof(read_buf));
+
+    //   // Ensures that there is always data flowing through
+    //   if (read_bytes != -1)
+    //   { 
+    //     interface.receiver_ = interface.Deserialize(read_buf);
+    //   }
+      
+    //   if (counter == 2)
+    //   {
+    //     counter = 0;
+    //   }
+    //   else 
+    //   {
+    //     counter++;
+    //   }
+    // }
 
     ros::spinOnce();
     r.sleep();
