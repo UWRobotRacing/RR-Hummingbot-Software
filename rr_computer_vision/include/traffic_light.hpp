@@ -21,6 +21,7 @@ class TrafficLightDetection
   public:
     TrafficLightDetection(ros::NodeHandle nh);
     ~TrafficLightDetection();
+    bool race_started;
 
   private:
     ros::NodeHandle nh_;
