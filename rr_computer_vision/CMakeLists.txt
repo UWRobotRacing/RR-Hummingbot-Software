@@ -14,6 +14,21 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   roslint
   rr_common
+  message_generation
+)
+
+add_message_files(
+  FILES
+  TrafficSign.msg
+)
+
+generate_messages(
+  DEPENDENCIES 
+  std_msgs
+)
+
+catkin_package(
+  CATKIN_DEPENDS message_runtime
 )
 
 find_package(OpenCV REQUIRED)
@@ -37,6 +52,8 @@ src/lane_detection.cpp include/lane_detection.hpp
 src/sign_detection.cpp include/sign_detection.hpp
 src/traffic_light.cpp include/traffic_light.hpp
 src/endline_detection.cpp include/endline_detection.hpp)
+
+add_dependencies(rr_computer_vision rr_computer_vision_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(rr_computer_vision computer_vision ${catkin_LIBRARIES} ${OpenCV_LIBS})

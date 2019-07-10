@@ -9,6 +9,8 @@
 // ROS
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
+#include <std_msgs/Bool.h>
+#include <rr_computer_vision/TrafficSign.h>
 
 // OpenCV
 #include <opencv2/opencv.hpp>
@@ -24,24 +26,34 @@ class SignDetection
   private:
     // Ros variables
     ros::NodeHandle nh_;
-    ros::ServiceClient client_;
-    //ros::Publisher sign_status_publisher_;
+    ros::Subscriber horiz_lane_monitor_sub_;
+    ros::Publisher sign_status_pub_;
     image_transport::ImageTransport it_;
-    image_transport::Subscriber img_subscriber_;
-    image_transport::Publisher img_publisher_;
+    image_transport::Subscriber zed_right_img_sub_;
+    // image_transport::Publisher img_publisher_;
 
-    void RGBCameraCallback(const sensor_msgs::ImageConstPtr& left_msg);
-    cv::Rect ExpandRect(cv::Rect rect_in);
-    std::pair<cv::Mat, uint8_t> CheckArrowDir(cv::Mat sign);
+    void InitializeSubscribers();
+    void InitializePublishers();
+
+    void HorizontalLaneMonitorCallback(const std_msgs::Bool& lane_crossed_msg);
+    void ZedCameraImgCallback(const sensor_msgs::ImageConstPtr& right_img_msg);
+    uint8_t CheckArrowDir(const cv::Mat& sign);
+
+    // Variable for msg from horizontal lane monitor
+    bool horizontal_lane_crossed;
 
     // Variables for tracking the sign through frames
     unsigned int consecutive_frames = 0;
     cv::Rect last_frame_bbox;
+    bool check_arrow = false;
+
+    // Array to accumulate direction frequency when tracking arrow direction
+    std::vector<uint16_t> arrow_status_accumulator = std::vector<uint16_t>(4);
 
     // Haar cascade
     cv::CascadeClassifier sign_cascade;
 
-    // Enum for publish message
+    // Enum for publishing TrafficSign msg
     enum sign_status: uint8_t
     {
       NONE,
