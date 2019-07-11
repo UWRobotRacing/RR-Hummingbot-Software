@@ -8,12 +8,12 @@
 
 #include <opencv2/opencv.hpp>
 
-enum race_conditions {
+enum weather_conditions {
   overcast = 0,
   sunny = 1,
   sun_in_image = 2,
   indoor = 3
-}
+};
 
 namespace traffic_light {
   // The traffic light looks more white when indoors and overcast as it is very bright LEDs 

@@ -39,6 +39,9 @@ class EndlineDetection
     // is when the endline first comes into view (approximately)
     const double contour_area_cutoff_ = 3000.00;
 
+    // const cv::Scalar overcast_hsv_lower_bounds_(0, 0, 230);
+
+
     // Colour thresholding parameters
     const int low_hue_ = 130;
     const int high_hue_ = 180;

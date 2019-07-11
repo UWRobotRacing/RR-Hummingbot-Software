@@ -1,13 +1,16 @@
-<!--@file computer_vision_base.launch
- -  @brief This launch file is used to run the lane detection node on each camera
- -  @author Matthew Post
- -  @author Toni Ogunmade(oluwatoni)
- -  @competition IARRC 2018
+<!--@file computer_vision.launch
+ -  @brief This launch file is used to run the computer vision node
+ -  @author Waleed Ahmed (w29ahmed)
+ -  @competition IARRC 2019
  -->
 <launch>
   <arg name="config_file" default="$(find rr_computer_vision)/config/urban_road_challenge.yaml"/>
 
   <param name="LaneDetectionParamsFile" type="string" value="$(arg config_file)"/>
+
+  <!-- Weather condition enum defined in rr_computer_vision/include/thresholding_values.hpp -->
+  <!-- overcast: 0, sunny: 1, sun_in_image: 2. indoor: 3 -->
+  <param name="WeatherCondition" type="int" value="1"/>
 
   <!-- Launch ZED camera wrapper -->
   <include file="$(find zed_wrapper)/launch/zed.launch"> </include>
