@@ -42,24 +42,26 @@ For the urban road challenge, we need to monitor the horizontal lanes located at
 ## Traffic Light Detection
 The start of each race is indicated by a traffic light switching from red to green. Our algorithm for detecting the traffic light is as follows:
 
-1. Colour thresholding in the HSV colourspace to extract reds from the image. Read more about it [here](https://docs.opencv.org/3.4/da/d97/tutorial_threshold_inRange.html). The thresholding values were specifically chosen based on testing on different rosbags taken in the E7 parking lot during the day time. It is important to notice that the results could vary under different lighting conditions. Below are two sets of images showing the result when facing towards and away from the sun:
+1. Crop out the top right quadrant of the image since the traffic light is always in that area
 
-| Original Image                                    |  Red Colour Threshold                          |
-| ------------------------------------------------- | ---------------------------------------------- |
-| ![](images/traffic_light_detection/original1.jpg) | ![](images/traffic_light_detection/thres1.png) |
-| ![](images/traffic_light_detection/original2.jpg) | ![](images/traffic_light_detection/thres2.png) |
+2. Colour thresholding in the HSV colourspace to extract reds from the image. Read more about it [here](https://docs.opencv.org/3.4/da/d97/tutorial_threshold_inRange.html). The thresholding values were specifically chosen based on testing on different rosbags taken in the E7 parking lot in different weather conditions, and a different set of values were chosen based on the weather (overcast, sunny, sun in image, indoor):
 
-2. Find blobs in each frame by using OpenCV's blob detection algorithm. Read more about it [here](https://www.learnopencv.com/blob-detection-using-opencv-python-c/). The parameters in the algorithm are adjusted to catch blobs that look circular.
+3. Find blobs in each frame by using OpenCV's blob detection algorithm. Read more about it [here](https://www.learnopencv.com/blob-detection-using-opencv-python-c/). The parameters in the algorithm are adjusted to catch blobs that look circular.
 
-3. Sort and find the largest blob. Most of the time, the red light is the only blob that is detected and it is the largest blob. Therefore, it is safe to assume that the largest blob is coming from the traffic light.
+4. Sort and find the largest blob. Most of the time, the red light is the only blob that is detected and it is the largest blob. Therefore, it is safe to assume that the largest blob is coming from the traffic light.
 
-4. Fit a bounding box around the blob found in the previous step, calculate the non-zero pixel ratio in the square, and set that as a reference ratio. 
+5. Fit a bounding box around the blob found in the previous step, calculate the non-zero pixel ratio in the square, and set that as a reference ratio.
 
-5. Calculate the ratio on the same square for the next few frames and compare it to the reference value. Must see at least 10 frames in a row with a similar ratio before concluding that the red light has been detected. The 10 frame counter is to avoid false positives that could arise from noisy frames.
+6. Calculate the ratio on the same square for the next few frames and compare it to the reference value. Must see at least 10 frames in a row with a similar ratio before concluding that the red light has been detected. The 10 frame counter is to avoid false positives that could arise from noisy frames.
 
-6. Keep checking the ratio in each frame until there are 5 frames in a row that give a ratio significantly smaller than the reference. This will happen when the red light turns off, at which point the green light comes on, and it is concluded that the green light has been detected.
+7. Keep checking the ratio in each frame until there are 5 frames in a row that give a ratio significantly smaller than the reference. This will happen when the red light turns off, at which point the green light comes on, and it is concluded that the green light has been detected.
 
-7.	Once the green light is detected, a service call is made that is provided by the Supervisor node, which will figure out what to do next. The traffic light node shuts down after this service call is made.
+8.	Once the green light is detected, a service call is made that is provided by the Supervisor node, which will figure out what to do next. The traffic light node shuts down after this service call is made.
+
+| Original Image | Cropped Image | Red Color Threshold | Blob Detection |
+| ---------------| ------------- | ------------------- | -------------- |
+| ![](images/traffic_light_detection/original3.jpg) | ![](images/traffic_light_detection/crop3.jpg) | ![](images/traffic_light_detection/thres3.jpg) | ![](images/traffic_light_detection/blob3.jpg) |
+| ![](images/traffic_light_detection/original4.jpg) | ![](images/traffic_light_detection/crop4.jpg) | ![](images/traffic_light_detection/thres4.jpg) | ![](images/traffic_light_detection/blob4.jpg) |
 
 ## Endline Detection
 All the races indicate the ending of a lap with a distinct magenta line, which is what we refer to as the "endline". Our algorithm for detecting the endline is as follows:

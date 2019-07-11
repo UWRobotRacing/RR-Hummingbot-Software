@@ -21,7 +21,7 @@ int main(int argc, char** argv)
   
   // Poll until traffic light is detected
   // TrafficLightDetection traffic_light_detection(nh);
-  // ros::Rate r(5);
+  // ros::Rate r(30);
   // while (ros::ok() && (!traffic_light_detection.race_started))
   // {
   //   ros::spinOnce();
