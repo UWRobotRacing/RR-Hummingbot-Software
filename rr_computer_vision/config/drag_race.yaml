@@ -1,0 +1,26 @@
+%YAML:1.0
+# @file drag_race.yaml
+# @brief Parameters for drag race
+# @author Waleed Ahmed (w29ahmed)
+# @author Carson Chen
+# @competition IARRC 2019
+
+# 4 point coordinates in image plane used as the source coordinates for the warp transform
+# Note: OpenCV Image coordinates are in [x,y], where X is a column index 
+# (0 left, positive rightwards), and Y is a row index (0 top, positive downwards)
+warp_src_coords: !!opencv-matrix
+   rows: 4
+   cols: 2
+   dt: f
+   data: [400, 350, 760, 350, 1280, 500, 0, 500]
+
+camera_feed: "left"
+min_contour_size: 100
+
+# Mapper meta data parameters
+resolution: 0.0039
+camera_width_offset: -0.05
+camera_height_offset: -0.105
+
+# Horizontal lane montioring
+monitor_horizontal_lanes: false
