@@ -11,6 +11,7 @@
 // Local includes
 #include "rr_topic_names.hpp"
 #include "endline_detection.hpp"
+#include "thresholding_values.hpp"
 
 // ROS includes
 #include <cv_bridge/cv_bridge.h>
@@ -27,6 +28,29 @@ EndlineDetection::EndlineDetection(ros::NodeHandle nh) : it_(nh_), detection_sta
   client_ = nh_.serviceClient<std_srvs::Empty>(rr_supervisor::count_lap_service);
   img_subscriber_ = it_.subscribe(rr_sensor_topics::zed_left, 1, &EndlineDetection::EndlineImgCallback, this);
   // test_publisher_ = it_.advertise("/test_endline", 1);
+
+  // Get hsv thresholding values based on the weather conditions
+  int weather_condition;
+  nh_.param<int>("WeatherCondition", weather_condition, 1);
+
+  switch (weather_condition) {
+    case 0:
+      hsv_lower_bounds_ = endline_detection::overcast_hsv_lower_bounds;
+      hsv_upper_bounds_ = endline_detection::overcast_hsv_upper_bounds;
+      break;
+    case 1:
+      hsv_lower_bounds_ = endline_detection::sunny_hsv_lower_bounds;
+      hsv_upper_bounds_ = endline_detection::sunny_hsv_upper_bounds;
+      break;
+    case 2:
+      hsv_lower_bounds_ = endline_detection::sun_in_image_hsv_lower_bounds;
+      hsv_upper_bounds_ = endline_detection::sun_in_image_hsv_upper_bounds;
+      break;
+    case 3:
+      hsv_lower_bounds_ = endline_detection::indoor_hsv_lower_bounds;
+      hsv_upper_bounds_ = endline_detection::indoor_hsv_upper_bounds;
+      break;
+  }
 }
 
 // Function used to sort by contour area
@@ -54,7 +78,7 @@ void EndlineDetection::EndlineImgCallback(const sensor_msgs::ImageConstPtr& msg)
 
     // Colour thresholding to filter out magenta (colour of the endline)
     cv::cvtColor(init_img, hsv_img, CV_BGR2HSV);
-    cv::inRange(hsv_img, cv::Scalar(low_hue_, low_sat_, low_val_), cv::Scalar(high_hue_, high_sat_, high_val_), mag_img);
+    cv::inRange(hsv_img, hsv_lower_bounds_, hsv_upper_bounds_, mag_img);
     cv::GaussianBlur(mag_img, mag_img, cv::Size(7,7), 0, 0);
 
     // Publish thresholded image (For testing purposes)

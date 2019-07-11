@@ -167,7 +167,6 @@ void TrafficLightDetection::RedColorThreshold(const cv::Mat& input_img, cv::Mat&
   cv::Mat hsv_img;
   cv::cvtColor(input_img, hsv_img, CV_BGR2HSV);
   cv::inRange(hsv_img, hsv_lower_bounds_, hsv_upper_bounds_, output_img);
-  cv::GaussianBlur(output_img, output_img, cv::Size(7,7), 0, 0);
 }
 
 /**

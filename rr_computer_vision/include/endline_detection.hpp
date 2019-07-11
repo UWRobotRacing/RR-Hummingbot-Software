@@ -39,24 +39,8 @@ class EndlineDetection
     // is when the endline first comes into view (approximately)
     const double contour_area_cutoff_ = 3000.00;
 
-    // const cv::Scalar overcast_hsv_lower_bounds_(0, 0, 230);
-
-
-    // Colour thresholding parameters
-    const int low_hue_ = 130;
-    const int high_hue_ = 180;
-
-    // Outdoor sunny facing away from sun or cloudy: [62, 255]
-    // Outdoor sunny facing sun: [0, 255]
-    // Indoor night time: [82, 255]
-    const int low_sat_ = 62;
-    const int high_sat_ = 255;
-
-    // Outdoor sunny facing away from sun or cloudy: [55, 255]
-    // Outdoor sunny facing sun: [41, 177]
-    // Indoor night time: [158, 255]
-    const int low_val_ = 55;
-    const int high_val_ = 255;
+    cv::Scalar hsv_lower_bounds_;
+    cv::Scalar hsv_upper_bounds_;
 };
 
 #endif /*ENDLINE_DETECTION_HPP*/
