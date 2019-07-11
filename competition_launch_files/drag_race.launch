@@ -17,4 +17,7 @@
   <!-- Mapper Node -->
   <include file="$(find rr_mapper)/launch/mapper.launch"/>
 
+  <!-- Path Planner Node -->
+  <include file="$(find rr_path_planner)/launch/path_planner.launch"/>
+
 </launch>

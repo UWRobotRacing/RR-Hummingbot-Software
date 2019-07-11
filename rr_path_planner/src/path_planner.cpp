@@ -223,7 +223,7 @@ void PathPlanner::ProcessMap(const nav_msgs::OccupancyGrid::ConstPtr& msg) {
   {
     ROS_INFO("ProcessMap() : Called: started");
   }
-  
+   
   if (DEBUG_ON_)
   {
     ROS_INFO("PATH PLANNER: ProcessMap: Start location (%d, %d)", X_START_,Y_START_);
@@ -256,22 +256,29 @@ void PathPlanner::GenerateRealPaths()
   int selected_path_index = 0;
   double selected_path_angle;
   double selected_path_distance;
-
+  ROS_INFO("NUM_PATHS_:%i ", NUM_PATHS_);
   for (int i = 0; i < NUM_PATHS_; i++)
   {
+    ROS_INFO("IN LOOP ");
     int index_on_path = CheckLength(i);
+     ROS_INFO("111111");
     dist = path_distance[i][index_on_path];
+    ROS_INFO("22222");
     dist_reward = DIST_REWARD_FACTOR_ * dist;
+    ROS_INFO("6666");
     angle_reward = angles_and_weights[i][1];
+    ROS_INFO("333333");
     reward = dist_reward + angle_reward;
     if (i == 0)
     {
+      ROS_INFO("44444");
       highest_reward = reward;
       index_of_longest_path = index_on_path;
       selected_path_index = i;
     }
     if (highest_reward < reward)
     {
+      ROS_INFO("55555");
       highest_reward = reward;
       selected_path_index = i;
       index_of_longest_path = index_on_path;
@@ -293,9 +300,13 @@ void PathPlanner::GenerateRealPaths()
 
   //since we don't have access to the current orientation of the car use 45 degrees as a placeholder
   //TODO(oluwatoni) change this?
+  
   vel_cmd_.linear.x = wheel_speed * cos(0.7071 + beta);
   vel_cmd_.linear.y = wheel_speed * sin(0.7071 + beta);
   vel_cmd_.angular.z = (wheel_speed / lr) * -sin(beta);
+
+  ROS_INFO("44444");
+
   //Publish vel_level, steer_cmd,
   cmd_pub_.publish(vel_cmd_);
   //Publish for VISUALIZATION_: selected_path based on index_of_longest_path
@@ -312,21 +323,29 @@ void PathPlanner::GenerateRealPaths()
  */
 int PathPlanner::CheckLength(int angle_index)
 {
+  ROS_INFO("TRAJECTORY_STEPS_: %i", TRAJECTORY_STEPS_);
   for (int j = 0; j < TRAJECTORY_STEPS_; j++)
   {
     if (path_distance[angle_index][j] >= min_offset_dist_)
     {
+      ROS_INFO("1");
       int spine_length = trajectory[angle_index][j].size();
+      ROS_INFO("2");
       for (int k = 0; k < spine_length; k++)
       {
+        ROS_INFO("3");
         if (IsCellOccupied(trajectory[angle_index][j][k]))
         {
           //obstacle detected in the cell
+          ROS_INFO("4");
           return j;
         }
+        ROS_INFO("5");
       }
     }
+          ROS_INFO("-----------------------------");
   }
+  ROS_INFO("TRAJECTORY_STEPS_ - 1:: %i", TRAJECTORY_STEPS_ - 1);
   return TRAJECTORY_STEPS_ - 1;
 }
 
@@ -336,8 +355,10 @@ int PathPlanner::CheckLength(int angle_index)
  */
 bool PathPlanner::IsCellOccupied(int index)
 {
+  ROS_INFO("000000000000000");
   if(map_-> data[index] != 0)
   {
+    ROS_INFO("11111111111111111111");
     return true;
   }
   return false;
