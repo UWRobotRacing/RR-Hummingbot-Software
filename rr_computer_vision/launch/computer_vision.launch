@@ -11,6 +11,8 @@
   <!-- Weather condition enum defined in rr_computer_vision/include/thresholding_values.hpp -->
   <!-- overcast: 0, sunny: 1, sun_in_image: 2. indoor: 3 -->
   <param name="WeatherCondition" type="int" value="1"/>
+  
+  <param name="HaarCascadeFile" type="string" value="$(find rr_computer_vision)/classifier_dev/haar_cascade.xml"/>
 
   <!-- Launch ZED camera wrapper -->
   <include file="$(find zed_wrapper)/launch/zed.launch"> </include>
