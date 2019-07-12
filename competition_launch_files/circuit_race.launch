@@ -1,0 +1,20 @@
+<launch>
+  <param name="LapCount" type="int" value="1"/>
+
+  <!-- Camera Offset -->
+  <param name="CameraWidthOffset" type="double" value="0.05"/>
+  <param name="CameraHeightOffset" type="double" value="-0.105"/>
+  <param name="Resolution" type="double" value="0.0047"/>
+
+  <!-- Supervisor Node -->
+  <include file="$(find rr_supervisor)/launch/supervisor.launch" />
+
+  <!-- Computer Vision Node -->
+  <include file="$(find rr_computer_vision)/launch/computer_vision.launch">
+    <arg name="config_file" value="$(find rr_computer_vision)/config/circuit_race.yaml" />
+  </include>
+
+  <!-- Mapper Node -->
+  <include file="$(find rr_mapper)/launch/mapper.launch"/>
+
+</launch>

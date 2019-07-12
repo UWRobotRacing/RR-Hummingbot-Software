@@ -7,9 +7,6 @@
 [submodule "rr_third_party_packages/laser_proc"]
 	path = rr_third_party_packages/laser_proc
 	url = https://github.com/ros-perception/laser_proc
-[submodule "rr_third_party_packages/twist_mux"]
-	path = rr_third_party_packages/twist_mux
-	url = https://github.com/ros-teleop/twist_mux
 [submodule "rr_third_party_packages/zed-ros-wrapper"]
 	path = rr_third_party_packages/zed-ros-wrapper
 	url = https://github.com/stereolabs/zed-ros-wrapper.git
