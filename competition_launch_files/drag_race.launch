@@ -14,7 +14,11 @@
     <arg name="config_file" value="$(find rr_computer_vision)/config/drag_race.yaml" />
   </include>
 
-  <!-- Mapper Node -->
+  <!-- Path Planner Node -->
+  <include file="$(find rr_path_planner)/launch/path_planner.launch"/>
+    <arg name="config_file" value="$(find rr_path_planner)/config/drag_race.yaml" />
+
+   <!-- Mapper Node -->
   <include file="$(find rr_mapper)/launch/mapper.launch"/>
 
 </launch>
