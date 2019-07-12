@@ -91,9 +91,9 @@ void PathPlanner::Init()
  */
 void PathPlanner::GetParams()
 {
-  nh_.param<int>("TrajRoll/MAP_WIDTH", map_W_, 600);
-  nh_.param<int>("TrajRoll/MAP_HEIGHT", map_H_, 400);
-  nh_.param<double>("TrajRoll/RESOLUTION", resolution_, 0.05);
+  nh_.param<int>("TrajRoll/MAP_WIDTH", map_W_, 870);
+  nh_.param<int>("TrajRoll/MAP_HEIGHT", map_H_, 500);
+  nh_.param<double>("TrajRoll/RESOLUTION", resolution_, 0.0039);
   nh_.param<int>("TrajRoll/X_START", X_START_, 0);
   nh_.param<int>("TrajRoll/Y_START", Y_START_, 0);
 
@@ -104,16 +104,16 @@ void PathPlanner::GetParams()
     ROS_WARN("PathPlanner: NUM_PATHS is not odd. Using 21 as default.");
     NUM_PATHS_ = 21;
   }
-  nh_.param<int>("TrajRoll/TRAJECTORY_STEPS", TRAJECTORY_STEPS_, 100);
-  nh_.param<double>("TrajRoll/MIN_STOPPING_DIST", MIN_STOPPING_DIST_, 0.3);
+  nh_.param<int>("TrajRoll/TRAJECTORY_STEPS", TRAJECTORY_STEPS_, 70);
+  nh_.param<double>("TrajRoll/MIN_STOPPING_DIST", MIN_STOPPING_DIST_, 0.2);
   nh_.param<double>("TrajRoll/STOPPING_FACTOR", STOPPING_FACTOR_, 0.15);
 
-  nh_.param<double>("TrajRoll/STRAIGHT_SPEED", STRAIGHT_SPEED_, 0.5);
+  nh_.param<double>("TrajRoll/STRAIGHT_SPEED", STRAIGHT_SPEED_, 2.0);
 
-  nh_.param<double>("TrajRoll/MAX_STEERING_ANGLE", MAX_STEERING_ANGLE_, 0.8);   //** 0.2 rad ~ 11 degree; 0.8 rad ~ 45 degree;
-  nh_.param<double>("TrajRoll/CAR_WIDTH", CAR_WIDTH_, 0.27);
+  nh_.param<double>("TrajRoll/MAX_STEERING_ANGLE", MAX_STEERING_ANGLE_, 0.7);   //** 0.2 rad ~ 11 degree; 0.8 rad ~ 45 degree;
+  nh_.param<double>("TrajRoll/CAR_WIDTH", CAR_WIDTH_, 0.3);
   nh_.param<double>("TrajRoll/DIST_REWARD_FACTOR", DIST_REWARD_FACTOR_, 1.0);
-  nh_.param<double>("TrajRoll/MIN_OFFSET_DIST", min_offset_dist_, 0.1);
+  nh_.param<double>("TrajRoll/MIN_OFFSET_DIST", min_offset_dist_, 0.05);
 
   nh_.param<bool>("TrajRoll/VISUALIZATION", VISUALIZATION_, true);
   nh_.param<bool>("TrajRoll/DEBUG_ON", DEBUG_ON_, false);
@@ -207,6 +207,8 @@ void PathPlanner::GenerateIdealPaths()
   {
     ROS_WARN("Invalid publisher");
   }
+
+  //CHANGE!!!!!!!!!!!!!!!
   if(VISUALIZATION_)
   {
     DrawPath(all_path_pub_, trajectory_points_, all_path_marker_id_, -1, 50, 0, 0, 0.01, 1.0);
@@ -287,7 +289,8 @@ void PathPlanner::GenerateRealPaths()
     }
   }
 
-//  ROS_INFO("PATH PLANNER: GenerateRealPaths: Selected path = %d", selected_path_index);
+//  ROS_INFO("PATH PLANNER: GenerateRealPaths: Selected path = %d", selected_path_index);.
+
 //  ROS_INFO("PATH PLANNER: GenerateRealPaths: Longest Distance = %f", selected_path_distance);
 //  ROS_INFO("PATH PLANNER: GenerateRealPaths: selected Angle = %f", selected_path_angle);
 
@@ -301,7 +304,7 @@ void PathPlanner::GenerateRealPaths()
   //since we don't have access to the current orientation of the car use 45 degrees as a placeholder
   //TODO(oluwatoni) change this?
   
-  vel_cmd_.linear.x = wheel_speed * cos(0.7071 + beta);
+  vel_cmd_.linear.x = 0; //wheel_speed * cos(0.7071 + beta);
   vel_cmd_.linear.y = wheel_speed * sin(0.7071 + beta);
   vel_cmd_.angular.z = (wheel_speed / lr) * -sin(beta);
 
@@ -334,7 +337,7 @@ int PathPlanner::CheckLength(int angle_index)
       for (int k = 0; k < spine_length; k++)
       {
         ROS_INFO("3");
-        if (IsCellOccupied(trajectory[angle_index][j][k]))
+        if (IsCellOccupied(trajectory[angle_index][j][k]))   //(trajectory[angle_index][j][k]) >0 &&
         {
           //obstacle detected in the cell
           ROS_INFO("4");
@@ -356,6 +359,7 @@ int PathPlanner::CheckLength(int angle_index)
 bool PathPlanner::IsCellOccupied(int index)
 {
   ROS_INFO("000000000000000");
+  ROS_INFO("INDEX:::99999:::: %i", index);
   if(map_-> data[index] != 0)
   {
     ROS_INFO("11111111111111111111");
@@ -378,7 +382,7 @@ bool PathPlanner::IsCellOccupied(int index)
  * @param alpha the transparency of the markers
  */
 void PathPlanner::DrawPath(ros::Publisher& pub, visualization_msgs::Marker& points,int id, int index, int R, int G, int B, float scale, float alpha) {
-  points.header.frame_id = "/base_link";
+  points.header.frame_id = "/map";
   points.header.stamp = ros::Time::now();
   points.ns = "Path Points";
   points.action = visualization_msgs::Marker::ADD;

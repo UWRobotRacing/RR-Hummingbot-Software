@@ -2,7 +2,7 @@
  *  @author Jungwook Lee
  *  @author Sirui Song
  *  @author Toni Ogunmade(oluwatoni)
- *  @competition IARRC 2018
+ *  @competition IARRC 2019
  */
 
 #include <ros/ros.h>
