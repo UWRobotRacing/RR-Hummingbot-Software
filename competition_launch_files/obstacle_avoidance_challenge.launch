@@ -15,10 +15,10 @@
   </include>
   
     <!-- Path Planner Node -->
-  <include file="$(find rr_path_planner)/launch/path_planner.launch"/>
+  <include file="$(find rr_path_planner)/launch/path_planner.launch">
     <arg name="config_file" value="$(find rr_path_planner)/config/obstacle_avoidance_challenge.yaml" />
-    
+  </include>
+
   <!-- Mapper Node -->
   <include file="$(find rr_mapper)/launch/mapper.launch"/>
-
 </launch>
