@@ -111,7 +111,7 @@ private:
     double prev_speed_;
     double prev_time_;
     double maxTurnLength_;
-
+    
     //Debug variables
     bool VISUALIZATION_;
     bool DEBUG_ON_;

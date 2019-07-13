@@ -244,6 +244,7 @@ void PathPlanner::ProcessMap(const nav_msgs::OccupancyGrid::ConstPtr& msg) {
 
 /** @brief score each path based on it's obstacle free length, 
  */
+
 void PathPlanner::GenerateRealPaths()
 {
   //generating realtime path, avoiding obstacles
