@@ -5,7 +5,7 @@
 int16 steer_angle
 
 # Speed (cm/s)
-uint16 speed
+int16 speed
 
 # Enum Flag Types
 uint16 alive=0

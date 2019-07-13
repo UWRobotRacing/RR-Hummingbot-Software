@@ -11,6 +11,26 @@
 
 #include <rr_interface/Transmitter.h>
 
+typedef struct
+{
+   int16_t jetson_ang;
+   int16_t  jetson_spd;
+   uint16_t jetson_flag;
+}jetson_data_t;
+
+typedef struct
+{
+   uint8_t        startByte;
+   jetson_data_t  data;
+   uint8_t        endByte;
+}jetson_packet_t;
+
+typedef union
+{
+  jetson_packet_t myFrame;
+  uint8_t         serializedArray[8];
+}jetson_union_t;
+
 /* 
   This is a flag that is sent by the transmitter (Jetson -> Coretex M4)
   It is designed to send specific commands to ensure that the robot does
@@ -35,11 +55,16 @@ class Interface
     ~Interface();
 
     struct Transmitter {
+      jetson_union_t jetson;
+    };
+    /*
+    struct Transmitter {
       int16_t steer_angle; // Degrees
       uint16_t speed; // cm/s
       uint16_t flag; // Flag enum
       uint16_t padding;
     };
+     */
 
     struct Receiver {
       coretexFlag flag; // Flag enum

@@ -47,11 +47,10 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
     // Writing 
-    Interface::Transmitter packet = interface.transmitter_;
-    // Add Padding
-    packet.padding = 65535;
-    unsigned char *convert = (unsigned char*)&packet;
-    int writeen_bytes = write(serial_port_filestream, convert, sizeof(convert));
+    //uint8_t convert[8];
+    
+    //memcpy(convert, &interface.transmitter_, sizeof(Interface::Transmitter));
+    int writen_bytes = write(serial_port_filestream, interface.transmitter_.jetson.serializedArray, sizeof(Interface::Transmitter));
 
     // if (counter == 0)
     // {
