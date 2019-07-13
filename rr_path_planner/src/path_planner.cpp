@@ -19,7 +19,10 @@
 
 /** @brief initializes the path planner object
  */
-PathPlanner::PathPlanner()
+PathPlanner::PathPlanner() :
+prev_speed_(0.0),
+prev_sign_choice_(sign_status::STRAIGHT),
+prev_time_(0)
 {
   // Setting initial variables and parameters
   Init();
@@ -119,6 +122,7 @@ void PathPlanner::GetParams()
   nh_.param<bool>("TrajRoll/DEBUG_ON", DEBUG_ON_, false);
   nh_.param<double>("simulated_odometry/wheel_to_wheel_dist", wheel_to_wheel_dist_, 0.335);
 
+  nh_.param<double>("DistanceThreshold", maxTurnLength_, 0.00);
   //ROS_INFO("<<<<<<<< Loaded Parameters >>>>>>>>");
 }
 
@@ -136,6 +140,10 @@ std::vector< std::vector <double> > PathPlanner::GetAnglesAndWeights(double max_
     angle_n_weights[i][0] = (max_angle*2/(num_paths-1)*i) - max_angle;
     //gives maximum weight(1.0) at center path i.e. straight path. & with increase in angle from center, angle weight decreases.
     angle_n_weights[i][1] = 1.0-(abs(i-(num_paths/2)))*(0.01/num_paths);
+    // Left
+    angle_n_weights[i][2] = (-tanh(angle_n_weights[i][0]/(0.25*max_angle))+1)/2;
+    // Right
+    angle_n_weights[i][3] = (tanh(angle_n_weights[i][0]/(0.25*max_angle))+1)/2;
   }
   return angle_n_weights;
 }
@@ -236,6 +244,7 @@ void PathPlanner::ProcessMap(const nav_msgs::OccupancyGrid::ConstPtr& msg) {
 
 /** @brief score each path based on it's obstacle free length, 
  */
+
 void PathPlanner::GenerateRealPaths()
 {
   //generating realtime path, avoiding obstacles
@@ -258,29 +267,36 @@ void PathPlanner::GenerateRealPaths()
   int selected_path_index = 0;
   double selected_path_angle;
   double selected_path_distance;
-  ROS_INFO("NUM_PATHS_:%i ", NUM_PATHS_);
+  int reward_choice = 1;
+  switch (prev_sign_choice_)
+  {
+    case sign_status::LEFT:
+      reward_choice = 2;
+    break;
+    case sign_status::RIGHT:
+      reward_choice = 3;
+    break;
+    case sign_status::STRAIGHT:
+    case sign_status::NONE:
+    default:
+      reward_choice = 1;
+    break; 
+  }
   for (int i = 0; i < NUM_PATHS_; i++)
   {
-    ROS_INFO("IN LOOP ");
     int index_on_path = CheckLength(i);
-     ROS_INFO("111111");
     dist = path_distance[i][index_on_path];
-    ROS_INFO("22222");
     dist_reward = DIST_REWARD_FACTOR_ * dist;
-    ROS_INFO("6666");
     angle_reward = angles_and_weights[i][1];
-    ROS_INFO("333333");
     reward = dist_reward + angle_reward;
     if (i == 0)
     {
-      ROS_INFO("44444");
       highest_reward = reward;
       index_of_longest_path = index_on_path;
       selected_path_index = i;
     }
     if (highest_reward < reward)
     {
-      ROS_INFO("55555");
       highest_reward = reward;
       selected_path_index = i;
       index_of_longest_path = index_on_path;
@@ -305,13 +321,21 @@ void PathPlanner::GenerateRealPaths()
   //TODO(oluwatoni) change this?
   
   vel_cmd_.linear.x = 0; //wheel_speed * cos(0.7071 + beta);
-  vel_cmd_.linear.y = wheel_speed * sin(0.7071 + beta);
+  vel_cmd_.linear.y = wheel_speed;
   vel_cmd_.angular.z = (wheel_speed / lr) * -sin(beta);
-
-  ROS_INFO("44444");
-
+  if ((prev_sign_choice_ == sign_status::LEFT || prev_sign_choice_ == sign_status::RIGHT) 
+      && distSinceLastTurn_ < maxTurnLength_)
+  {
+    Accumulate(wheel_speed);
+  }
+  else
+  {
+    distSinceLastTurn_ = 0;
+    prev_sign_choice_ = sign_status::STRAIGHT;
+  }
   //Publish vel_level, steer_cmd,
   cmd_pub_.publish(vel_cmd_);
+  prev_speed_ = wheel_speed;
   //Publish for VISUALIZATION_: selected_path based on index_of_longest_path
   if(VISUALIZATION_)
   {
@@ -326,30 +350,32 @@ void PathPlanner::GenerateRealPaths()
  */
 int PathPlanner::CheckLength(int angle_index)
 {
-  ROS_INFO("TRAJECTORY_STEPS_: %i", TRAJECTORY_STEPS_);
   for (int j = 0; j < TRAJECTORY_STEPS_; j++)
   {
     if (path_distance[angle_index][j] >= min_offset_dist_)
     {
-      ROS_INFO("1");
       int spine_length = trajectory[angle_index][j].size();
-      ROS_INFO("2");
       for (int k = 0; k < spine_length; k++)
       {
-        ROS_INFO("3");
         if (IsCellOccupied(trajectory[angle_index][j][k]))   //(trajectory[angle_index][j][k]) >0 &&
         {
           //obstacle detected in the cell
-          ROS_INFO("4");
           return j;
         }
-        ROS_INFO("5");
       }
     }
-          ROS_INFO("-----------------------------");
   }
-  ROS_INFO("TRAJECTORY_STEPS_ - 1:: %i", TRAJECTORY_STEPS_ - 1);
+  //ROS_INFO("TRAJECTORY_STEPS_ - 1:: %i", TRAJECTORY_STEPS_ - 1);
   return TRAJECTORY_STEPS_ - 1;
+}
+
+void PathPlanner::SignDirectionCallback(const rr_computer_vision::TrafficSign& msg)
+{
+  prev_sign_choice_ = msg.traffic_sign_status;
+  if (prev_sign_choice_ == sign_status::LEFT || prev_sign_choice_ == sign_status::RIGHT)
+  {
+    distSinceLastTurn_ = 0;
+  }
 }
 
 /** @brief returns if a cell is occupied or not
@@ -358,11 +384,8 @@ int PathPlanner::CheckLength(int angle_index)
  */
 bool PathPlanner::IsCellOccupied(int index)
 {
-  ROS_INFO("000000000000000");
-  ROS_INFO("INDEX:::99999:::: %i", index);
   if(map_-> data[index] != 0)
   {
-    ROS_INFO("11111111111111111111");
     return true;
   }
   return false;
@@ -560,4 +583,12 @@ int PathPlanner::xyToMapIndex(double x, double y)
 double PathPlanner::StopDistFromVel(geometry_msgs::Twist velocity)
 {
   return (pow(GetVelocityMagnitude(velocity), 2) * STOPPING_FACTOR_);
+}
+
+void PathPlanner::Accumulate(double speed)
+{
+  double newTime = ros::Time::now().toSec();
+  double step = newTime - prev_time_;
+  distSinceLastTurn_ = step*prev_speed_; 
+  prev_time_ = newTime;
 }
