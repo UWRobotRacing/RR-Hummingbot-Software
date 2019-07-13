@@ -75,7 +75,7 @@ void PathPlanner::Init()
   trajectory_marker_vector_.resize(NUM_PATHS_);
 
   //resizing the path variables
-  angles_and_weights.resize(NUM_PATHS_, std::vector<double>(2, 0.0));
+  angles_and_weights.resize(NUM_PATHS_, std::vector<double>(4, 0.0));
   path_distance.resize(NUM_PATHS_, std::vector<double>(TRAJECTORY_STEPS_, 0.0));
   trajectory.resize(NUM_PATHS_);
 
@@ -133,7 +133,7 @@ void PathPlanner::GetParams()
  */
 std::vector< std::vector <double> > PathPlanner::GetAnglesAndWeights(double max_angle, int num_paths)
 {
-  std::vector< std::vector <double> > angle_n_weights(num_paths, std::vector<double> (2, 0.0));
+  std::vector< std::vector <double> > angle_n_weights(num_paths, std::vector<double> (4, 0.0));
   for(int i=0;i<num_paths;i++) 
   {
     // angle range -max_angle to +max_angle divided equally in num_paths
