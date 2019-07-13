@@ -8,6 +8,7 @@
 #include "traffic_light.hpp"
 #include "lane_detection.hpp"
 #include "endline_detection.hpp"
+#include "sign_detection.hpp"
 
 /** @brief main file that starts the subscribers and calls spin
  */
@@ -20,7 +21,7 @@ int main(int argc, char** argv)
   
   // Poll until traffic light is detected
   // TrafficLightDetection traffic_light_detection(nh);
-  // ros::Rate r(5);
+  // ros::Rate r(30);
   // while (ros::ok() && (!traffic_light_detection.race_started))
   // {
   //   ros::spinOnce();
@@ -30,6 +31,7 @@ int main(int argc, char** argv)
   // Once race has started, can instantiate the other objects
   LaneDetection lane_detection(nh);
   // EndlineDetection endline_detection(nh);
+  // SignDetection sign_detection(nh);
   // ComputerVision computer_vision(nh);
 
   ros::spin();
