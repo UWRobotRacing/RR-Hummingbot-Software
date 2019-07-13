@@ -46,14 +46,12 @@ src/traffic_light.cpp include/traffic_light.hpp
 src/endline_detection.cpp include/endline_detection.hpp)
 
 add_compile_options(-std=c++11)
-add_executable(rr_computer_vision src/computer_vision_main.cpp)
-add_library(computer_vision src/computer_vision.cpp include/computer_vision.hpp 
+add_executable(rr_computer_vision src/computer_vision_main.cpp src/computer_vision.cpp include/computer_vision.hpp 
 src/lane_detection.cpp include/lane_detection.hpp
 src/sign_detection.cpp include/sign_detection.hpp
 src/traffic_light.cpp include/traffic_light.hpp
 src/endline_detection.cpp include/endline_detection.hpp)
-
 add_dependencies(rr_computer_vision rr_computer_vision_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(rr_computer_vision computer_vision ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(rr_computer_vision ${catkin_LIBRARIES} ${OpenCV_LIBS})
