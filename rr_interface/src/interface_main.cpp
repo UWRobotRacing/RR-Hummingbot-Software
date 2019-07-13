@@ -19,7 +19,7 @@
 #include "interface.hpp"
 
 // Change this for different serial values
-const std::string serial_port = "/dev/ttyUSB0";
+const std::string serial_port = "/dev/ttyACM1";
 int serial_port_filestream;
 
 // Forward declaration
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   Interface interface(nh);
 
   ROS_INFO("Interface: Interface Node Initialized");
-  ros::Rate r(10);
+  ros::Rate r(5);
 
   // Declared later to remove some preset communication stuff that doesnt need to be tweaked
   setupCommunication();
@@ -48,10 +48,11 @@ int main(int argc, char **argv)
   {
     // Writing 
     //uint8_t convert[8];
-    
+    interface.transmitter_.myFrame.startByte = 'a';
+    interface.transmitter_.myFrame.endByte = 'n';
     //memcpy(convert, &interface.transmitter_, sizeof(Interface::Transmitter));
-    int writen_bytes = write(serial_port_filestream, interface.transmitter_.jetson.serializedArray, sizeof(Interface::Transmitter));
-
+    int writen_bytes = write(serial_port_filestream, interface.transmitter_.serializedArray, sizeof(interface.transmitter_));
+    //ROS_INFO("VALUE %d", sizeof(interface.transmitter_));
     // if (counter == 0)
     // {
     //   // Writing 

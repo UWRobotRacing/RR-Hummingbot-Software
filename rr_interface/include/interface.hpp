@@ -11,11 +11,10 @@
 
 #include <rr_interface/Transmitter.h>
 
-typedef struct
+typedef struct  __attribute__ ((packed))
 {
-   int16_t jetson_ang;
-   int16_t  jetson_spd;
-   uint16_t jetson_flag;
+   int8_t jetson_ang;
+   uint8_t  jetson_spd;
 }jetson_data_t;
 
 typedef struct
@@ -28,7 +27,7 @@ typedef struct
 typedef union
 {
   jetson_packet_t myFrame;
-  uint8_t         serializedArray[8];
+  uint8_t         serializedArray[4];
 }jetson_union_t;
 
 /* 
@@ -54,9 +53,6 @@ class Interface
     Interface(ros::NodeHandle nh);
     ~Interface();
 
-    struct Transmitter {
-      jetson_union_t jetson;
-    };
     /*
     struct Transmitter {
       int16_t steer_angle; // Degrees
@@ -73,7 +69,7 @@ class Interface
     std::vector<uint16_t> Serialize(std::vector<uint16_t> transmitter);
     Receiver Deserialize(char* buffer);
 
-    Transmitter transmitter_;
+    jetson_union_t transmitter_;
     Receiver receiver_;
   private:
 

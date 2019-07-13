@@ -43,7 +43,6 @@ void Interface::TransmitterCallback(const rr_interface::Transmitter &msg) {
         break;
     }
      */
-    transmitter_.jetson.myFrame.data.jetson_ang = msg.steer_angle;
-    transmitter_.jetson.myFrame.data.jetson_spd = msg.speed;
-    transmitter_.jetson.myFrame.data.jetson_flag = msg.flag;
+    transmitter_.myFrame.data.jetson_ang = msg.steer_angle;
+    transmitter_.myFrame.data.jetson_spd = msg.speed;
 }

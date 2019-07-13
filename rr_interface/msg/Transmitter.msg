@@ -2,12 +2,8 @@
 # This is mainly designed to help us figure out the current status of M4
 
 # Steering Angle (Degrees)
-int16 steer_angle
+int8 steer_angle
 
 # Speed (cm/s)
-int16 speed
+uint8 speed
 
-# Enum Flag Types
-uint16 alive=0
-
-uint16 flag
