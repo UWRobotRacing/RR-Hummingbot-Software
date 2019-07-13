@@ -1,5 +1,7 @@
 <launch>
+  <!-- Distance you have to travel after a sign before you switch back to going straight in cm -->
   <param name="DistanceThreshold" type="double" value="4.00"/>
+
   <arg name="config_file" default="$(find rr_path_planner)/config/circuit_race.yaml"/>
   <rosparam file="$(arg config_file)"/>
   <node pkg="rr_path_planner" name="rr_path_planner" type="rr_path_planner" output="screen">

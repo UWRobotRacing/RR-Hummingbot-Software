@@ -288,7 +288,7 @@ void PathPlanner::GenerateRealPaths()
     int index_on_path = CheckLength(i);
     dist = path_distance[i][index_on_path];
     dist_reward = DIST_REWARD_FACTOR_ * dist;
-    angle_reward = angles_and_weights[i][reward_choice];   // 0
+    angle_reward = angles_and_weights[i][reward_choice];
     reward = dist_reward + angle_reward;
     if (i == 0)
     {
@@ -324,14 +324,12 @@ void PathPlanner::GenerateRealPaths()
   vel_cmd_.linear.x = 0; //wheel_speed * cos(0.7071 + beta);
   vel_cmd_.linear.y = wheel_speed;
   vel_cmd_.angular.z = (wheel_speed / lr) * -sin(beta);
-  if ((prev_sign_choice_ == rr_cv::sign_status::LEFT || prev_sign_choice_ == rr_cv::sign_status::RIGHT)
-      && distSinceLastTurn_ < maxTurnLength_)
+  if ((prev_sign_choice_ == rr_cv::sign_status::LEFT || prev_sign_choice_ == rr_cv::sign_status::RIGHT) && distSinceLastTurn_ < maxTurnLength_)
   {
     Accumulate(wheel_speed);
   }
   else
   {
-    distSinceLastTurn_ = 0;
     prev_sign_choice_ = rr_cv::sign_status::STRAIGHT;  // STRAIGHT
   }
   //Publish vel_level, steer_cmd,
@@ -390,8 +388,8 @@ void PathPlanner::SignDirectionCallback(const rr_computer_vision::TrafficSign& m
 
   if (traffic_sign_state == rr_cv::sign_status::LEFT || traffic_sign_state == rr_cv::sign_status::RIGHT)
   {
-    prev_sign_choice_ = traffic_sign_state;
     distSinceLastTurn_ = 0;
+    prev_sign_choice_ = traffic_sign_state;
   }
 }
 
@@ -605,7 +603,12 @@ double PathPlanner::StopDistFromVel(geometry_msgs::Twist velocity)
 void PathPlanner::Accumulate(double speed)
 {
   double newTime = ros::Time::now().toSec();
+  if (prev_time_ == 0)
+  {
+    prev_time_ = ros::Time::now().toSec();
+    newTime = ros::Time::now().toSec();
+  }
   double step = newTime - prev_time_;
-  distSinceLastTurn_ = step*prev_speed_; 
+  distSinceLastTurn_ += step*prev_speed_;
   prev_time_ = newTime;
 }
