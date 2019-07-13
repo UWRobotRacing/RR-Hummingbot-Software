@@ -287,7 +287,7 @@ void PathPlanner::GenerateRealPaths()
     int index_on_path = CheckLength(i);
     dist = path_distance[i][index_on_path];
     dist_reward = DIST_REWARD_FACTOR_ * dist;
-    angle_reward = angles_and_weights[i][1];
+    angle_reward = 0; //angles_and_weights[i][reward_choice];
     reward = dist_reward + angle_reward;
     if (i == 0)
     {
