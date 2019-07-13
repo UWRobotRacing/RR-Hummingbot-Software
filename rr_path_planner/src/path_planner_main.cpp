@@ -4,6 +4,7 @@
  *  @author Toni Ogunmade(oluwatoni)
  *  @competition IARRC 2019
  */
+#include <path_planner.h>
 
 #include <ros/ros.h>
 #include <ros/console.h>
@@ -15,8 +16,6 @@
 #include <iostream>
 #include <visualization_msgs/Marker.h>
 #include <vector>
-
-#include <path_planner.h>
 
 /** @brief starts the path_planner node
  *  This node doesn't act until it gets the enable signal

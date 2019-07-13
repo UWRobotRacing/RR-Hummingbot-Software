@@ -27,6 +27,7 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Bool.h>
 #include <visualization_msgs/Marker.h>
+#include <rr_computer_vision/TrafficSign.h>
 
 class PathPlanner {
 public:
@@ -43,10 +44,12 @@ private:
     std::vector<geometry_msgs::Point> rayTrace(double x0, double y0, double x1, double y1);
     void ProcessMap(const nav_msgs::OccupancyGrid::ConstPtr& msg);
     void EnableCallBack(const std_msgs::Int8::ConstPtr& msg);
+    void SignDirectionCallback(const rr_computer_vision::TrafficSign& msg);
     bool IsCellOccupied(int index);
     int CheckLength(int angle_index);
     double Velocity(double dist, double steer);
     double StopDistFromVel(geometry_msgs::Twist velocity);
+    void Accumulate(double speed);
 
     //ROS nodes, pub, sub, msgs & variables
     ros::NodeHandle nh_;
@@ -102,6 +105,13 @@ private:
     double STOPPING_FACTOR_;
     double DIST_REWARD_FACTOR_;
 
+    // Left Right Determiner
+    uint8_t prev_sign_choice_;
+    double distSinceLastTurn_;
+    double prev_speed_;
+    double prev_time_;
+    double maxTurnLength_;
+
     //Debug variables
     bool VISUALIZATION_;
     bool DEBUG_ON_;
@@ -123,6 +133,14 @@ private:
     std::vector <visualization_msgs::Marker> trajectory_marker_rayTrace_;
     ros::Publisher rayTrace_pub_;
     int trajectory_marker_rayTrace_id_;
+
+    enum sign_status: uint8_t
+    {
+      NONE = 0,
+      LEFT,
+      RIGHT,
+      STRAIGHT
+    };
 };
 
 #endif
