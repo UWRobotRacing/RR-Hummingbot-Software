@@ -31,7 +31,7 @@ int main(int argc, char** argv)
   // Once race has started, can instantiate the other objects
   LaneDetection lane_detection(nh);
   // EndlineDetection endline_detection(nh);
-  // SignDetection sign_detection(nh);
+  SignDetection sign_detection(nh);
   // ComputerVision computer_vision(nh);
 
   ros::spin();

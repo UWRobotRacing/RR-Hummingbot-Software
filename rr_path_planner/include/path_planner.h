@@ -18,7 +18,6 @@
 
 #include <ros/ros.h>
 #include <ros/console.h>
-// #include "msg_srv_names.hpp"
 #include <nav_msgs/OccupancyGrid.h>
 #include <geometry_msgs/Point32.h>
 #include <geometry_msgs/Pose2D.h>
@@ -54,6 +53,7 @@ private:
     //ROS nodes, pub, sub, msgs & variables
     ros::NodeHandle nh_;
     ros::Subscriber map_sub_;
+    ros::Subscriber traffic_state_sub_;
 
     double wheel_to_wheel_dist_;
     ros::Publisher cmd_pub_;
@@ -133,14 +133,6 @@ private:
     std::vector <visualization_msgs::Marker> trajectory_marker_rayTrace_;
     ros::Publisher rayTrace_pub_;
     int trajectory_marker_rayTrace_id_;
-
-    enum sign_status: uint8_t
-    {
-      NONE = 0,
-      LEFT,
-      RIGHT,
-      STRAIGHT
-    };
 };
 
 #endif

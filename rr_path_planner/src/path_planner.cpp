@@ -21,7 +21,7 @@
  */
 PathPlanner::PathPlanner() :
 prev_speed_(0.0),
-prev_sign_choice_(sign_status::STRAIGHT),
+prev_sign_choice_(rr_cv::sign_status::STRAIGHT),
 prev_time_(0)
 {
   // Setting initial variables and parameters
@@ -45,6 +45,7 @@ prev_time_(0)
   //ros topics init
   //Normal Pub and Subscriber
   map_sub_ = nh_.subscribe(rr_mapper::mapper_occupnacy_grid, 1, &PathPlanner::ProcessMap, this);
+  traffic_state_sub_ = nh_.subscribe(rr_cv::traffic_sign_status, 1, &PathPlanner::SignDirectionCallback, this);
   cmd_pub_ = nh_.advertise<geometry_msgs::Twist>(rr_path_planner::twist_cmd, 1, true);
 }
 
@@ -96,7 +97,7 @@ void PathPlanner::GetParams()
 {
   nh_.param<int>("TrajRoll/MAP_WIDTH", map_W_, 870);
   nh_.param<int>("TrajRoll/MAP_HEIGHT", map_H_, 500);
-  nh_.param<double>("TrajRoll/RESOLUTION", resolution_, 0.0039);
+  nh_.param<double>("TrajRoll/RESOLUTION", resolution_, 0.0047);
   nh_.param<int>("TrajRoll/X_START", X_START_, 0);
   nh_.param<int>("TrajRoll/Y_START", Y_START_, 0);
 
@@ -270,14 +271,14 @@ void PathPlanner::GenerateRealPaths()
   int reward_choice = 1;
   switch (prev_sign_choice_)
   {
-    case sign_status::LEFT:
+    case rr_cv::sign_status::LEFT:
       reward_choice = 2;
     break;
-    case sign_status::RIGHT:
+    case rr_cv::sign_status::RIGHT:
       reward_choice = 3;
     break;
-    case sign_status::STRAIGHT:
-    case sign_status::NONE:
+    case rr_cv::sign_status::STRAIGHT:
+    case rr_cv::sign_status::NONE:
     default:
       reward_choice = 1;
     break; 
@@ -287,7 +288,7 @@ void PathPlanner::GenerateRealPaths()
     int index_on_path = CheckLength(i);
     dist = path_distance[i][index_on_path];
     dist_reward = DIST_REWARD_FACTOR_ * dist;
-    angle_reward = 0; //angles_and_weights[i][reward_choice];
+    angle_reward = angles_and_weights[i][reward_choice];   // 0
     reward = dist_reward + angle_reward;
     if (i == 0)
     {
@@ -300,7 +301,7 @@ void PathPlanner::GenerateRealPaths()
       highest_reward = reward;
       selected_path_index = i;
       index_of_longest_path = index_on_path;
-      selected_path_angle = angles_and_weights[i][0];
+      selected_path_angle = angles_and_weights[i][0];           // []
       selected_path_distance = dist;
     }
   }
@@ -323,7 +324,7 @@ void PathPlanner::GenerateRealPaths()
   vel_cmd_.linear.x = 0; //wheel_speed * cos(0.7071 + beta);
   vel_cmd_.linear.y = wheel_speed;
   vel_cmd_.angular.z = (wheel_speed / lr) * -sin(beta);
-  if ((prev_sign_choice_ == sign_status::LEFT || prev_sign_choice_ == sign_status::RIGHT) 
+  if ((prev_sign_choice_ == rr_cv::sign_status::LEFT || prev_sign_choice_ == rr_cv::sign_status::RIGHT)
       && distSinceLastTurn_ < maxTurnLength_)
   {
     Accumulate(wheel_speed);
@@ -331,7 +332,7 @@ void PathPlanner::GenerateRealPaths()
   else
   {
     distSinceLastTurn_ = 0;
-    prev_sign_choice_ = sign_status::STRAIGHT;
+    prev_sign_choice_ = rr_cv::sign_status::STRAIGHT;  // STRAIGHT
   }
   //Publish vel_level, steer_cmd,
   cmd_pub_.publish(vel_cmd_);
@@ -371,9 +372,25 @@ int PathPlanner::CheckLength(int angle_index)
 
 void PathPlanner::SignDirectionCallback(const rr_computer_vision::TrafficSign& msg)
 {
-  prev_sign_choice_ = msg.traffic_sign_status;
-  if (prev_sign_choice_ == sign_status::LEFT || prev_sign_choice_ == sign_status::RIGHT)
+
+  uint8_t traffic_sign_state = msg.traffic_sign_status;
+
+  // Log if we are turning
+  switch (traffic_sign_state) {
+    case rr_cv::sign_status::LEFT:
+      ROS_INFO("TURNING LEFT");
+      break;
+    case rr_cv::sign_status::RIGHT:
+      ROS_INFO("TURNING RIGHT");
+      break;
+    case rr_cv::sign_status::STRAIGHT:
+      ROS_INFO("GOING STRAIGHT");
+      break;
+  }
+
+  if (traffic_sign_state == rr_cv::sign_status::LEFT || traffic_sign_state == rr_cv::sign_status::RIGHT)
   {
+    prev_sign_choice_ = traffic_sign_state;
     distSinceLastTurn_ = 0;
   }
 }

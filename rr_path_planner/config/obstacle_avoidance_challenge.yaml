@@ -13,8 +13,8 @@ TrajRoll/STOPPING_FACTOR:      0.15
 TrajRoll/STRAIGHT_SPEED:       3.0
 
 #Vehicle Parameters
-TrajRoll/MAX_STEERING_ANGLE:   0.4
-TrajRoll/CAR_WIDTH:            0.15
+TrajRoll/MAX_STEERING_ANGLE:   0.45
+TrajRoll/CAR_WIDTH:            0.30
 TrajRoll/DIST_REWARD_FACTOR:   2.0
 TrajRoll/MIN_OFFSET_DIST:      0.05
 
