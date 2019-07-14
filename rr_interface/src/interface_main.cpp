@@ -19,11 +19,11 @@
 #include "interface.hpp"
 
 // Change this for different serial values
-const std::string serial_port = "/dev/ttyACM0";
-int serial_port_filestream;
+const char serial_port[] = "/dev/ttyACM0";
 
-// Forward declaration
-void setupCommunication();
+int serialport_init(const char* serialport, int baud);
+int serialport_write(int fd, uint8_t* str, int len);
+int serialport_writebyte(int fd, uint8_t b);
 
 /** @brief starts the interface node
  *
@@ -31,29 +31,76 @@ void setupCommunication();
  *
  *  @return NONE
  */ 
+
 int main(int argc, char **argv)
 {
+  int SERIAL_PORT_FS;
   ros::init(argc, argv, "rr_interface");
   ros::NodeHandle nh;
   Interface interface(nh);
 
-  ROS_INFO("Interface: Interface Node Initialized");
-  ros::Rate r(10);
+  ROS_INFO("Interface: SERIAL Interface Node Initialized");
+  ros::Rate r(5);
 
   // Declared later to remove some preset communication stuff that doesnt need to be tweaked
-  setupCommunication();
+  SERIAL_PORT_FS = serialport_init(serial_port, 9600);
 
+// delay sync
+  ROS_INFO("Interface: SERIAL Begin");
+  usleep(1000000);
+  ROS_INFO("Interface: SYNC 1");
+  serialport_writebyte(SERIAL_PORT_FS, char(254));
+//   usleep(1000000);
+//   ROS_INFO("Interface: SYNC 2");
+//   serialport_writebyte(SERIAL_PORT_FS, char(255));
+//   serialport_writebyte(SERIAL_PORT_FS, char(255));
+//   serialport_writebyte(SERIAL_PORT_FS, char(255));
+//   usleep(1000000);
+  ROS_INFO("Interface: SYNC END");
   int counter = 0;
+  int clear_cnter = 0;
   while (ros::ok())
   {
     // Writing 
-    //uint8_t convert[8];
+    jetson_union_t send_buffer;
     interface.transmitter_.myFrame.startByte = 'a';
     interface.transmitter_.myFrame.endByte = 'n';
+    counter ++;
+    memcpy(&send_buffer, &interface.transmitter_.serializedArray, sizeof(jetson_union_t));
+    // int writen_bytes = write(SERIAL_PORT_FS, send_buffer.serializedArray, sizeof(send_buffer));
+    // ROS_INFO("VALUE %d", writen_bytes);
+    // well well well, we fuking need 0xFF to pad the data to prevent corruption and allow detection on arduino
+    uint8_t dummy[] = {0x0A};
+    uint8_t dummy2[] = {(uint8_t)('\n')};
+    bool result = true;
+    // write(SERIAL_PORT_FS, dummy, 8);
+    // serialport_write(SERIAL_PORT_FS, cmd, 8); 
+    result &= serialport_write(SERIAL_PORT_FS, send_buffer.serializedArray, sizeof(jetson_union_t));
+    result &= serialport_writebyte(SERIAL_PORT_FS, 0x0A);
+    result &= serialport_writebyte(SERIAL_PORT_FS, '\r');
+    result &= serialport_writebyte(SERIAL_PORT_FS, '\n');
+    // result &= serialport_write(SERIAL_PORT_FS, send_buffer.serializedArray, sizeof(jetson_union_t));
+    // result &= serialport_write(SERIAL_PORT_FS, dummy2, 8);
+    // ROS_INFO("Ang: %d  Spd: %d   FLAG: %d   | %d :: %s", 
+    //             interface.transmitter_.myFrame.data.jetson_ang,
+    //             interface.transmitter_.myFrame.data.jetson_spd,
+    //             interface.transmitter_.myFrame.data.jetson_flag,
+    //             counter,
+    //             (result?"SUCCESS":"FAILED"));
+    if(!result)
+    {
+        // close(SERIAL_PORT_FS);
+        // SERIAL_PORT_FS = serialport_init(serial_port, 9600);
+        ROS_WRN("UNABLE TO WRITE");
+        // serialport_writebyte(SERIAL_PORT_FS, char(254));
+    }
+    clear_cnter++;
+    if (clear_cnter>=50)
+    {
+        tcflush(SERIAL_PORT_FS, TCIOFLUSH);//force to flush the buffer
+        clear_cnter = 0;
+    }
 
-    //memcpy(convert, &interface.transmitter_, sizeof(Interface::Transmitter));
-    int writen_bytes = write(serial_port_filestream, interface.transmitter_.serializedArray, sizeof(interface.transmitter_));
-    //ROS_INFO("VALUE %d", sizeof(interface.transmitter_));
     // if (counter == 0)
     // {
     //   // Writing 
@@ -67,12 +114,12 @@ int main(int argc, char **argv)
     //   {
     //     payload[i] = convert[sizeof(payload)-i-1];
     //   }
-    //   int written_bytes = write(serial_port_filestream, payload, sizeof(packet));
+    //   int written_bytes = write(SERIAL_PORT_FS, payload, sizeof(packet));
     //   delete payload;
     //   payload = nullptr;
     //    */
     //   unsigned char *convert = (unsigned char*)&packet;
-    //   int writeen_bytes = write(serial_port_filestream, convert, sizeof(convert));
+    //   int writeen_bytes = write(SERIAL_PORT_FS, convert, sizeof(convert));
     // }
     // else
     // {
@@ -84,7 +131,7 @@ int main(int argc, char **argv)
     //   // Read bytes. The behaviour of read() (e.g. does it block?,
     //   // how long does it block for?) depends on the configuration
     //   // settings above, specifically VMIN and VTIME
-    //   int read_bytes = read(serial_port_filestream, &read_buf, sizeof(read_buf));
+    //   int read_bytes = read(SERIAL_PORT_FS, &read_buf, sizeof(read_buf));
 
     //   // Ensures that there is always data flowing through
     //   if (read_bytes != -1)
@@ -107,95 +154,135 @@ int main(int argc, char **argv)
   }
 
   //----- CLOSE THE UART -----
-  close(serial_port_filestream);
+  close(SERIAL_PORT_FS);
   ROS_INFO("Closed Serial Port");
   return 0;
 }
 
-void setupCommunication()
+int serialport_init(const char* serialport, int baud)
 {
-  // The following tutorial was followed to set up this serial UART communcation: 
-  // https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/
+    struct termios toptions;
+    int fd;
+    
+    fd = open(serialport, O_RDWR | O_NOCTTY | O_NDELAY);
+    // fd = open(serialport, O_RDWR | O_NONBLOCK );
+    
+    if (fd == -1)  {
+        ROS_ERROR("serialport_init: Unable to open port ");
+        return -1;
+    }
+    
+    // Sets the read() function to return NOW and not wait for data to enter
+    // buffer if there isn't anything there.
+    fcntl(fd, F_SETFL, FNDELAY);
 
-  /* The flags (defined in fcntl.h):
-    Access modes (use 1 of these):
-      O_RDONLY - Open for reading only.
-      O_RDWR - Open for reading and writing.
-      O_WRONLY - Open for writing only.
+    //int iflags = TIOCM_DTR;
+    //ioctl(fd, TIOCMBIS, &iflags);     // turn on DTR
+    //ioctl(fd, TIOCMBIC, &iflags);    // turn off DTR
 
-    O_NDELAY / O_NONBLOCK (same function) - Enables nonblocking mode. When set read requests on the file can return immediately with a failure status
-                        if there is no input immediately available (instead of blocking). Likewise, write requests can also return
-                        immediately with a failure status if the output can't be written immediately.
+    if (tcgetattr(fd, &toptions) < 0) {
+        ROS_ERROR("serialport_init: Couldn't get term attributes");
+        return -1;
+    }
+    speed_t brate = baud; // let you override switch below if needed
+    switch(baud) 
+    {
+      case 9600:   brate=B9600;   break;
+      case 4800:   brate=B4800;   break;
+      case 19200:  brate=B19200;  break;
+      case 38400:  brate=B38400;  break;
+      case 57600:  brate=B57600;  break;
+      case 115200: brate=B115200; break;
+    }
+    cfsetispeed(&toptions, brate);
+    cfsetospeed(&toptions, brate);
+    cfsetspeed(&toptions,  brate);
 
-    O_NOCTTY - When set and path identifies a terminal device, open() shall not cause the terminal device to become the controlling terminal for the process.
-  */
-  std::string serial_port_name = serial_port;
-  // Everything in linux is considered a file, hence why this varaible is referred to as a file stream
-  serial_port_filestream = open(serial_port_name.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
 
-  // Check for errors
-  if (serial_port_filestream < 0) {
-      ROS_ERROR("Error %i from open: %s\n", errno, strerror(errno));
-  }
-  ROS_INFO("Serial port %s opened in non-blocking read/write mode", serial_port_name.c_str());
+    // toptions.c_cflag |= (CLOCAL | CREAD);
+    // toptions.c_cflag &= ~PARENB;
+    // toptions.c_cflag &= ~CSTOPB;
+    // toptions.c_cflag &= ~CSIZE;
+    // toptions.c_cflag |= CS8;
+    // toptions.c_cflag &= ~CRTSCTS;
+    // toptions.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+    // toptions.c_iflag &= ~(IXON | IXOFF | IXANY);
+    // toptions.c_oflag &= ~OPOST;
 
-  // Create new termios struc, we call it 'tty' for convention
-  struct termios tty;
-  memset(&tty, 0, sizeof tty);
 
-  // Read in existing settings, and handle any error
-  if(tcgetattr(serial_port_filestream, &tty) != 0) {
-      ROS_ERROR("Error %i from tcgetattr: %s\n", errno, strerror(errno));
-  }
-  
-  // Now we will adjust the termios settings to match our serial commuication specifications
 
-  // Parity bits
-  tty.c_cflag &= ~PARENB; // Clear parity bit, meaning we will not use a parity bit
-  // Following code enables parity bit
-  // tty.c_cflag |= PARENB;
-  // tty.c_cflag |= PARODD;	// If set, odd parity used, otherwise default is even parity
+    // toptions.c_cflag = (toptions.c_cflag & ~CSIZE) | CS8;
+    // toptions.c_iflag =  IGNBRK;
+    // toptions.c_lflag = 0;
+    // toptions.c_oflag = 0;
+    // toptions.c_cflag |= CLOCAL | CREAD;
+    // toptions.c_cc[VMIN] = 1;
+    // toptions.c_cc[VTIME] = 5;
+    // toptions.c_iflag &= ~(IXON|IXOFF|IXANY);
+    // toptions.c_cflag &= ~(PARENB | PARODD);
+    // toptions.c_cflag &= ~CSTOPB;
+    /* Great reference for serial programming: https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/ */
+    // 8N1
+    toptions.c_cflag = 0;
+    toptions.c_iflag = 0;
+    toptions.c_lflag = 0;
+    toptions.c_oflag = 0;
 
-  // Stop bits
-  tty.c_cflag &= ~CSTOPB; // Clear stop field, only one stop bit used in communication (most common)
-  // tty.c_cflag |= CSTOPB;  // Set stop field, two stop bits used in communication
+    toptions.c_cflag &= ~PARENB; // no parity
+    toptions.c_cflag &= ~CSTOPB; // no stop bit
+    toptions.c_cflag &= ~CSIZE;
+    toptions.c_cflag |= CS8; // 8 bit per byte
+    // no flow control
+    toptions.c_cflag &= ~CRTSCTS; // no flow control
+    toptions.c_cflag |= CREAD | CLOCAL;  // turn on READ & ignore ctrl lines
 
-  // Data bits 
-  tty.c_cflag |= CS8; // 8 bits per byte
-  // tty.c_cflag |= CS5; // 5 bits per byte
-  // tty.c_cflag |= CS6; // 6 bits per byte
-  // tty.c_cflag |= CS7; // 7 bits per byte
+    //toptions.c_cflag &= ~HUPCL; // disable hang-up-on-close to avoid reset
+    // no echo
+    toptions.c_lflag &= ~ECHO; // Disable echo
+    toptions.c_lflag &= ~ECHOE; // Disable erasure
+    toptions.c_lflag &= ~ECHONL; // Disable new-line echo
+    toptions.c_lflag &= ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
+    toptions.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); // make raw
 
-  // Misc settings
-  tty.c_cflag &= ~CRTSCTS; // Disable RTS/CTS hardware flow control (most common)
-  tty.c_cflag |= CREAD | CLOCAL; // Turn on READ & ignore ctrl lines (CLOCAL = 1)
-  tty.c_lflag &= ~ICANON;	// Disable canonical mode 
-  tty.c_lflag &= ~ECHO; // Disable echo
-  tty.c_lflag &= ~ECHOE; // Disable erasure
-  tty.c_lflag &= ~ECHONL; // Disable new-line echo
-  tty.c_lflag &= ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
-  tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Turn off s/w flow ctrl
-  tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL); // Disable any special handling of received bytes
-  tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
-  tty.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
-  // tty.c_oflag &= ~OXTABS; // Prevent conversion of tabs to spaces (NOT PRESENT IN LINUX)
-  // tty.c_oflag &= ~ONOEOT; // Prevent removal of C-d chars (0x004) in output (NOT PRESENT IN LINUX)
+    toptions.c_iflag &= ~(IXON | IXOFF | IXANY); // turn off s/w flow ctrl
+    toptions.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL); // Disable any special handling of received bytes
+    
+    toptions.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
+    toptions.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
+    // toptions.c_oflag &= ~OXTABS; // Prevent conversion of tabs to spaces (NOT PRESENT IN LINUX)
+    // toptions.c_oflag &= ~ONOEOT; // Prevent removal of C-d chars (0x004) in output (NOT PRESENT IN LINUX)
 
-  // Setting VMIn and VTIME to 0 means no blocking, return immediately 
-  // with what is availalbe on the port, which is what we want
-  tty.c_cc[VTIME] = 0;
-  tty.c_cc[VMIN] = sizeof(Interface::Receiver);
+    see: http://unixwiz.net/techtips/termios-vmin-vtime.html
+    toptions.c_cc[VMIN]  = 0;
+    toptions.c_cc[VTIME] = 0;
+    toptions.c_cc[VTIME] = 20;
+    
+    tcflush(fd, TCIFLUSH);
+    if( tcsetattr(fd, TCSANOW, &toptions) != 0) {
+        ROS_ERROR("init_serialport: Couldn't set term attributes");
+        return -1;
+    }
 
-  // Baud Rate
-  // UNIX compliant baud rates are: 
-  // B0,  B50,  B75,  B110,  B134,  B150,  B200, B300, B600, B1200, B1800, B2400, B4800, B9600, B19200, B38400, B57600, B115200, B230400, B460800
-  cfsetispeed(&tty, B115200);	// Input
-  cfsetospeed(&tty, B115200);	// Output
+    return fd;
+}
 
-  // Save tty settings, also checking for error
-  if (tcsetattr(serial_port_filestream, TCSANOW, &tty) != 0) {
-      ROS_ERROR("Error %i from tcsetattr: %s\n", errno, strerror(errno));
-  }
-  ROS_INFO("Successfully configured serial port settings for UART communication");
 
+//
+int serialport_writebyte(int fd, uint8_t b)
+{
+    int n = write(fd,&b,1);
+    if( n!=1)
+        return 0;
+    return -1;
+}
+
+//
+int serialport_write(int fd, uint8_t* str, int len)
+{
+    int n = write(fd, str, len);
+    if( n!=len ) {
+        ROS_ERROR("serialport_write: couldn't write whole string\n");
+        return 0;
+    }
+    return 1;
 }
