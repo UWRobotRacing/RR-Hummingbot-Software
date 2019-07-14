@@ -13,8 +13,9 @@
 
 typedef struct  __attribute__ ((packed))
 {
-   int8_t jetson_ang;
-   uint8_t  jetson_spd;
+  int16_t jetson_ang;
+  int16_t  jetson_spd;
+  uint16_t jetson_flag;
 }jetson_data_t;
 
 typedef struct
@@ -27,7 +28,7 @@ typedef struct
 typedef union
 {
   jetson_packet_t myFrame;
-  uint8_t         serializedArray[4];
+  uint8_t         serializedArray[8];
 }jetson_union_t;
 
 /* 

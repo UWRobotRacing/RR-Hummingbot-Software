@@ -2,8 +2,9 @@
 # This is mainly designed to help us figure out the current status of M4
 
 # Steering Angle (Degrees)
-int8 steer_angle
+int16 steer_angle
 
 # Speed (cm/s)
-uint8 speed
+int16 speed
 
+uint16 FLAG

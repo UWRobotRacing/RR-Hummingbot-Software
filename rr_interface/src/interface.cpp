@@ -13,6 +13,7 @@
  */
 Interface::Interface(ros::NodeHandle nh) {
     transmitter_subscriber_ = nh.subscribe("interface/transmitter", 0 , &Interface::TransmitterCallback, this);
+    memset(transmitter_.serializedArray, '\n', sizeof(transmitter_.serializedArray));
 }
 
 /**
@@ -45,4 +46,5 @@ void Interface::TransmitterCallback(const rr_interface::Transmitter &msg) {
      */
     transmitter_.myFrame.data.jetson_ang = msg.steer_angle;
     transmitter_.myFrame.data.jetson_spd = msg.speed;
+    transmitter_.myFrame.data.jetson_flag = msg.FLAG;
 }
