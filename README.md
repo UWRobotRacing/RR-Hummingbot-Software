@@ -53,15 +53,18 @@ doxygen doxygen_config
 It is setup to document all \*.c, \*.cpp, \*.h, and \*.hpp files. It will generate html output under doxygen\_output/html. To view this, reference the index.html file in that directory in a browser of your choice. Feel free to change the doxygen\_config file in order to generate different types of documentation or cover more file types.
 
 ### Contributers for the current code:
-* Waleed Ahmed (Software Lead)
-* Andrew Jin
-* Jack Xu
+* [Waleed Ahmed](https://github.com/w29ahmed) (Software Lead)
+* [Andrew Jin](https://github.com/DongJunJin)
+* [Martin Ethier](https://github.com/MartinEthier)
+* [Allan Zhao](https://github.com/y556zhao)
+* [Carson Chen](https://github.com/CXYCarson)
+* [Jack Xu](https://github.com/JXproject)
 
 ### Past Contributers (2014-2017):
-* Toni Ogunmade (Software Lead)
-* Adrian Malaran
-* Angela Gu
-* Brian Kibazohi
+* [Toni Ogunmade](https://github.com/Oluwatoni) (Software Lead)
+* [Adrian Malaran](https://github.com/AdrianMalaran)
+* [Angela Gu](https://github.com/angegu)
+* [Brian Kibazohi](https://github.com/kibazohb)
 * Matthew Post (Software Lead)
 * Praveen Dorairaj
 * Ivy Xing
