@@ -60,7 +60,7 @@ It is setup to document all \*.c, \*.cpp, \*.h, and \*.hpp files. It will genera
 * [Carson Chen](https://github.com/CXYCarson)
 * [Jack Xu](https://github.com/JXproject)
 
-### Past Contributers (2014-2017):
+### Past Contributers (2014-2018):
 * [Toni Ogunmade](https://github.com/Oluwatoni) (Software Lead)
 * [Adrian Malaran](https://github.com/AdrianMalaran)
 * [Angela Gu](https://github.com/angegu)
