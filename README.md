@@ -1,5 +1,6 @@
 # UW Robotics Team
 ## Robot Racing
+![](images/Hummingbot.jpg)
 
 ### Description:
 This repository contains the current competition code (2019), which will be used used for IARRC 2019. A list of what we're currently working on is in the issues section of this repo.
