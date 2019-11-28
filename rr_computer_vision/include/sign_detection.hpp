@@ -52,15 +52,6 @@ class SignDetection
 
     // Haar cascade
     cv::CascadeClassifier sign_cascade;
-
-    // Enum for publishing TrafficSign msg
-    enum sign_status: uint8_t
-    {
-      NONE,
-      LEFT,
-      RIGHT,
-      STRAIGHT
-    };
 };
 
 #endif //SIGN_DETECTION_PROCESSOR_HPP

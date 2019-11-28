@@ -279,7 +279,7 @@ void LaserMapper::CombineOccupancyGrid(nav_msgs::OccupancyGrid &to_grid,
   // TODO(jungwook): Handle Resolution Change
   if (to_grid.info.resolution != from_grid.info.resolution)
   {
-    ROS_ERROR("CombineOccupancyGrid: Resolution mismatch.");
+    ROS_ERROR("CombineOccupancyGrid: Resolution mismatch. TO: %f FROM: %f", to_grid.info.resolution, from_grid.info.resolution);
     return;
   }
 

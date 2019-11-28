@@ -215,7 +215,7 @@ void SignDetection::ZedCameraImgCallback(const sensor_msgs::ImageConstPtr& right
         uint8_t arrow_status = CheckArrowDir(cv::Mat(right_img, best_bbox).clone());
         ++arrow_status_accumulator[arrow_status];
       }
-      sign_status_msg.traffic_sign_status = NONE;
+      sign_status_msg.traffic_sign_status = rr_cv::sign_status::NONE;
       sign_status_pub_.publish(sign_status_msg);
     }
 
@@ -224,7 +224,7 @@ void SignDetection::ZedCameraImgCallback(const sensor_msgs::ImageConstPtr& right
       // Only start checking arrow direction after 10 consecutive sign frames
       check_arrow = true;
     }
-    sign_status_msg.traffic_sign_status = NONE;
+    sign_status_msg.traffic_sign_status = rr_cv::sign_status::NONE;
     sign_status_pub_.publish(sign_status_msg);
   }
 
@@ -283,7 +283,7 @@ uint8_t SignDetection::CheckArrowDir(const cv::Mat& sign) {
   // Angle ranges 0-180 deg from the vertival axis going CW
   if (angle < 45 || angle > 135) {
     // Sign is straight
-    return STRAIGHT;
+    return rr_cv::sign_status::STRAIGHT;
   } else {
     // Sign is horizontal, need to apply secondary check, summary of check is:
     // Get a line perpendicular to the orientation of the arrow that passes through it's middle
@@ -330,9 +330,9 @@ uint8_t SignDetection::CheckArrowDir(const cv::Mat& sign) {
     // Return arrow direction with highest area
     uint8_t status_out;
     if (left_area > right_area) {
-      status_out = LEFT;
+      status_out = rr_cv::sign_status::LEFT;
     } else {
-      status_out = RIGHT;
+      status_out = rr_cv::sign_status::RIGHT;
     }
 
     return status_out;

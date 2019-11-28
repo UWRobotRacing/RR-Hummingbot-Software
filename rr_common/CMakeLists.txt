@@ -18,6 +18,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_compile_options(-std=c++11)
+
 ## Install project namespaced headers
 install(DIRECTORY include/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
